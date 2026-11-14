@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Genie Sim を RTX 3090 で動かす | 仕組み、すごいところ、勉強になるところ</title>
+<meta name="description" content="AgiBot のロボット学習向けシミュレーション基盤 Genie Sim を RTX 3090 で動かすための資料。どういう仕組みで動いているか、何がすごいのか、動かすと何が勉強になるのかを、本体のコードと論文に当たってまとめた。">
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a></p>
+    <h1>Genie Sim を RTX&nbsp;3090 で動かす<small>仕組み、すごいところ、勉強になるところ</small></h1>
+    <p class="lead">AgiBot が公開しているロボット学習向けのシミュレーション基盤 Genie Sim を、RTX 3090 を積んだ PC で動かすための資料である。どういう仕組みで動いているか、何がすごいのか、動かすと何が勉強になるのかを、本体のコードと論文に当たってまとめた。環境を作る手順とスクリプトは、同じリポジトリの <a href="https://github.com/mamoru1126/humanoid_study/tree/master/genie_sim_rtx3090">genie_sim_rtx3090</a> にある。</p>
+    <ul class="tiles">
+      <li><b>24 GB</b><span>RTX 3090 の VRAM。Isaac Sim 6.2 の最小要件は 16 GB</span></li>
+      <li><b>約 6.4 GB</b><span>最初の 10 タスクを動かすのに要るアセットの量</span></li>
+      <li><b>0.83 対 0.75</b><span>シミュレーションだけで学習した方策と、実機のデータで学習した方策の、実機での成功率（論文の 8 タスクの平均）</span></li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#s0"><span class="fl">0</span>結論</a></li>
+      <li><a href="#s1"><span class="fl">1</span>Genie Sim とは</a></li>
+      <li><a href="#s2"><span class="fl">2</span>仕組み</a></li>
+      <li><a href="#s3"><span class="fl">3</span>何がすごいのか</a></li>
+      <li><a href="#s4"><span class="fl">4</span>RTX 3090 の事情</a></li>
+      <li><a href="#s5"><span class="fl">5</span>何が勉強になるか</a></li>
+      <li><a href="#s6"><span class="fl">6</span>進め方</a></li>
+      <li><a href="#s7"><span class="fl">7</span>確認の状況</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#s0">0　結論</a></li>
+        <li><a href="#s1">1　Genie Sim とは何か</a></li>
+        <li><a href="#s2">2　どういう仕組みで動いているか</a></li>
+        <li><a href="#s3">3　何がすごいのか</a></li>
+        <li><a href="#s4">4　RTX 3090 で動かすときの事情</a></li>
+        <li><a href="#s5">5　何が勉強になるか</a></li>
+        <li><a href="#s6">6　進め方</a></li>
+        <li><a href="#s7">7　確認できていること、できていないこと</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+    <!-- ============================================================ 0 -->
+    <section id="s0">
+      <h2><span class="fl">0</span>結論</h2>
+      <ol class="verdict">
+        <li><strong>Genie Sim は、NVIDIA Isaac Sim の上に載る「場面づくり、データ収集、評価」の一式である。</strong>方策（policy）は中に持たない。WebSocket でつないだ外のサーバに任せる。</li>
+        <li><strong>いちばんの売りは、シミュレーションでの成績が実機の成績と合うことを数字で示した点にある。</strong>論文は、シミュレーションと実機の成功率の決定係数を 0.94、シミュレーションのデータだけで学習した方策の実機での成功率を平均 0.83（実機のデータで学習した場合は 0.75）と報告している<a class="r" href="#r2">[2]</a>。</li>
+        <li><strong>RTX 3090 は NVIDIA の動作確認の対象に入っていないが、要件（RT コアがあること、VRAM 16 GB 以上）は満たす</strong><a class="r" href="#r3">[3]</a>。Genie Sim のコードが 3090 をはっきり弾くのは、布などを扱うソルバ libuipc だけで、影響するのはアセットの索引にある 150 タスクのうち 3 つである。ただし、この資料の時点で、3090 の実機では確かめていない。</li>
+        <li><strong>勉強になるのは、方策とシミュレータの境目である。</strong>観測を受け取り、行動のまとまりを返し、それが 30 Hz で実行され、条件で採点される。この一周を、付属の 110 行の「動かない方策」で回すところから始められる。</li>
+        <li><strong>最初の目標は 3 段階に分ける。</strong>カメラ画像を 1 組保存する。動かない方策で評価を最後まで通し、録画する。2 台目の 3090 に置いた方策サーバをつなぐ。</li>
+      </ol>
+    </section>
+
+    <!-- ============================================================ 1 -->
+    <section id="s1">
+      <h2><span class="fl">1</span>Genie Sim とは何か</h2>
+      <p>Genie Sim は、AgiBot（智元機器人）が開発しているロボット学習向けのシミュレーション基盤である。2026 年 1 月の CES で 3.0 が発表され、コード、アセット、データセットが公開された<a class="r" href="#r4">[4]</a>。コードのライセンスは MPL-2.0 である<a class="r" href="#r1">[1]</a>。</p>
+      <p>物理や描画を自前で持つシミュレータではない。物理と描画は NVIDIA Isaac Sim に任せ、その上で、ロボット学習に要る 4 つの仕事を受け持つ。材料（物体と環境）をそろえる、場面を作る、データを集める、方策を評価する、の 4 つである。学習そのものと、学習した方策を動かすサーバは、外に置く。</p>
+
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 262" role="img" aria-labelledby="f1t f1d">
+          <title id="f1t">Genie Sim が受け持つ仕事と、外に置くもの</title>
+          <desc id="f1d">左に Genie Sim の 4 つの仕事が上から順に並ぶ。材料、場面、データ、評価。右に、自分で用意するものが 2 つある。学習と方策サーバ。データが学習へ渡り、学習した方策が方策サーバに載り、方策サーバと評価が WebSocket でやりとりする。場面は評価でも使う。</desc>
+          <defs>
+            <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <rect x="26" y="10" width="200" height="46" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="38" y="29">材料</text>
+          <text class="s" x="38" y="46">物体 5,140 点、実環境の再構成</text>
+          <rect x="26" y="72" width="200" height="46" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="38" y="91">場面</text>
+          <text class="s" x="38" y="108">配置、指示文、採点の条件を生成</text>
+          <rect x="26" y="134" width="200" height="46" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="38" y="153">データ</text>
+          <text class="s" x="38" y="170">自動の収集と、遠隔操作</text>
+          <rect x="26" y="206" width="200" height="46" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="38" y="225">評価</text>
+          <text class="s" x="38" y="242">方策をつないで採点する</text>
+
+          <rect x="262" y="134" width="128" height="46" rx="5" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.5"/>
+          <text class="h" x="274" y="153">学習</text>
+          <text class="s" x="274" y="170">自分で用意する</text>
+          <rect x="262" y="206" width="128" height="46" rx="5" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.5"/>
+          <text class="h" x="274" y="225">方策サーバ</text>
+          <text class="s" x="274" y="242">自分で用意する</text>
+
+          <path d="M126 56V71" stroke="#18222D" stroke-width="1.5" marker-end="url(#a1)"/>
+          <path d="M126 118V133" stroke="#18222D" stroke-width="1.5" marker-end="url(#a1)"/>
+          <path d="M226 157H261" stroke="#18222D" stroke-width="1.5" marker-end="url(#a1)"/>
+          <path d="M326 180V205" stroke="#18222D" stroke-width="1.5" marker-end="url(#a1)"/>
+          <path d="M227 229H261" stroke="#18222D" stroke-width="1.5" marker-start="url(#a1)" marker-end="url(#a1)"/>
+          <text class="s" x="244" y="200" text-anchor="middle">WebSocket</text>
+          <path d="M26 95H10V229H25" fill="none" stroke="#18222D" stroke-width="1.5" marker-end="url(#a1)"/>
+        </svg>
+        </div>
+        <figcaption>図1　Genie Sim の仕事（青）と、自分で用意するもの（橙）。この資料で動かすのは「評価」の部分で、そこに方策サーバをつなぐ。</figcaption>
+      </figure>
+
+      <h3 id="s1-1">1.1　部品</h3>
+      <p>本体は <code>source/</code> の下に部品ごとに分かれている<a class="r" href="#r1">[1]</a>。アセットだけは本体と別に配られる。評価を回すときに触るのは上の 3 つで、残りは必要になってから読む。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>部品</th><th>役割</th><th>最初に触るか</th></tr></thead>
+          <tbody>
+            <tr><td><code>geniesim_cli</code></td><td data-l="役割">操作用の <code>geniesim</code> コマンド。コンテナの起動、アセットの取得、評価の実行をまとめる</td><td data-l="最初に">触る</td></tr>
+            <tr><td><code>geniesim_benchmark</code></td><td data-l="役割">評価。タスクの定義、方策との通信、採点</td><td data-l="最初に">触る</td></tr>
+            <tr><td><code>geniesim_assets</code></td><td data-l="役割">シーン、物体、ロボット、背景画像の置き場。本体とは別に、Hugging Face と ModelScope で配られる<a class="r" href="#r6">[6]</a></td><td data-l="最初に">触る</td></tr>
+            <tr><td><code>geniesim_ros</code></td><td data-l="役割">RT Engine。ROS 2 の上で物理と描画を回す対話型のシミュレーション。MoveIt 2 や ros2_control とつながる</td><td data-l="最初に">あとで</td></tr>
+            <tr><td><code>data_collection</code></td><td data-l="役割">データの自動収集と再生。動作の計画に cuRobo を使う</td><td data-l="最初に">あとで</td></tr>
+            <tr><td><code>geniesim_teleop</code></td><td data-l="役割">VR 機器（Pico）での遠隔操作</td><td data-l="最初に">あとで</td></tr>
+            <tr><td><code>geniesim_scene_agent</code></td><td data-l="役割">言葉からアセットを探し、場面を組む</td><td data-l="最初に">あとで</td></tr>
+            <tr><td><code>scene_reconstruction</code>、<code>geniesim_world</code></td><td data-l="役割">実環境の 3 次元再構成と、パノラマ画像からの 3 次元の世界の生成</td><td data-l="最初に">あとで</td></tr>
+            <tr><td><code>rlinf_geniesim</code></td><td data-l="役割">強化学習の基盤 RLinf から、Genie Sim を環境として使うためのサーバ。人が途中で介入する学習にも対応する</td><td data-l="最初に">あとで</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">表は主なものに絞った。ほかに、全体を束ねる <code>geniesim</code>、世界モデルでロボットの動画を作る <code>geniesim_dream</code>、LLM の計画をロボットの動作につなぐ <code>agent2act</code> がある。</p>
+
+      <h3 id="s1-2">1.2　版に注意する</h3>
+      <p>Genie Sim は更新が速い。発表時の 3.0 は Isaac Sim 5.1 を土台にしていたが、この資料で読んだ 2026-11-13 の版（<code>VERSION</code> は 3.6.0）は Isaac Sim 6.2、ROS 2 Jazzy、Python 3.12 が土台で、5.1 以前の構成は終了扱いになっている<a class="r" href="#r1">[1]</a>。Web の記事や動画の手順は古い版のものが多い。手順は本体の <code>README.md</code> と <code>docker/README.md</code> を正とする。このリポジトリのスクリプトは、読んだ版に固定して取得する。</p>
+    </section>
+
+    <!-- ============================================================ 2 -->
+    <section id="s2">
+      <h2><span class="fl">2</span>どういう仕組みで動いているか</h2>
+
+      <h3 id="s2-1">2.1　層の重なり</h3>
+      <p>動かすときの構成は、外から順に 4 層になる。PC、コンテナ、Isaac Sim、Genie Sim の評価プログラムである。方策サーバはその外にあり、同じ PC でも別の PC でもよい。</p>
+
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 315" role="img" aria-labelledby="f2t f2d">
+          <title id="f2t">動かすときの層の重なり</title>
+          <desc id="f2d">いちばん外が PC で、Ubuntu、NVIDIA ドライバ、Docker、RTX 3090 がある。その中にコンテナ geniesim4 があり、Ubuntu 24.04、ROS 2 Jazzy、Python 3.12 が入っている。コンテナの中に、Genie Sim の評価プログラムと Isaac Sim 6.2 がある。Isaac Sim は、場面を記述する USD、物理の PhysX、描画の RTX、土台の Omniverse Kit からなる。コンテナの外に方策サーバがあり、評価プログラムと WebSocket でやりとりする。PC のディレクトリ 2 つが、コンテナの /workspace と /geniesim_assets につながる。</desc>
+          <defs>
+            <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <rect x="5" y="5" width="390" height="305" rx="6" fill="#F2F4F6" stroke="#18222D" stroke-width="1.5"/>
+          <text class="h" x="16" y="26">PC</text>
+          <text class="s" x="40" y="26">Ubuntu、NVIDIA ドライバ、Docker、RTX 3090</text>
+
+          <rect x="15" y="38" width="232" height="263" rx="5" fill="#FFFFFF" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="26" y="58">コンテナ geniesim4</text>
+          <text class="s" x="26" y="74">Ubuntu 24.04、ROS 2 Jazzy</text>
+          <text class="s" x="26" y="89">Python 3.12</text>
+
+          <rect x="27" y="101" width="208" height="48" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="38" y="121">Genie Sim の評価プログラム</text>
+          <text class="s" x="38" y="138">タスク、方策との通信、採点</text>
+
+          <rect x="27" y="161" width="208" height="130" rx="4" fill="#F2F4F6" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="38" y="181">Isaac Sim 6.2</text>
+          <rect x="37" y="191" width="60" height="42" rx="3" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="67" y="209" text-anchor="middle">USD</text>
+          <text class="s" x="67" y="225" text-anchor="middle">場面</text>
+          <rect x="101" y="191" width="60" height="42" rx="3" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="131" y="209" text-anchor="middle">PhysX</text>
+          <text class="s" x="131" y="225" text-anchor="middle">物理</text>
+          <rect x="165" y="191" width="60" height="42" rx="3" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="195" y="209" text-anchor="middle">RTX</text>
+          <text class="s" x="195" y="225" text-anchor="middle">描画</text>
+          <rect x="37" y="241" width="188" height="40" rx="3" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="131" y="258" text-anchor="middle">Omniverse Kit</text>
+          <text class="s" x="131" y="274" text-anchor="middle">アプリの土台</text>
+
+          <rect x="262" y="101" width="127" height="48" rx="4" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.5"/>
+          <text class="h" x="325.5" y="121" text-anchor="middle">方策サーバ</text>
+          <text class="s" x="325.5" y="138" text-anchor="middle">同じ PC か別の PC</text>
+          <path d="M236 125H261" stroke="#18222D" stroke-width="1.5" marker-start="url(#a2)" marker-end="url(#a2)"/>
+          <text class="s" x="325.5" y="167" text-anchor="middle">WebSocket、msgpack</text>
+
+          <rect x="262" y="191" width="127" height="100" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="272" y="210">ディレクトリ</text>
+          <text class="s" x="272" y="229">本体のコード →</text>
+          <text class="s" x="280" y="244">/workspace</text>
+          <text class="s" x="272" y="264">アセット →</text>
+          <text class="s" x="280" y="279">/geniesim_assets</text>
+          <path d="M261 241H248" stroke="#18222D" stroke-width="1.5" marker-end="url(#a2)"/>
+        </svg>
+        </div>
+        <figcaption>図2　層の重なり。PC に入れるのは、ドライバ、Docker、軽い <code>geniesim</code> コマンドだけである。Isaac Sim と ROS 2 はコンテナの中にあるので、PC の ROS 2 の版とぶつからない。</figcaption>
+      </figure>
+
+      <p>Isaac Sim の中身を、Gazebo を知っている人向けに言い換えるとこうなる。場面は SDF ではなく USD（OpenUSD）で書く。物理は PhysX が既定で、剛体の計算は初期設定では CPU で行う（<code>enable_gpu_dynamics</code> が偽。11 個のタスクは設定で GPU に切り替えている）。描画は RTX のレイトレーシングで、初期設定は <code>RaytracedLighting</code> である。これらを Omniverse Kit というアプリの土台が束ねていて、Python から起動して操れる。Genie Sim の評価プログラムは、まさにそう使っている。</p>
+
+      <h3 id="s2-2">2.2　起動すると何が起きるか</h3>
+      <p><code>geniesim docker up</code> は、本体の <code>docker/start.sh</code> を呼んでコンテナを起動する。コンテナの中では <code>docker/entrypoint.sh</code> が準備を進める<a class="r" href="#r1">[1]</a>。</p>
+      <ol>
+        <li><strong>コンテナを起動する。</strong>GPU をすべて渡し（<code class="k">--gpus all</code>）、ホストのネットワークをそのまま使い（<code class="k">--network=host</code>）、特権つき（<code class="k">--privileged</code>）で動かす。本体のコードを <code>/workspace</code> に、アセットを <code>/geniesim_assets</code> に、キャッシュの置き場をホーム以下につなぐ。</li>
+        <li><strong>利用者の番号を合わせる。</strong>コンテナの中の利用者 <code>isaac-sim</code> の番号を、PC の利用者の番号に書き換える。コンテナが作ったファイルの持ち主が PC の利用者になり、あとで消せなくなることがない。</li>
+        <li><strong>本体を登録する。</strong><code>/workspace</code> の Python パッケージを「編集可能」の形で入れる。PC 側でコードを書き換えると、作り直さずにコンテナの中へ反映される。</li>
+        <li><strong>libuipc を確かめる。</strong>布などの変形する物体を扱うソルバである。RTX 3090 ではここで「使えない」と表示され、そのまま先へ進む（4.2 節）。</li>
+        <li><strong>準備の完了を知らせる。</strong>ログに <code>GENIESIM_READY</code> と出る。</li>
+      </ol>
+      <p>設計の考え方は、重くて変わらないもの（Isaac Sim、ROS 2、依存パッケージ）をイメージに焼き、軽くてよく変わるもの（本体のコード、アセット、出力）を外からつなぐ、というものである。シェーダのキャッシュは名前つきのボリュームに置かれ、コンテナを消しても残る。</p>
+
+      <h3 id="s2-3">2.3　評価の一周</h3>
+      <p><code>geniesim benchmark run タスク名</code> は、コンテナの中で評価プログラム（<code>app/app.py</code>）を起動する。プログラムは Isaac Sim を立ち上げ、場面とロボットを読み込み、方策サーバとやりとりしながらエピソードを進める<a class="r" href="#r1">[1]</a>。</p>
+
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 352" role="img" aria-labelledby="f3t f3d">
+          <title id="f3t">評価の 1 エピソードの流れ</title>
+          <desc id="f3d">左の列がシミュレータ側、右の列が方策サーバである。シミュレータは、場面を読み込んでロボットを初期姿勢にし、観測を作る。観測は画像 3 枚と関節の状態である。方策サーバが観測と指示文から行動 30 点を返す。シミュレータは行動を 1 点ずつ 30 ヘルツで関節へ指令し、その間、物理は 120 ヘルツで進む。30 ステップごとに条件を判定する。条件を満たすか、上限に達するまで、観測に戻って繰り返す。最後に採点と録画を保存する。</desc>
+          <defs>
+            <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <text class="h" x="104" y="18" text-anchor="middle">シミュレータ</text>
+          <text class="h" x="314" y="18" text-anchor="middle">方策サーバ</text>
+
+          <rect x="16" y="30" width="176" height="42" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="27" y="48">場面を読み込む</text>
+          <text class="s" x="27" y="64">ロボットを初期姿勢へ</text>
+
+          <rect x="16" y="88" width="176" height="42" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="27" y="106">観測を作る</text>
+          <text class="s" x="27" y="122">画像 3 枚と関節の状態</text>
+
+          <rect x="242" y="110" width="144" height="58" rx="4" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.5"/>
+          <text class="h" x="253" y="128">方策が推論する</text>
+          <text class="s" x="253" y="144">観測と指示文から</text>
+          <text class="s" x="253" y="159">行動 30 点を返す</text>
+
+          <rect x="16" y="168" width="176" height="58" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="27" y="186">行動を 1 点ずつ実行</text>
+          <text class="s" x="27" y="202">関節へ指令、30 Hz</text>
+          <text class="s" x="27" y="217">物理は 120 Hz で進む</text>
+
+          <rect x="16" y="242" width="176" height="42" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="27" y="260">条件を判定する</text>
+          <text class="s" x="27" y="276">30 ステップごと</text>
+
+          <rect x="16" y="304" width="176" height="38" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="27" y="328">採点と録画を保存</text>
+
+          <path d="M104 72V87" stroke="#18222D" stroke-width="1.5" marker-end="url(#a3)"/>
+          <path d="M192 109H217V128H241" fill="none" stroke="#18222D" stroke-width="1.5" marker-end="url(#a3)"/>
+          <path d="M242 152H217V190H193" fill="none" stroke="#18222D" stroke-width="1.5" marker-end="url(#a3)"/>
+          <path d="M104 226V241" stroke="#18222D" stroke-width="1.5" marker-end="url(#a3)"/>
+          <path d="M104 284V303" stroke="#18222D" stroke-width="1.5" marker-end="url(#a3)"/>
+          <path d="M16 263H6V109H15" fill="none" stroke="#18222D" stroke-width="1.5" marker-end="url(#a3)"/>
+          <text class="s" x="114" y="298">条件を満たすか、上限に達するまで繰り返す</text>
+        </svg>
+        </div>
+        <figcaption>図3　1 エピソードの流れ。青がシミュレータ側、橙が方策サーバ。左端の線は、行動を使い切ったら観測に戻ることを表す。</figcaption>
+      </figure>
+
+      <p>数字は本体のコードによる。物理は 120 Hz、描画は 60 Hz を基準に進む（<code>physics_step</code>、<code>rendering_step</code>）。方策が返す行動は、複数の時刻ぶんをまとめた「チャンク」で、環境は 1 ステップに 1 点ずつ、関節の目標位置として与える。1 ステップは 1/30 秒に当たり、30 ステップごとにタスクの条件を判定する（<code>pi_env.py</code> の <code>_CHUNK_STEPS = 30</code>）。</p>
+      <p>GPU の負荷を抑える工夫が 1 つ入っている。カメラ画像が要るのは方策に観測を渡すときだけなので、行動を再生している間は描画を要求しない（<code>task_benchmark.py</code>）。</p>
+      <p>次の推論の前には、腕が目標に収まるのを最大 1 秒待つ（<code>infer_settle_timeout</code>）。方策の応答を待つ間に物体が重力でずれるのを避けたいときは、設定 <code>pause_physics_during_inference</code> を真にすると、待ち時間のあいだ物理を止められる。初期設定は止めない。推論が遅い構成では、この設定で結果が変わりうる。</p>
+
+      <h3 id="s2-4">2.4　方策との約束</h3>
+      <p>評価プログラムと方策サーバは、WebSocket の上で msgpack をやりとりする。形は JSON-RPC に似ていて、要求は <code>{"method": "infer", "params": {...}}</code>、応答は <code>{"result": {...}}</code> である（<code>corobotpolicy.py</code>）<a class="r" href="#r1">[1]</a>。初期設定のつなぎ先は <code>localhost:8999</code> で、<code class="k">--infer-host=ホスト:ポート</code> で変える。</p>
+      <div class="tw">
+        <table class="stack c1">
+          <thead><tr><th>向き</th><th>項目</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td>要求</td><td data-l="項目"><code>images</code></td><td data-l="中身">頭（<code>head</code>）、左手首（<code>hand_left</code>）、右手首（<code>hand_right</code>）のカメラ画像。JPEG で送る</td></tr>
+            <tr><td>要求</td><td data-l="項目"><code>states</code></td><td data-l="中身">腕、グリッパ、腰、頭の関節の状態と、手先の位置姿勢（<code>end_pose</code>）。台車のあるロボットでは台車の状態も入る</td></tr>
+            <tr><td>要求</td><td data-l="項目"><code>prompt</code></td><td data-l="中身">指示文。例は「Right arm picks up red block on the table」</td></tr>
+            <tr><td>要求</td><td data-l="項目"><code>robot_type</code>、<code>task_name</code>、<code>episode_idx</code> など</td><td data-l="中身">ロボットの種類、タスクの名前、エピソードの番号と区切り</td></tr>
+            <tr><td>応答</td><td data-l="項目"><code>left_arm</code>、<code>right_arm</code></td><td data-l="中身">腕の行動のチャンク。種類（<code>kind</code>）は、関節角の絶対値 <code>JOINT_ABS</code> か、手先の位置姿勢の絶対値 <code>EEF_ABS</code>。後者は評価プログラムが逆運動学で関節角に直す</td></tr>
+            <tr><td>応答</td><td data-l="項目"><code>left_effector</code>、<code>right_effector</code></td><td data-l="中身">グリッパの行動のチャンク</td></tr>
+            <tr><td>応答</td><td data-l="項目"><code>waist</code>、<code>head</code>、<code>wheels</code></td><td data-l="中身">腰、頭、台車。使うロボットとタスクのときだけ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>この約束さえ守れば、方策の中身は何でもよい。本体に付属の <code>scripts/fake_infer_server.py</code> は、受け取った関節角をそのまま 30 点ぶん返すだけの 110 行のサーバで、ロボットは姿勢を保つ。モデルなしで評価の一周を回すために用意されている。自分の方策サーバを書くときの、いちばん短い手本でもある。</p>
+
+      <h3 id="s2-5">2.5　タスクと採点</h3>
+      <p>タスクは、設定ファイル 1 つ（<code>ロボット_分類_名前.yaml</code>）と、場面の組からなる。場面 1 つは 1 つのディレクトリで、主なファイルは次の 4 つである。<code>g2op_if_pick_block_color</code>（色を指定してブロックを取る）には場面が 20 個あり、どの場面にも指示が 5 つある<a class="r" href="#r1">[1]</a>。評価は、指示 1 つを 1 エピソードとして順に行う。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>ファイル</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td><code>scene.usda</code></td><td data-l="中身">場面そのもの。机や物体の配置を USD で書いたもの</td></tr>
+            <tr><td><code>scene_info.json</code></td><td data-l="中身">場面にある物体の説明。色、形、大きさ、材質、位置</td></tr>
+            <tr><td><code>instructions.json</code></td><td data-l="中身">この場面で出す指示文の一覧と、対象の物体、使う腕</td></tr>
+            <tr><td><code>problems.json</code></td><td data-l="中身">指示ごとの採点の条件</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>採点の条件は、小さな部品を組み合わせて書かれている。「右腕で赤いブロックを取る」の条件は、次の 2 段である。</p>
+<pre><code>"ActionList": [
+  { "ActionSetWaitAny": [
+      { "Follow": "赤いブロック|[0.1,0.2,0.1]|right_gripper" },
+      { "StepOut": 200 } ] },
+  { "ActionSetWaitAny": [
+      { "PickUpOnGripper": "赤いブロック|right_gripper" },
+      { "StepOut": 200 } ] }
+]</code></pre>
+      <p class="tnote">物体の名前は、実際には <code>benchmark_building_blocks_378069fe</code> のような識別子である。読みやすさのために置き換えた。</p>
+      <p>1 段目は「右のグリッパが赤いブロックの近く（指定した範囲）に来る」、2 段目は「赤いブロックが右のグリッパに持ち上げられる」である。各段は、条件が成り立つか、200 ステップが過ぎるかの、早いほうで終わる（<code>ActionSetWaitAny</code>）。方策が何もしなければ、1 段目が時間切れになってエピソードが終わる。結果は <code>evaluate_ret_00.json</code> に書かれる。</p>
+      <p>指示文と採点の条件は、手で書いたものではない。場面の説明から LLM が指示文を作り、その指示文から LLM が採点の条件を作る、という順で生成されている（<code>evaluator/generators</code>）。条件の語彙（<code>Follow</code>、<code>PickUpOnGripper</code>、<code>Ontop</code>、<code>Inside</code>、<code>Upright</code> など）と、組み合わせ方（どれか 1 つ、全部、順に）を決めておき、組み立てを LLM に任せる作りである。</p>
+
+      <h3 id="s2-6">2.6　ロボットとタスクの種類</h3>
+      <p>読んだ版には、タスクの設定が 161 個ある。ロボットごとの内訳は次のとおり<a class="r" href="#r1">[1]</a>。</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>ロボット（設定名の頭）</th><th>分類</th><th class="n">タスク数</th></tr></thead>
+          <tbody>
+            <tr><td>AgiBot G2、グリッパ omnipicker（<code>g2op</code>）</td><td>指示理解 <code>if</code></td><td class="n">10</td></tr>
+            <tr><td>同上</td><td>操作 <code>manip</code></td><td class="n">10</td></tr>
+            <tr><td>同上</td><td>空間理解 <code>spatial</code></td><td class="n">8</td></tr>
+            <tr><td>同上</td><td>外乱への強さ <code>robust</code></td><td class="n">50</td></tr>
+            <tr><td>同上</td><td>機体をまたぐ評価 <code>crsemb</code></td><td class="n">6</td></tr>
+            <tr><td>AgiBot G2、グリッパ 90D（<code>g2crsb90d</code>）</td><td>細かい操作 <code>finemanip</code>、全身 <code>wbc</code>、試験用 <code>sandbox</code></td><td class="n">41</td></tr>
+            <tr><td>AgiBot G2、多指ハンド Wuji（<code>g2crsbwuji</code>）</td><td>器用な操作 <code>dexmanip</code></td><td class="n">10</td></tr>
+            <tr><td>AgiBot G1（<code>g1op</code>）</td><td>実機との対応 <code>s2r</code></td><td class="n">8</td></tr>
+            <tr><td>AgiBot G1、AgileX、ARX（<code>g1</code>、<code>agilex</code>、<code>arxone</code>）</td><td>機体をまたぐ評価 <code>crsemb</code></td><td class="n">18</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>物理のエンジンは、タスクの設定の <code>runtime</code> で選ぶ。ほとんどは Isaac Sim の PhysX で動く。</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>runtime</th><th>中身</th><th class="n">タスク数</th><th>RTX 3090</th></tr></thead>
+          <tbody>
+            <tr><td><code>isaac</code></td><td>Isaac Sim の PhysX</td><td class="n">145</td><td>対象</td></tr>
+            <tr><td><code>libuipc</code></td><td>布などの変形物体のソルバ</td><td class="n">3</td><td><span class="st n">動かない</span></td></tr>
+            <tr><td><code>newton</code></td><td>Newton（ROS 2 の RT Engine 経由）</td><td class="n">1</td><td>未確認</td></tr>
+            <tr><td><code>mujoco</code></td><td>MuJoCo</td><td class="n">1</td><td>未確認</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">タスク数は、アセットの索引（<code>_asset_index.json.gz</code>）に載っている 150 タスクの内訳。PhysX 以外の 5 つは、どれも多指ハンドの <code>dexmanip</code> に属する。</p>
+
+      <h3 id="s2-7">2.7　アセットの配り方</h3>
+      <p>アセットは、Python のパッケージの形をした 1 つの置き場（<code>geniesim_assets</code>）にまとまっている。全部を落とす必要はない。<code>geniesim assets download</code> は、指定したタスクが実際に参照するファイルだけを取得する。参照の関係は事前に調べて索引に固めてあり、取得したファイルは SHA256 で中身を確かめる。同じ中身のファイルはハードリンクで 1 つにまとめる<a class="r" href="#r1">[1]</a>。</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>取得の単位</th><th class="n">タスク数</th><th class="n">容量</th></tr></thead>
+          <tbody>
+            <tr><td>タスク 1 つ</td><td class="n">1</td><td class="n">5.13 GiB</td></tr>
+            <tr><td>指示理解（<code>g2op_if</code>）</td><td class="n">10</td><td class="n">6.42 GiB</td></tr>
+            <tr><td>操作（<code>manip</code>）</td><td class="n">10</td><td class="n">7.32 GiB</td></tr>
+            <tr><td>空間理解（<code>spatial</code>）</td><td class="n">8</td><td class="n">5.39 GiB</td></tr>
+            <tr><td>外乱への強さ（<code>robust</code>）</td><td class="n">50</td><td class="n">6.42 GiB</td></tr>
+            <tr><td>全身（<code>wbc</code>）</td><td class="n">8</td><td class="n">8.60 GiB</td></tr>
+            <tr class="sum"><td>索引にある全部</td><td class="n">150</td><td class="n">17.70 GiB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">容量は、重複を除いた値。索引から計算した。「タスク 1 つ」は <code>g2op_if_pick_block_color</code> の値。<code>g2op_if</code> の値は、CLI の <code>geniesim assets plan g2op_if</code> の表示（10 タスク、1,137 ファイル、6.42 GiB）と一致する。</p>
+      <p>タスク 1 つでも 5 GiB を超えるのは、背景に使う全天の画像（HDR と EXR、合わせて約 5.3 GiB）が、どのタスクにも含まれるからである。評価のたびに背景を取り替えて、見た目の違いへの強さを確かめるために入っている。そのため、タスクを増やしても容量はあまり増えない。</p>
+    </section>
+
+    <!-- ============================================================ 3 -->
+    <section id="s3">
+      <h2><span class="fl">3</span>何がすごいのか</h2>
+      <p>ここに書くことは、論文<a class="r" href="#r2">[2]</a>と本体の説明<a class="r" href="#r1">[1]</a>による。自分で再現して確かめたものではない。</p>
+
+      <h3 id="s3-1">3.1　シミュレーションの成績が、実機の成績と合う</h3>
+      <p>シミュレーションで評価する意味があるかどうかは、そこでの順位が実機でも保たれるかで決まる。論文は、学習の条件が違う 16 通りの方策を、実機とシミュレーションの両方で 50 回ずつ試し、成功率を突き合わせた。決定係数は 0.94、回帰直線の傾きは約 1.025 だった<a class="r" href="#r2">[2]</a>。シミュレーションで良い方策は実機でも良く、成功率の値そのものもほぼ同じ、という結果である。</p>
+      <p>もう 1 つの結果は、シミュレーションのデータだけで学習した方策を、そのまま実機で動かしたものである。方策は π0.5 を調整したもの、ロボットは AgiBot G1 で、8 つのタスクの平均は 0.83 だった。実機のデータで学習した場合の 0.75 を上回る。</p>
+
+      <figure class="fig chart">
+        <div class="cv">
+          <p class="ct">実機での成功率：学習に使ったデータの違い</p>
+          <p class="cs">方策は π0.5 を調整したもの。ロボットは AgiBot G1。値は 0 から 1</p>
+          <ul class="legend">
+            <li><span class="sw a"></span>シミュレーションのデータで学習</li>
+            <li><span class="sw b"></span>実機のデータで学習</li>
+          </ul>
+          <ul class="rows">
+            <li><span class="nm">Select Color</span>
+              <div class="plot"><span class="bar a" style="width:85%" tabindex="0" role="img" aria-label="Select Color、シミュレーションのデータで学習、0.85" data-tip="シミュレーション 0.85"></span><span class="bar b" style="width:73%" tabindex="0" role="img" aria-label="Select Color、実機のデータで学習、0.73" data-tip="実機 0.73"></span></div></li>
+            <li><span class="nm">Recognize Size</span>
+              <div class="plot"><span class="bar a" style="width:94%" tabindex="0" role="img" aria-label="Recognize Size、シミュレーションのデータで学習、0.94" data-tip="シミュレーション 0.94"></span><span class="bar b" style="width:75%" tabindex="0" role="img" aria-label="Recognize Size、実機のデータで学習、0.75" data-tip="実機 0.75"></span></div></li>
+            <li><span class="nm">Grasp Targets</span>
+              <div class="plot"><span class="bar a" style="width:71%" tabindex="0" role="img" aria-label="Grasp Targets、シミュレーションのデータで学習、0.71" data-tip="シミュレーション 0.71"></span><span class="bar b" style="width:58%" tabindex="0" role="img" aria-label="Grasp Targets、実機のデータで学習、0.58" data-tip="実機 0.58"></span></div></li>
+            <li><span class="nm">Organize Items</span>
+              <div class="plot"><span class="bar a" style="width:60%" tabindex="0" role="img" aria-label="Organize Items、シミュレーションのデータで学習、0.60" data-tip="シミュレーション 0.60"></span><span class="bar b" style="width:40%" tabindex="0" role="img" aria-label="Organize Items、実機のデータで学習、0.40" data-tip="実機 0.40"></span></div></li>
+            <li><span class="nm">Pack in Supermarket</span>
+              <div class="plot"><span class="bar a" style="width:95%" tabindex="0" role="img" aria-label="Pack in Supermarket、シミュレーションのデータで学習、0.95" data-tip="シミュレーション 0.95"></span><span class="bar b" style="width:95%" tabindex="0" role="img" aria-label="Pack in Supermarket、実機のデータで学習、0.95" data-tip="実機 0.95"></span></div></li>
+            <li><span class="nm">Sort Fruit</span>
+              <div class="plot"><span class="bar a" style="width:100%" tabindex="0" role="img" aria-label="Sort Fruit、シミュレーションのデータで学習、1.00" data-tip="シミュレーション 1.00"></span><span class="bar b" style="width:100%" tabindex="0" role="img" aria-label="Sort Fruit、実機のデータで学習、1.00" data-tip="実機 1.00"></span></div></li>
+            <li><span class="nm">Place Block into Drawer</span>
+              <div class="plot"><span class="bar a" style="width:85%" tabindex="0" role="img" aria-label="Place Block into Drawer、シミュレーションのデータで学習、0.85" data-tip="シミュレーション 0.85"></span><span class="bar b" style="width:90%" tabindex="0" role="img" aria-label="Place Block into Drawer、実機のデータで学習、0.90" data-tip="実機 0.90"></span></div></li>
+            <li><span class="nm">Bimanual Chip Handover</span>
+              <div class="plot"><span class="bar a" style="width:73%" tabindex="0" role="img" aria-label="Bimanual Chip Handover、シミュレーションのデータで学習、0.73" data-tip="シミュレーション 0.73"></span><span class="bar b" style="width:71%" tabindex="0" role="img" aria-label="Bimanual Chip Handover、実機のデータで学習、0.71" data-tip="実機 0.71"></span></div></li>
+            <li class="avg"><span class="nm">平均</span>
+              <div class="plot"><span class="bar a" style="width:83%" tabindex="0" role="img" aria-label="平均、シミュレーションのデータで学習、0.83" data-tip="シミュレーション 0.83"><i>0.83</i></span><span class="bar b" style="width:75%" tabindex="0" role="img" aria-label="平均、実機のデータで学習、0.75" data-tip="実機 0.75"><i>0.75</i></span></div></li>
+          </ul>
+          <div class="ticks" aria-hidden="true"><span style="left:0">0</span><span style="left:25%">0.25</span><span style="left:50%">0.5</span><span style="left:75%">0.75</span><span style="left:100%">1.0</span></div>
+          <details class="tv">
+            <summary>表で見る</summary>
+            <div class="tw">
+              <table class="stack">
+                <thead><tr><th>タスク</th><th class="n">シミュレーションの<br>データで学習</th><th class="n">実機の<br>データで学習</th></tr></thead>
+                <tbody>
+                  <tr><td>Select Color</td><td class="n" data-l="シミュレーション">0.85</td><td class="n" data-l="実機">0.73</td></tr>
+                  <tr><td>Recognize Size</td><td class="n" data-l="シミュレーション">0.94</td><td class="n" data-l="実機">0.75</td></tr>
+                  <tr><td>Grasp Targets</td><td class="n" data-l="シミュレーション">0.71</td><td class="n" data-l="実機">0.58</td></tr>
+                  <tr><td>Organize Items</td><td class="n" data-l="シミュレーション">0.60</td><td class="n" data-l="実機">0.40</td></tr>
+                  <tr><td>Pack in Supermarket</td><td class="n" data-l="シミュレーション">0.95</td><td class="n" data-l="実機">0.95</td></tr>
+                  <tr><td>Sort Fruit</td><td class="n" data-l="シミュレーション">1.00</td><td class="n" data-l="実機">1.00</td></tr>
+                  <tr><td>Place Block into Drawer</td><td class="n" data-l="シミュレーション">0.85</td><td class="n" data-l="実機">0.90</td></tr>
+                  <tr><td>Bimanual Chip Handover</td><td class="n" data-l="シミュレーション">0.73</td><td class="n" data-l="実機">0.71</td></tr>
+                  <tr class="sum"><td>平均</td><td class="n" data-l="シミュレーション">0.83</td><td class="n" data-l="実機">0.75</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+        <figcaption>図4　実機での成功率。論文の表 II による<a class="r" href="#r2">[2]</a>。8 つのうち 5 つで、シミュレーションのデータで学習した方策が上回り、2 つは同じ、1 つは下回る。</figcaption>
+      </figure>
+
+      <div class="call">
+        <p><strong>読むときの注意。</strong>データの量はそろっていない。論文の注記では、シミュレーションのデータは 1 タスク 500 から 1,500 エピソード、実機のデータは 500 エピソードである。「同じ量ならシミュレーションのほうが良い」という結果ではなく、「シミュレーションなら安く多く作れ、それで実機のデータに並ぶか上回る」という結果として読む。開発元による報告であり、第三者が再現した例はこの資料では確かめていない。</p>
+      </div>
+
+      <h3 id="s3-2">3.2　場面、指示、採点を LLM に作らせる</h3>
+      <p>評価で手間がかかるのは、場面を数多く用意し、それぞれに正しい採点を付けることである。Genie Sim はここを LLM で自動にした。物体のアセットは 5,140 点あり、小売、工業、飲食、家庭、事務の 5 つの分野にまたがる<a class="r" href="#r1">[1]</a>。言葉での要求から、アセットを検索して配置を決め、USD の場面を組み立てる。そのうえで指示文と採点の条件を作る。評価用の場面は 10 万を超えるとされる<a class="r" href="#r4">[4]</a>。</p>
+      <p>2.5 節で見た <code>scene_info.json</code>、<code>instructions.json</code>、<code>problems.json</code> の 3 つは、この流れの生成物である。採点の条件を部品の組み合わせに限っているので、LLM が作った条件を、人が読んで確かめられる。</p>
+
+      <h3 id="s3-3">3.3　実際の環境を取り込む</h3>
+      <p>実在の場所を撮影して 3 次元に再構成し、シミュレーションの場面として使う仕組みがある。3D Gaussian Splatting による再構成と、画像を生成するモデルを組み合わせ、見た目が写実的で、衝突の計算に使える形状も持つ環境を作る<a class="r" href="#r1">[1]</a>。実機の評価と同じ場所をシミュレーションに持ち込めるので、3.1 節の突き合わせが成り立つ。</p>
+
+      <h3 id="s3-4">3.4　データを自動で作る</h3>
+      <p>公開されている合成データは 1 万時間を超え、200 以上のタスクにまたがる<a class="r" href="#r1">[1]</a>。作り方は 2 通りある。遠隔操作と、プログラムによる自動収集である。自動収集は、失敗したら戻ってやり直す仕組みを持つ。人が実機を動かして集めるデータに比べ、量と多様さを安く増やせる。</p>
+
+      <h3 id="s3-5">3.5　手元の評価と、公開の順位表が同じ道具</h3>
+      <p>評価の仕組みは、公開の順位表 RoboColiseum の裏側でも使われている<a class="r" href="#r5">[5]</a>。順位表は、指示理解、外乱への強さ、操作、空間理解の 4 つに分かれる。外乱への強さは、指示の言い換え、ロボットの初期姿勢、背景、画質、カメラの位置を変えて測る<a class="r" href="#r1">[1]</a>。手元で動かした方策サーバを、同じ約束のまま順位表の評価につなげる。手元で確かめてから出せる、ということである。</p>
+
+      <h3 id="s3-6">3.6　道具としての作り</h3>
+      <ul>
+        <li><strong>入口が 1 つ。</strong>コンテナの起動、アセットの取得、評価の実行、状態の診断が、<code>geniesim</code> コマンドにまとまっている。</li>
+        <li><strong>必要な分だけ落とせる。</strong>2.7 節のとおり、タスクが参照するファイルだけを取得し、中身を確かめる。</li>
+        <li><strong>依存を固定している。</strong>コンテナに入れる Python パッケージは、ハッシュつきのロックファイルから入れる。Isaac Sim に同梱の PyTorch や CUDA を二重に入れない工夫もある。</li>
+        <li><strong>AI に読ませる前提の文書がある。</strong>各部品に <code>AGENTS.md</code> と、作業ごとの手順書 <code>SKILL.md</code> が置かれ、コーディング用の AI がそのまま従えるように書かれている。人が読んでも、どこから読めばよいかがわかる。</li>
+      </ul>
+    </section>
+
+    <!-- ============================================================ 4 -->
+    <section id="s4">
+      <h2><span class="fl">4</span>RTX 3090 で動かすときの事情</h2>
+
+      <h3 id="s4-1">4.1　公式の要件との関係</h3>
+      <p>Isaac Sim 6.2 の要件の表に、RTX 3090 は載っていない。表にあるのは RTX 4080 以降である<a class="r" href="#r3">[3]</a>。</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>項目</th><th>Isaac Sim 6.2 の最小</th><th>RTX 3090 の PC</th></tr></thead>
+          <tbody>
+            <tr><td>GPU</td><td>GeForce RTX 4080</td><td>GeForce RTX 3090。30 系で、最小の機種より 1 世代前</td></tr>
+            <tr><td>VRAM</td><td>16 GB</td><td>24 GB</td></tr>
+            <tr><td>RT コア</td><td>必須（A100、H100 は対象外）</td><td>あり</td></tr>
+            <tr><td>ドライバ（Linux）</td><td>595.58.03 で動作確認</td><td>PC による。要確認</td></tr>
+            <tr><td>メモリ</td><td>32 GB</td><td>PC による</td></tr>
+            <tr><td>OS</td><td>Ubuntu 22.04 か 24.04</td><td>コンテナを使うので、PC はどちらでもよい</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>要件のうち、世代のほかは満たせる。Isaac Sim の GitHub にある質問への回答では、以前の版について、RTX 3090 でも動くはずだが、新しい版は古い世代で個別には試していない、とされている<a class="r" href="#r7">[7]</a>。つまり「動く見込みは高いが、保証はない」が正確な位置づけである。不具合が出たときに、対象外の世代として扱われることはありうる。Ubuntu 22.04 への対応は、今後の版で終わる予定とされている<a class="r" href="#r3">[3]</a>。</p>
+
+      <h3 id="s4-2">4.2　libuipc が使えない</h3>
+      <p>libuipc は、布や袋のような変形する物体の接触を解くソルバである。Genie Sim は、ビルド済みのものを GPU の世代ごとに配っていて、対応は RTX 40 系（計算能力 8.9）と RTX 50 系（12.0）だけである。RTX 3090 は 8.6 で、対象に入らない<a class="r" href="#r1">[1]</a>。影響は 2 か所に出る。</p>
+      <div class="tw">
+        <table class="stack c1w">
+          <thead><tr><th>場面</th><th>起きること</th><th>対処</th></tr></thead>
+          <tbody>
+            <tr><td>イメージを手元でビルドする</td><td data-l="起きること">CLI が GPU を調べ、「Unsupported host GPU capability '8.6'」で止まる</td><td data-l="対処">ビルド済みイメージを使う。または <code>--build-arg LIBUIPC_SM=89</code> を付ける。ビルドは GPU を使わないので通る</td></tr>
+            <tr><td>コンテナを起動する</td><td data-l="起きること">ログに「libuipc unavailable」と出る</td><td data-l="対処">そのままでよい。起動は続く</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>動かなくなるのは、<code>runtime</code> が <code>libuipc</code> の 3 タスクである。ハンガーに布をかける、巾着袋、布をたたむ、の 3 つで、どれも多指ハンドのタスクに属する。PhysX で動く 145 タスクは、libuipc を読み込まない（コードで確認した）。</p>
+
+      <h3 id="s4-3">4.3　VRAM の見通し</h3>
+      <p>評価のときに GPU を使うのは、主に描画である。剛体の物理は、ほとんどのタスクで CPU で計算する。ロボット G2 のカメラは 3 台で、解像度は頭が 640×400、両手首が 640×528 と小さい。画面なしで動かせば、表示用の描画も減る。最小要件が 16 GB であることと合わせると、24 GB には余裕がある見込みである。</p>
+      <p>ただし、実測はしていない。このリポジトリのスクリプトは、実行のあいだ <code>nvidia-smi</code> の値を記録し、終わりに最大値を表示する。最初に動かしたときに、この値を確かめる。足りないときに効く手は、ほかに GPU を使っているもの（ブラウザ、別の学習）を止める、画面なしで動かす、の 2 つである。</p>
+
+      <h3 id="s4-4">4.4　3090 が 2 台あるときの分け方</h3>
+      <p>評価プログラムと方策サーバは、ネットワークでつながる別々のプロセスである。3090 を積んだ PC が 2 台あるなら、1 台をシミュレーションに、もう 1 台を方策に使うのがよい。1 枚の GPU で描画と推論を取り合わずに済む。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>PC</th><th>動かすもの</th><th>GPU の使いみち</th></tr></thead>
+          <tbody>
+            <tr><td>1 台目</td><td data-l="動かすもの">Genie Sim のコンテナ（評価プログラムと Isaac Sim）</td><td data-l="GPU">描画</td></tr>
+            <tr><td>2 台目</td><td data-l="動かすもの">方策サーバ。評価をしないときは学習</td><td data-l="GPU">推論、学習</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>方策の大きさの目安を挙げる。Genie Sim の説明では、基準として配られている π0.5 の方策は、推論のとき 1 つあたり 8 GB 未満で動く<a class="r" href="#r1">[1]</a>。3090 で足りる。学習は別で、π0 系を LoRA で調整するのに 22.5 GB を超える VRAM が要るとされ<a class="r" href="#r8">[8]</a>、24 GB では際どい。ACT や Diffusion Policy のような小さな方策は、学習も推論も 3090 で回せる。</p>
+
+      <h3 id="s4-5">4.5　画面なしで様子を確かめる</h3>
+      <p>SSH 越しや、画面のない PC でも確かめられる。使えるのは次の 3 つである。評価の設定は、<code class="k">--benchmark.名前=値</code> の形でコマンドに付けて渡す。</p>
+      <ul>
+        <li><strong>カメラ画像の保存。</strong>設定 <code>preview</code> を真にする（<code class="k">--benchmark.preview=true</code>）と、方策に渡すはずの画像 3 枚を PNG で保存して終わる。方策サーバは要らない。</li>
+        <li><strong>録画。</strong>設定 <code>record</code> を真にすると、頭と両手首のカメラの動画（<code>head.webm</code>、<code>hand_left.webm</code>、<code>hand_right.webm</code>）と、関節などの状態が残る。<code>record_world_camera</code> も真にすると、外から見たカメラの動画も残る。</li>
+        <li><strong>採点結果。</strong><code>evaluate_ret_00.json</code> に、条件ごとの結果が残る。</li>
+      </ul>
+      <p>画面のある PC では、<code class="k">--app.headless=false</code> で Isaac Sim の画面を開ける。場面を作っている間や、不具合を調べている間は、画面があるほうが早い。</p>
+    </section>
+
+    <!-- ============================================================ 5 -->
+    <section id="s5">
+      <h2><span class="fl">5</span>何が勉強になるか</h2>
+      <p>Genie Sim を動かして読むと、ロボットの方策を学習させて評価するときに要る考え方が、動く形でひととおり手に入る。ROS 2 と Gazebo の経験がある人にとっての対応づけから始める。</p>
+
+      <h3 id="s5-1">5.1　Gazebo との対応</h3>
+      <div class="tw">
+        <table class="stack c1">
+          <thead><tr><th>こと</th><th>Gazebo と ROS 2</th><th>Isaac Sim と Genie Sim</th></tr></thead>
+          <tbody>
+            <tr><td>場面の記述</td><td data-l="Gazebo">SDF、URDF</td><td data-l="Genie Sim">USD。場面 1 つが <code>scene.usda</code></td></tr>
+            <tr><td>物理</td><td data-l="Gazebo">gz-physics（DART など）</td><td data-l="Genie Sim">PhysX。タスクによって Newton、MuJoCo、libuipc</td></tr>
+            <tr><td>描画</td><td data-l="Gazebo">ラスタライズ（OGRE）</td><td data-l="Genie Sim">RTX のレイトレーシング</td></tr>
+            <tr><td>ROS 2 とのつなぎ</td><td data-l="Gazebo">ros_gz_bridge</td><td data-l="Genie Sim">評価では、方策とのやりとりに ROS 2 を使わない（WebSocket）。対話型の RT Engine は ROS 2 のノードとして動く</td></tr>
+            <tr><td>制御の入口</td><td data-l="Gazebo">トピック、ros2_control</td><td data-l="Genie Sim">評価では、方策サーバの応答を関節の目標位置として与える</td></tr>
+            <tr><td>起動</td><td data-l="Gazebo">launch ファイル</td><td data-l="Genie Sim">Python から Isaac Sim を起動するスクリプト</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s5-2">5.2　身につくこと</h3>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>やること</th><th>身につくこと</th></tr></thead>
+          <tbody>
+            <tr><td>コンテナを起動し、中を見る</td><td data-l="身につく">重いソフトをコンテナで運用する型。イメージに焼くものと外からつなぐものの分け方、利用者の番号合わせ、キャッシュの置き方</td></tr>
+            <tr><td>場面のファイルを読む</td><td data-l="身につく">USD の基本。物体、材質、関節がどう書かれるか</td></tr>
+            <tr><td>動かない方策で一周を回す</td><td data-l="身につく">方策の入出力の形。何を観測として渡し、何を行動として受け取るか</td></tr>
+            <tr><td>応答の種類を変えてみる</td><td data-l="身につく">行動の表し方の違い。関節角で返すか、手先の位置姿勢で返して逆運動学に任せるか</td></tr>
+            <tr><td>推論を遅くしてみる（付属サーバの <code>--delay</code>）</td><td data-l="身につく">推論の遅れが閉ループに与える影響と、その扱い方（収まるのを待つ、物理を止める）</td></tr>
+            <tr><td>採点の条件を読む</td><td data-l="身につく">成功をどう定義するか。条件の組み立て、時間切れ、場面と指示を複数にすること</td></tr>
+            <tr><td><code>robust</code> のタスクを動かす</td><td data-l="身につく">外乱への強さの測り方。指示の言い換え、背景、画質、カメラの位置</td></tr>
+            <tr><td>自分の方策サーバを書く</td><td data-l="身につく">学習した方策を、サービスとして動かす作り。学習の枠組みに依らない</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s5-3">5.3　AgiBot の実機につながること</h3>
+      <p>業務で AgiBot のロボットを使うなら、得るものがもう 1 つある。シミュレーションのロボットが、実機と同じ型だという点である。</p>
+      <ul>
+        <li><strong>同じ機体。</strong>評価に使うロボットの中心は AgiBot の G1 と G2 で、どちらも車輪で動く双腕の機体である。観測は、頭と両手首のカメラ画像と、関節の状態という構成になっている。</li>
+        <li><strong>同じ約束で実機へ。</strong>評価プログラムには、実機向けの方策をそのままつなぐための設定（<code>realprobe</code>）がある。方策サーバに伝えるロボットの種類から、シミュレーションを表す接尾辞を外す。</li>
+        <li><strong>データの形式。</strong>AgiBot の形式のデータを LeRobot の形式に直すコマンド（<code>geniesim dataset convert agibot-to-lerobot</code>）がある。LeRobot で学習する流れに乗せやすい。</li>
+        <li><strong>制御の実装が読める。</strong>全身を使うタスクでは、台車の動きを、操舵つきの各車輪の向きと速度に割り振る。この計算を二次計画法（OSQP）で解いている（<code>pi_env.py</code>）。MPC を学んだ人には読みやすい。</li>
+      </ul>
+
+      <h3 id="s5-4">5.4　読む順路</h3>
+      <p>本体は大きいが、読む順路が用意されている。一番上の <code>AGENTS.md</code>、<code>source/AGENTS.md</code>（部品の地図）、各部品の <code>AGENTS.md</code>、作業ごとの <code>SKILL.md</code> の順にたどる。評価まわりを読むなら、次の 4 つから始めるとよい。下の 3 つは、<code>source/<wbr>geniesim_benchmark/<wbr>src/<wbr>geniesim_benchmark/</code> からの位置で書いた。</p>
+      <div class="tw">
+        <table class="stack wrap">
+          <thead><tr><th>ファイル</th><th>わかること</th></tr></thead>
+          <tbody>
+            <tr><td><code>scripts/fake_infer_server.py</code></td><td data-l="わかること">方策サーバの最小の形（110 行）</td></tr>
+            <tr><td><code>benchmark/policy/corobotpolicy.py</code></td><td data-l="わかること">観測の組み立てと、応答の解釈</td></tr>
+            <tr><td><code>benchmark/envs/pi_env.py</code></td><td data-l="わかること">行動の実行、収まるのを待つ処理、台車の制御</td></tr>
+            <tr><td><code>app/app.py</code></td><td data-l="わかること">Isaac Sim の起動と、全体の流れ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 -->
+    <section id="s6">
+      <h2><span class="fl">6</span>進め方</h2>
+      <p>段階に分け、それぞれに「ここまでできたら次へ」の目印を置く。段階 0 から 3 は、<a href="https://github.com/mamoru1126/humanoid_study/tree/master/genie_sim_rtx3090">手順書とスクリプト</a>で進められる。</p>
+      <div class="tw">
+        <table class="stack c1">
+          <thead><tr><th>段階</th><th>やること</th><th>次へ進む目印</th></tr></thead>
+          <tbody>
+            <tr><td>0　環境を作る</td><td data-l="やること">PC を確かめ、本体、アセット、イメージを取得し、コンテナを起動する</td><td data-l="目印">ログに <code>GENIESIM_READY</code> が出る</td></tr>
+            <tr><td>1　描画を確かめる</td><td data-l="やること">プレビューで、カメラ画像を 1 組保存する</td><td data-l="目印">机、物体、ロボットの腕が写った画像が 3 枚できる。VRAM の最大値を記録する</td></tr>
+            <tr><td>2　一周を回す</td><td data-l="やること">動かない方策をつなぎ、場面 1 つぶんの評価（指示 5 つ、5 エピソード）を録画する</td><td data-l="目印">採点結果と録画ができる。点数は 0 でよい</td></tr>
+            <tr><td>3　2 台をつなぐ</td><td data-l="やること">2 台目の PC で動かない方策のサーバを立て、1 台目からつなぐ</td><td data-l="目印">段階 2 と同じ結果が、ネットワーク越しに出る</td></tr>
+            <tr><td>4　方策を入れ替える</td><td data-l="やること">自分の方策サーバを書く。決まった動きを返すものから始め、学習した方策に替える</td><td data-l="目印">録画でロボットが動く。点数が 0 より大きくなる</td></tr>
+            <tr><td>5　広げる</td><td data-l="やること">タスクを増やす。データを集める。RT Engine を ROS 2 から操る</td><td data-l="目印">業務のタスクに近い場面で、評価が回る</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>段階 4 の方策は、小さなものから始めるのがよい。ACT や Diffusion Policy は 3090 で学習でき、失敗の原因を切り分けやすい。大きな方策に替えるのは、データ、学習、評価の流れが一度通ってからにする。</p>
+      <p>段階 5 の RT Engine は、評価用に取得したアセットだけでは動かない。対話型の場面は別のアセットを参照するので、アセットの全体を取得し、ROS 2 のワークスペースをビルドする必要がある。</p>
+    </section>
+
+    <!-- ============================================================ 7 -->
+    <section id="s7">
+      <h2><span class="fl">7</span>確認できていること、できていないこと</h2>
+      <p>この資料とスクリプトは、GPU のない環境で、本体のコードを読み、動かせる部分だけを動かして作った。RTX 3090 の実機で動かした結果は、まだない。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>項目</th><th>状況</th><th>根拠</th></tr></thead>
+          <tbody>
+            <tr><td>仕組みの説明（2 節）</td><td data-l="状況"><span class="st y">確認した</span></td><td data-l="根拠">本体の 2026-11-13 の版のコードを読んだ</td></tr>
+            <tr><td>本体とロボットのモデルの取得</td><td data-l="状況"><span class="st y">確認した</span></td><td data-l="根拠">スクリプトで実際に取得した</td></tr>
+            <tr><td>アセットの容量</td><td data-l="状況"><span class="st y">確認した</span></td><td data-l="根拠">索引から計算し、CLI の表示と突き合わせた</td></tr>
+            <tr><td>スクリプトの流れ</td><td data-l="状況"><span class="st p">一部を確認した</span></td><td data-l="根拠">Docker と GPU を模したものを相手に、本体の CLI と起動スクリプトを実際に動かした</td></tr>
+            <tr><td>libuipc が 3090 で使えないこと</td><td data-l="状況"><span class="st p">コードで確認した</span></td><td data-l="根拠">判定の処理を読んだ。3090 では動かしていない</td></tr>
+            <tr><td>アセットとイメージのダウンロード</td><td data-l="状況"><span class="st n">未確認</span></td><td data-l="根拠">作業した環境から、配布元に届かない</td></tr>
+            <tr><td>3090 での起動、描画、評価の一周</td><td data-l="状況"><span class="st n">未確認</span></td><td data-l="根拠">GPU のある PC で動かしていない</td></tr>
+            <tr><td>VRAM の使用量、所要時間</td><td data-l="状況"><span class="st n">未確認</span></td><td data-l="根拠">初回に実測する。スクリプトが記録する</td></tr>
+            <tr><td>すごいところ（3 節）の数字</td><td data-l="状況"><span class="st p">出典による</span></td><td data-l="根拠">論文と本体の説明。再現はしていない</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>動かした結果は、<code>genie_sim_rtx3090</code> の <code>scripts/save_log.sh</code> でまとめてリポジトリに置ける。結果が出たら、この表を更新する。</p>
+    </section>
+
+    <!-- ============================================================ refs -->
+    <section id="refs">
+      <h2>参考文献</h2>
+      <ol class="refs">
+        <li id="r1">AgiBot, "Genie Sim," GitHub リポジトリ。2026-11-13 の版（コミット 083793f、<code>VERSION</code> 3.6.0）を参照した。<a href="https://github.com/AgibotTech/genie_sim">https://github.com/AgibotTech/genie_sim</a></li>
+        <li id="r2">C. Yin, D. Huang, D. Yang, J. Wang, N. Zhao et al., "Genie Sim 3.0 : A High-Fidelity Comprehensive Simulation Platform for Humanoid Robot," 2026. <a href="https://arxiv.org/abs/2601.02078">arXiv:2601.02078</a>（第 2 版を参照した）</li>
+        <li id="r3">NVIDIA, "Isaac Sim Requirements," Isaac Sim 6.2.0 Documentation. <a href="https://docs.isaacsim.omniverse.nvidia.com/6.2.0/installation/requirements.html">https://docs.isaacsim.omniverse.nvidia.com/6.2.0/installation/requirements.html</a></li>
+        <li id="r4">AGIBOT, "AGIBOT Unveils Genie Sim 3.0 at CES 2026, the First Open-Source Simulation Platform Built on Real-World Robot Operations," PR Newswire, 2026-01-06. <a href="https://www.prnewswire.com/news-releases/agibot-unveils-genie-sim-3-0-at-ces-2026--the-first-open-source-simulation-platform-built-on-real-world-robot-operations-302653656.html">https://www.prnewswire.com/news-releases/agibot-unveils-genie-sim-3-0-at-ces-2026--the-first-open-source-simulation-platform-built-on-real-world-robot-operations-302653656.html</a></li>
+        <li id="r5">RoboColiseum. <a href="https://robocoliseum.ai/">https://robocoliseum.ai/</a></li>
+        <li id="r6">AgiBot, "GenieSimAssets," Hugging Face Datasets. <a href="https://huggingface.co/datasets/agibot-world/GenieSimAssets">https://huggingface.co/datasets/agibot-world/GenieSimAssets</a></li>
+        <li id="r7">NVIDIA Isaac Sim, GitHub Discussions #423（RTX 3090 での動作についての回答）。<a href="https://github.com/isaac-sim/IsaacSim/discussions/423">https://github.com/isaac-sim/IsaacSim/discussions/423</a></li>
+        <li id="r8">Physical Intelligence, "openpi," GitHub リポジトリ（README の必要な VRAM の表）。<a href="https://github.com/Physical-Intelligence/openpi">https://github.com/Physical-Intelligence/openpi</a></li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

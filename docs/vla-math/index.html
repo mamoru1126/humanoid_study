@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLM・VLA の数理を学ぶロードマップ｜学習、推論、蒸留を数式で説明できるようになるまで</title>
+<meta name="description" content="画像と言葉から行動を出すモデル（VLA）の数理を学ぶための順路。学習、推論、蒸留が数式の上で何をしているかを説明し、段階ごとに、中心になる式、読むもの、手を動かすこと、目印を置いた。">
+<link rel="stylesheet" href="../assets/katex/katex.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+
+/* ---------- math ---------- */
+.katex{font-size:1.06em}
+.katex-display{margin:1.05em 0;padding:.3em 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex-display > .katex{white-space:nowrap}
+@media (max-width:345px){.katex-display > .katex{font-size:.95em}}
+td .katex,th .katex{font-size:1em}
+
+/* ---------- images ---------- */
+.fig img{display:block;width:100%;max-width:444px;height:auto;margin:0 auto}
+
+/* ---------- stages ---------- */
+.stage{margin:2.6em 0 0;padding-top:1.5em;border-top:1px solid var(--line)}
+.stage h3{display:flex;flex-wrap:wrap;align-items:baseline;gap:.3em .6em;margin:0 0 .7em;font-size:1.14rem}
+.stage h3 .no{flex:none;display:inline-grid;place-items:center;min-width:1.9em;height:1.6em;padding:0 .3em;border:1.5px solid var(--ink);border-radius:4px;font-size:.82em;font-variant-numeric:tabular-nums;line-height:1}
+.stage h3 small{font-weight:400;font-size:.78em;color:var(--steel);margin-left:auto;white-space:nowrap}
+h4{font-size:.84rem;line-height:1.5;margin:1.5em 0 .35em;font-weight:700;color:var(--steel);letter-spacing:.04em}
+ul.chk{list-style:none;padding-left:0}
+ul.chk li{position:relative;padding-left:1.7em}
+ul.chk li::before{content:"";position:absolute;left:.1em;top:.42em;width:.95em;height:.95em;border:1.5px solid var(--steel);border-radius:3px}
+ol.q{padding-left:1.7em}
+ol.q li{margin:.6em 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a></p>
+    <h1>VLM・VLA の数理を学ぶロードマップ<small>学習、推論、蒸留を、数式で説明できるようになるまで</small></h1>
+    <p class="lead">画像と言葉から行動を出すモデル（VLA）が、数理的にどういう仕組みで動いているかを学ぶための順路である。使われているアルゴリズムを 9 つの段階に分け、段階ごとに、中心になる式、読むもの、手を動かすこと、わかったと言える目印を置いた。学習、推論、蒸留の 3 つが数式の上で何をしているかは、この資料の中でひととおり説明し、小さなコードで確かめる。</p>
+    <ul class="tiles">
+      <li><b>学習</b><span>モデルの分布を、お手本のデータに合わせる</span></li>
+      <li><b>推論</b><span>合わせた分布から、行動を 1 つ取り出す</span></li>
+      <li><b>蒸留</b><span>できたモデルのふるまいを、別のモデルに写す</span></li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#s0"><span class="fl">0</span>結論</a></li>
+      <li><a href="#s1"><span class="fl">1</span>中心の式</a></li>
+      <li><a href="#s2"><span class="fl">2</span>3 つの数理</a></li>
+      <li><a href="#s3"><span class="fl">3</span>1 次元で確かめる</a></li>
+      <li><a href="#s4"><span class="fl">4</span>ロードマップ</a></li>
+      <li><a href="#s5"><span class="fl">5</span>各段階</a></li>
+      <li><a href="#s6"><span class="fl">6</span>MPC からの橋</a></li>
+      <li><a href="#s7"><span class="fl">7</span>進め方</a></li>
+      <li><a href="#s8"><span class="fl">8</span>理解度チェック</a></li>
+      <li><a href="#s9"><span class="fl">9</span>確認の状況</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#s0">0　結論</a></li>
+        <li><a href="#s1">1　中心にある 1 つの式</a></li>
+        <li><a href="#s2">2　学習、推論、蒸留の数理</a></li>
+        <li><a href="#s3">3　1 次元で確かめる</a></li>
+        <li><a href="#s4">4　ロードマップ</a></li>
+        <li><a href="#s5">5　各段階</a></li>
+        <li><a href="#s6">6　MPC・MPPI からの橋</a></li>
+        <li><a href="#s7">7　進め方</a></li>
+        <li><a href="#s8">8　理解度チェック</a></li>
+        <li><a href="#s9">9　確認できていること、できていないこと</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+    <!-- ============================================================ 0 -->
+    <section id="s0">
+      <h2><span class="fl">0</span>結論</h2>
+      <ol class="verdict">
+        <li><strong>VLA は、条件付きの確率分布を表すニューラルネットである。</strong>観測と指示を入れると、行動の分布が決まる。使われている数理は、この分布を「どう表し、どうお手本に合わせ、どう取り出すか」の 3 つに整理できる。</li>
+        <li><strong>学習は、モデルの分布をお手本の分布に合わせることである。</strong>基本の形は最尤推定で、負の対数尤度を勾配法で小さくする。これは、2 つの分布の KL ダイバージェンスを小さくすることと同じである。拡散やフローでは、同じねらいを二乗誤差の回帰で実現する。</li>
+        <li><strong>推論は、合わせた分布から行動を 1 つ取り出す計算である。</strong>取り出し方は 2 系統ある。トークンを 1 つずつ取り出す自己回帰と、ノイズから始めて微分方程式を解くフロー（拡散）である。どちらも、ネットを何回も計算する。</li>
+        <li><strong>蒸留は、学習済みのモデル（教師）の出力を目標にして、別のモデル（生徒）を学習させることである。</strong>ロボットでは、3 つの違う意味で使われる。モデルを小さくする。推論のステップを減らす。方策をまとめる（シミュレータの中の情報を使う教師から、実機の観測だけで動く生徒へ）。</li>
+        <li><strong>必要な数学は、線形代数、確率、最適化、常微分方程式の 4 つである。</strong>MPC と MPPI を数式で追ったことがあれば、最適化と確率の半分はすでに持っている。</li>
+        <li><strong>順路は 9 段階あり、全部で 70 時間ほどが目安である。</strong>3 つの意味だけを先に知りたいなら、この資料の 2 章と 3 章を読み、段階 5 と段階 8 へ進めばよい。</li>
+      </ol>
+    </section>
+
+    <!-- ============================================================ 1 -->
+    <section id="s1">
+      <h2><span class="fl">1</span>中心にある 1 つの式</h2>
+      <p>VLA（Vision-Language-Action モデル）がやっていることは、次の 1 行で書ける。</p>
+      \[
+      A_t \sim \pi_\theta(\,\cdot \mid o_t,\ \ell\,)
+      \]
+      <p>「観測 \(o_t\) と指示 \(\ell\) を条件にした分布 \(\pi_\theta\) から、行動のまとまり \(A_t\) を 1 つ取り出す」と読む。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>記号</th><th>意味</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td>\(o_t\)</td><td data-l="意味">時刻 \(t\) の観測。カメラ画像と、関節の角度など</td><td data-l="例">画像 3 枚と、関節の角度</td></tr>
+            <tr><td>\(\ell\)</td><td data-l="意味">言葉の指示</td><td data-l="例">「赤いブロックを取って」</td></tr>
+            <tr><td>\(a_t\)</td><td data-l="意味">時刻 \(t\) の行動。\(D\) 次元の実数のベクトル</td><td data-l="例">関節の目標角度、手先の目標位置</td></tr>
+            <tr><td>\(A_t\)</td><td data-l="意味">行動のまとまり（action chunk）。先の \(H\) ステップ分 \((a_t,\dots,a_{t+H-1})\)</td><td data-l="例">π0 の実装では \(H = 50\)<a class="r" href="#r43">[43]</a></td></tr>
+            <tr><td>\(\theta\)</td><td data-l="意味">ネットの重み</td><td data-l="例">数億個から数十億個</td></tr>
+            <tr><td>\(\pi_\theta\)</td><td data-l="意味">方策（policy）。重み \(\theta\) で決まる条件付きの確率分布</td><td data-l="例">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>以下では、条件の \((o_t, \ell)\) をまとめて \(c\) と書き、時刻の添字を省いて \(\pi_\theta(A \mid c)\) と書く。</p>
+
+      <h3>なぜ「1 つの答え」ではなく「分布」なのか</h3>
+      <p>同じ観測と指示でも、正しい行動は 1 つとは限らない。障害物は右からでも左からでも避けられる。人のお手本には、両方が混ざっている。「1 つの答え」を出すように学習すると、2 つの正解の平均、つまり障害物の正面へ進む答えになることがある。これを避けるには、答えの分布をまるごと表して、そこから 1 つを取り出す必要がある。<a href="#s3">3 章</a>で、実際にそうなることを確かめる。</p>
+
+      <h3>3 つの動詞</h3>
+      <p>この 1 行の式に対して、やることは 3 つある。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>動詞</th><th>数式の上での意味</th><th>計算としてやること</th><th>いつ</th></tr></thead>
+          <tbody>
+            <tr><td>学習</td><td data-l="意味">\(\displaystyle \min_\theta\ \mathbb{E}_{\mathcal D}\big[-\log \pi_\theta(A \mid c)\big]\)</td><td data-l="計算">損失の勾配を逆伝播で求め、重み \(\theta\) を少しずつ動かす</td><td data-l="いつ">事前。GPU で数時間から数週間</td></tr>
+            <tr><td>推論</td><td data-l="意味">\(A \sim \pi_\theta(\,\cdot \mid c)\)</td><td data-l="計算">\(\theta\) は固定。ネットを 1 回から数十回、前向きに計算する</td><td data-l="いつ">実行時。制御の周期に間に合わせる</td></tr>
+            <tr><td>蒸留</td><td data-l="意味">\(\displaystyle \min_\phi\ \mathbb{E}_{x\sim\rho}\big[D\big(f_{\text{教}}(x),\, f_{\text{生}}(x;\phi)\big)\big]\)</td><td data-l="計算">教師の出力を目標にして、生徒の重み \(\phi\) を学習する</td><td data-l="いつ">学習のあと、実機に載せる前</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">\(\mathcal D\) はお手本のデータ、\(f_{\text{教}}\) は教師、\(f_{\text{生}}\) は生徒、\(D\) はずれを測る量、\(\rho\) はどの入力の上で合わせるかを決める分布。くわしくは <a href="#s2">2 章</a>。</p>
+
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 338" role="img" aria-labelledby="f1t f1d">
+          <title id="f1t">VLA の構成と、段階の対応</title>
+          <desc id="f1d">上から順に、入力はカメラ画像、言葉の指示、関節の状態の 3 つ。それぞれがトークンの列に変えられ、1 本の列になる。列は Transformer に入る。その先で、行動の出し方が 2 つに分かれる。トークンで出す方法と、連続値で出す方法である。どちらも、行動のまとまりを出力する。</desc>
+          <defs>
+            <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <rect x="10" y="8" width="118" height="46" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="69" y="27" text-anchor="middle">カメラ画像</text>
+          <text class="s" x="69" y="44" text-anchor="middle">小片に切る</text>
+          <rect x="141" y="8" width="118" height="46" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="200" y="27" text-anchor="middle">言葉の指示</text>
+          <text class="s" x="200" y="44" text-anchor="middle">単語の断片に切る</text>
+          <rect x="272" y="8" width="118" height="46" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="331" y="27" text-anchor="middle">関節の状態</text>
+          <text class="s" x="331" y="44" text-anchor="middle">線形層に通す</text>
+          <path d="M69 54V71M200 54V71M331 54V71" stroke="#18222D" stroke-width="1.5" marker-end="url(#m1)"/>
+
+          <rect x="10" y="73" width="380" height="34" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="22" y="95">トークンの列</text>
+          <text class="s" x="378" y="95" text-anchor="end">段階 2、3</text>
+          <path d="M200 107V124" stroke="#18222D" stroke-width="1.5" marker-end="url(#m1)"/>
+
+          <rect x="10" y="126" width="380" height="52" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="22" y="147">Transformer（VLM の本体）</text>
+          <text class="s" x="22" y="165">注意機構で、列の中の情報を混ぜる</text>
+          <text class="s" x="378" y="147" text-anchor="end">段階 2</text>
+          <path d="M102 178V199M298 178V199" stroke="#18222D" stroke-width="1.5" marker-end="url(#m1)"/>
+
+          <rect x="10" y="201" width="184" height="56" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="22" y="222">トークンで出す</text>
+          <text class="s" x="22" y="241">自己回帰。1 つずつ</text>
+          <text class="s" x="182" y="222" text-anchor="end">段階 6</text>
+          <rect x="206" y="201" width="184" height="56" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="218" y="222">連続値で出す</text>
+          <text class="s" x="218" y="241">フロー、拡散、回帰</text>
+          <text class="s" x="378" y="222" text-anchor="end">段階 5、6</text>
+          <path d="M102 257V278M298 257V278" stroke="#18222D" stroke-width="1.5" marker-end="url(#m1)"/>
+
+          <rect x="10" y="280" width="380" height="50" rx="4" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.5"/>
+          <text class="h" x="22" y="301">行動のまとまり</text>
+          <text class="s" x="22" y="319">先の H ステップ分。先頭から実行する</text>
+          <text class="s" x="378" y="301" text-anchor="end">段階 4、7</text>
+        </svg>
+        </div>
+        <figcaption>図 1　VLA の構成と、ロードマップの段階の対応。上から下へ計算するのが推論である。全体の重みをお手本に合わせるのが学習（段階 1）、できあがったものを軽いモデルに写すのが蒸留（段階 8）である。</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============================================================ 2 -->
+    <section id="s2">
+      <h2><span class="fl">2</span>学習、推論、蒸留の数理</h2>
+
+      <h3>2.1　学習は、分布をお手本に合わせること</h3>
+      <p>お手本のデータ \(\mathcal D\) は、人がロボットを遠隔操作して集めた、条件と行動の組 \((c, A)\) の集まりである。学習の基本の形は<strong>最尤推定</strong>で、お手本の行動に、できるだけ高い確率を割り当てる重みを探す。</p>
+      \[
+      \theta^\star = \arg\max_\theta \sum_{(c,A)\in\mathcal D} \log \pi_\theta(A \mid c)
+      \]
+      <p>符号を変えて平均を取ったものが、損失である。</p>
+      \[
+      L(\theta) = \mathbb{E}_{(c,A)\sim\mathcal D}\big[-\log \pi_\theta(A \mid c)\big]
+      \]
+      <p>お手本の行動の分布を \(p\) と書くと、この損失は次のように分けられる。</p>
+      \[
+      \mathbb{E}_{p}\big[-\log \pi_\theta\big] = H(p) + \mathrm{KL}\big(p \,\|\, \pi_\theta\big)
+      \]
+      <p>\(H(p)\) はお手本のエントロピーで、\(\theta\) によらない。だから、損失を小さくすることは、お手本の分布とモデルの分布の KL ダイバージェンスを小さくすることと同じである。「学習は、分布を合わせること」と言えるのは、このためである。</p>
+      <p>分布 \(\pi_\theta\) をどういう形で表すかによって、損失の見た目が変わる。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>分布の表し方</th><th>損失</th><th>使っている例</th></tr></thead>
+          <tbody>
+            <tr><td>正規分布。平均をネットが出す</td><td data-l="損失">二乗誤差 \(\|A - f_\theta(c)\|^2\)</td><td data-l="例">単純な回帰</td></tr>
+            <tr><td>ラプラス分布。中心をネットが出す</td><td data-l="損失">絶対値の誤差 \(\|A - f_\theta(c)\|_1\)</td><td data-l="例">ACT<a class="r" href="#r9">[9]</a>、OpenVLA-OFT<a class="r" href="#r20">[20]</a></td></tr>
+            <tr><td>トークンごとの確率の積</td><td data-l="損失">交差エントロピー \(-\sum_i \log p_\theta(u_i \mid u_{&lt;i}, c)\)</td><td data-l="例">RT-2<a class="r" href="#r16">[16]</a>、OpenVLA<a class="r" href="#r17">[17]</a>、π0-FAST<a class="r" href="#r19">[19]</a></td></tr>
+            <tr><td>ノイズを運ぶ流れ（フロー）</td><td data-l="損失">速度の二乗誤差 \(\|v_\theta(A^\tau,\tau,c) - (A-\varepsilon)\|^2\)</td><td data-l="例">π0<a class="r" href="#r18">[18]</a>、SmolVLA<a class="r" href="#r25">[25]</a>、GR00T N1<a class="r" href="#r23">[23]</a></td></tr>
+            <tr><td>ノイズを少しずつ除く過程（拡散）</td><td data-l="損失">ノイズの二乗誤差 \(\|\varepsilon_\theta(A^k,k,c) - \varepsilon\|^2\)</td><td data-l="例">Diffusion Policy<a class="r" href="#r15">[15]</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">上の 3 行は、負の対数尤度そのものである。正規分布を仮定すると二乗誤差に、ラプラス分布を仮定すると絶対値の誤差になる。拡散の損失は、負の対数尤度の上界を簡単にしたものである<a class="r" href="#r10">[10]</a>。フローの損失は尤度を直接は使わないが、お手本の分布を作り出す速度場への回帰になっていて、ねらいは同じである<a class="r" href="#r12">[12]</a>。</p>
+      <p>損失を小さくするには、勾配法を使う。</p>
+      \[
+      \theta \leftarrow \theta - \eta\, \nabla_\theta L(\theta)
+      \]
+      <p>勾配 \(\nabla_\theta L\) は、連鎖律を出力側から入力側へたどる逆伝播で求める。データは全部を一度には使わず、少しずつ取り出して（ミニバッチ）、そのたびに重みを動かす。\(\eta\) は学習率である。</p>
+
+      <h3>2.2　推論は、分布から 1 つ取り出すこと</h3>
+      <p>推論では、重み \(\theta\) を固定する。逆伝播はしない。計算は、入力から出力へ向かう前向きの計算だけである。取り出し方は、分布の表し方で決まる。</p>
+      <p><strong>自己回帰。</strong>行動をトークンの列 \(u_1,\dots,u_M\) で表し、分布を条件付き確率の積に分ける。</p>
+      \[
+      p_\theta(u_{1:M} \mid c) = \prod_{i=1}^{M} p_\theta(u_i \mid u_{&lt;i},\, c)
+      \]
+      <p>推論では、\(u_1\) を取り出し、それを入力に足して \(u_2\) を取り出し、と前から順に進める。ネットの計算は \(M\) 回になる。ロボットでは、確率が最大のトークンを選ぶ設定が多い（LeRobot の π0-FAST は、既定で温度 0）<a class="r" href="#r44">[44]</a>。</p>
+      <p><strong>フロー。</strong>正規分布から取り出したノイズ \(A^0 = \varepsilon\) から始めて、学習した速度場 \(v_\theta\) に沿って運ぶ。つまり、次の常微分方程式を \(\tau = 0\) から \(\tau = 1\) まで解く。</p>
+      \[
+      \frac{dA^\tau}{d\tau} = v_\theta(A^\tau, \tau, c), \qquad A^0 = \varepsilon \sim \mathcal N(0, I)
+      \]
+      <p>いちばん簡単な解き方はオイラー法で、\(\delta = 1/N\) として次の更新を \(N\) 回くり返す。</p>
+      \[
+      A^{\tau+\delta} = A^\tau + \delta\, v_\theta(A^\tau, \tau, c)
+      \]
+      <p>π0 の実装は \(N = 10\) である。画像と言葉の部分は最初に 1 回だけ計算し、その結果を使い回して、行動の部分だけを 10 回計算する<a class="r" href="#r43">[43]</a>。</p>
+      <p><strong>回帰。</strong>ネットを 1 回計算して、出てきた値をそのまま行動として使う。分布から取り出すというより、分布の中心を 1 つ出していることになる。</p>
+      <p>どの方法でも、出てくるのは \(H\) ステップ分の行動のまとまりである。先頭の何ステップかを実行して、また出し直す。先まで計画して先頭だけ使うという形は、MPC と同じである（<a href="#s6">6 章</a>）。</p>
+
+      <h3>2.3　蒸留は、教師のふるまいを生徒に写すこと</h3>
+      <p>蒸留も学習の一種で、損失を勾配法で小さくするところは同じである。違うのは目標で、人のお手本ではなく、<strong>学習済みのモデル（教師）の出力</strong>を目標にする。一般の形は次のとおりである。</p>
+      \[
+      \min_\phi\ \mathbb{E}_{x\sim\rho}\Big[ D\big(f_{\text{教}}(x),\ f_{\text{生}}(x;\phi)\big) \Big]
+      \]
+      <p>決めることは 3 つある。教師の何を目標にするか（\(f_{\text{教}}\)）。どの入力の上で合わせるか（\(\rho\)）。ずれをどう測るか（\(D\)）。教師は、入力を与えればいくらでも答えを出せる。お手本と違って、目標が大量に、ばらつきなく手に入る。これが蒸留の強みである。</p>
+      <p>ロボットの分野では、「蒸留」が 3 つの違う意味で使われる。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>何をするか</th><th>教師</th><th>生徒</th><th>合わせるもの</th><th>得るもの</th></tr></thead>
+          <tbody>
+            <tr><td>小さくする（知識蒸留）</td><td data-l="教師">大きいモデル</td><td data-l="生徒">小さいモデル</td><td data-l="合わせる">出力の確率分布、途中の特徴</td><td data-l="得る">メモリと計算時間</td></tr>
+            <tr><td>ステップを減らす</td><td data-l="教師">多くのステップで解くフローや拡散</td><td data-l="生徒">1 回から数回で出すモデル</td><td data-l="合わせる">ノイズから行動への写像、または行動の分布</td><td data-l="得る">計算の回数（10 回が 1 回に）</td></tr>
+            <tr><td>方策をまとめる（方策蒸留）</td><td data-l="教師">シミュレータの中の情報を使う方策、強化学習の方策、複数の専門の方策</td><td data-l="生徒">実機の観測だけで動く 1 つの方策</td><td data-l="合わせる">行動</td><td data-l="得る">実機で動くこと、1 つにまとまること</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>小さくする。</strong>分類の例で書く。ネットの出力（ロジット）を \(z\) とし、温度 \(T\) の softmax を \(p^{(T)}_i = e^{z_i/T} / \sum_j e^{z_j/T}\) と書く。生徒の損失は、正解 \(y\) に対する交差エントロピーと、教師の分布に対する KL の和である<a class="r" href="#r27">[27]</a>。</p>
+      \[
+      \begin{aligned}
+      L(\phi) ={}&amp; (1-\alpha)\,\mathrm{CE}\big(y,\ p_{\text{生}}\big) \\
+      &amp;+ \alpha\, T^2\, \mathrm{KL}\big(p^{(T)}_{\text{教}} \,\big\|\, p^{(T)}_{\text{生}}\big)
+      \end{aligned}
+      \]
+      <p>教師の出力は、正解のクラスだけでなく、「どのクラスとどのクラスが似ているか」も含んでいる。温度を上げると、正解でないクラスの確率の差が見えるようになり、その情報が生徒に伝わる。係数 \(T^2\) は、温度を変えても勾配の大きさがそろうようにするためのものである。</p>
+
+      <p><strong>ステップを減らす。</strong>フローの推論は、ノイズ \(\varepsilon\) を行動 \(A\) に写す、決まった写像と見なせる。教師の速度場を \(N\) ステップで積分した結果を \(\Phi_N(\varepsilon, c)\) と書く。いちばん素直な蒸留は、これを 1 回の計算で出す生徒 \(g_\phi\) を、回帰で学習することである。</p>
+      \[
+      \min_\phi\ \mathbb{E}_{\varepsilon,\,c}\ \big\| g_\phi(\varepsilon, c) - \Phi_N(\varepsilon, c) \big\|^2
+      \]
+      <p>実際に使われる方法は、これを工夫したものである。段階的蒸留は、教師の 2 ステップ分を生徒の 1 ステップに合わせ、ステップ数を半分にすることをくり返す<a class="r" href="#r28">[28]</a>。一貫性モデルは、「同じ軌道の上の点は、どこから始めても同じ終点に着く」という条件を生徒に課す<a class="r" href="#r29">[29]</a>。ほかに、写像ではなく、生徒が出す行動の分布を教師の分布に合わせる方法もある<a class="r" href="#r31">[31]</a>。</p>
+
+      <p><strong>方策をまとめる。</strong>教師 \(\pi_{\text{教}}(a \mid s)\) は、シミュレータの中でしか分からない真の状態 \(s\)（物体の正確な位置や、摩擦など）を見て動く。生徒 \(\pi_{\text{生}}(a \mid o)\) は、実機で手に入る観測 \(o\) だけを見る。</p>
+      \[
+      \min_\phi\ \mathbb{E}_{s\sim d_{\text{生}}}\Big[ D\big(\pi_{\text{教}}(\cdot \mid s),\ \pi_{\text{生}}(\cdot \mid o(s);\phi)\big) \Big]
+      \]
+      <p>\(d_{\text{生}}\) は、<strong>生徒が自分で動いたときに訪れる状態</strong>の分布である。ここが要点になる。教師が訪れた状態の上だけで合わせると、生徒は、少し外れたときの戻り方を教わらない。生徒に動かせて、訪れた状態に教師の答えを付け直す。この手順を DAgger という<a class="r" href="#r8">[8]</a>。</p>
+
+      <div class="call">
+        <p><strong>蒸留でないもの。</strong>量子化（重みを少ないビットで表す）、枝刈り、LoRA は、同じモデルを軽くしたり、一部だけ学習したりする方法である。教師と生徒という関係はない。蒸留と組み合わせて使うことはある。</p>
+      </div>
+      <p>蒸留には限界もある。生徒は、教師の誤りもそのまま写す。また、どの入力の上で合わせるか（\(\rho\)）を誤ると、合わせたはずの生徒が、実際に使う場面で教師とずれる。</p>
+
+      <h3>2.4　2 つの系統を並べる</h3>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th></th><th>自己回帰型</th><th>フロー型</th></tr></thead>
+          <tbody>
+            <tr><td>行動の表し方</td><td data-l="自己回帰">離散のトークンの列</td><td data-l="フロー">連続値のまま</td></tr>
+            <tr><td>分布の表し方</td><td data-l="自己回帰">トークンの条件付き確率の積</td><td data-l="フロー">ノイズを運ぶ速度場</td></tr>
+            <tr><td>学習の損失</td><td data-l="自己回帰">交差エントロピー</td><td data-l="フロー">速度の二乗誤差</td></tr>
+            <tr><td>学習の 1 回の計算</td><td data-l="自己回帰">正解の列を入れて、全部の位置を一度に</td><td data-l="フロー">時間 \(\tau\) を 1 つ選び、その点で 1 回</td></tr>
+            <tr><td>推論</td><td data-l="自己回帰">トークンを 1 つずつ。\(M\) 回</td><td data-l="フロー">常微分方程式を \(N\) ステップ。\(N\) 回</td></tr>
+            <tr><td>蒸留の主なねらい</td><td data-l="自己回帰">モデルを小さくする</td><td data-l="フロー">ステップを減らす</td></tr>
+            <tr><td>例</td><td data-l="自己回帰">RT-2、OpenVLA、π0-FAST</td><td data-l="フロー">π0、SmolVLA、GR00T N1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">2 つを組み合わせるモデルもある。π0.5 は、学習では離散のトークンも使い、推論ではフローで行動を出す<a class="r" href="#r22">[22]</a>。段階 6 で扱う。</p>
+    </section>
+
+    <!-- ============================================================ 3 -->
+    <section id="s3">
+      <h2><span class="fl">3</span>1 次元で確かめる</h2>
+      <p>式だけでは実感しにくいので、行動が 1 次元の小さな問題で、学習、推論、蒸留を実際に動かす。場面は次のとおりである。</p>
+      <ul>
+        <li>ロボットの正面に障害物がある。</li>
+        <li>お手本は、左へ避けるもの（行動 \(a = -1\)）と、右へ避けるもの（\(a = +1\)）が半々である。</li>
+        <li>正面へ進む行動（\(a = 0\)）は、お手本に 1 つもない。</li>
+      </ul>
+      <p>コードは、このリポジトリの <a href="https://github.com/mamoru1126/humanoid_study/tree/master/vla_math"><code>vla_math/</code></a> にある。numpy だけで書いてあり、GPU は要らない。ニューラルネットの逆伝播と Adam も、ライブラリを使わずに書いてある。</p>
+<pre><code>python3 vla_math/ex01_learn_infer_distill.py</code></pre>
+      <p>以下の数値と図は、これを実行して得たものである。</p>
+
+      <h3>3.1　回帰は、山の平均を出す</h3>
+      <p>二乗誤差で「1 つの答え \(c\)」を学習すると、答えはお手本の平均になる。</p>
+      \[
+      \arg\min_c\ \mathbb{E}\big[(a - c)^2\big] = \mathbb{E}[a]
+      \]
+      <p>この問題では \(\mathbb{E}[a] = 0\) で、実験でも \(c = 0.002\) になった。障害物の正面へ進む行動であり、お手本のどれとも違う。入力を増やしてネットを大きくしても、同じ観測に対して正解が 2 つある限り、同じことが起きる。分布を表す必要がある、というのはこのことである。</p>
+
+      <h3>3.2　学習：直線の速度を目標にすると、交わらない流れになる</h3>
+      <p>フローマッチングの学習は、次の 3 行である。</p>
+      <ol>
+        <li>お手本 \(a\)、ノイズ \(\varepsilon \sim \mathcal N(0,1)\)、時間 \(\tau \in [0,1]\) を取り出す。</li>
+        <li>ノイズとお手本を直線で結び、途中の点 \(a^\tau = (1-\tau)\,\varepsilon + \tau\, a\) を作る。</li>
+        <li>その点での直線の速度 \(a - \varepsilon\) を目標にして、ネット \(v_\theta(a^\tau, \tau)\) を二乗誤差で学習する。</li>
+      </ol>
+      <p>微分方程式は、学習では一度も解かない。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ex01_paths.png" width="444" height="567" alt="上の図は、ノイズとお手本を結ぶ直線を 36 本描いたもの。横軸はフローの時間で、0 がノイズ、1 が行動。縦軸は行動。左の山へ向かう直線と右の山へ向かう直線が、途中で何度も交わっている。下の図は、学習した速度場に沿った軌道を 40 本描いたもの。軌道は交わらず、0 より上から始まったものは右の山（プラス 1）へ、下から始まったものは左の山（マイナス 1）へ集まる。">
+        </div>
+        <figcaption>図 2　上：学習で使う直線。ノイズとお手本を勝手に組にして結ぶので、直線どうしは交わる。下：学習した速度場に沿った軌道。交わらずに、2 つの山へ分かれる。</figcaption>
+      </figure>
+      <p>目標の直線は交わるのに、学習された流れは交わらない。理由は、二乗誤差の回帰の最適解が、条件付きの期待値になるからである。</p>
+      \[
+      v^\star(x, \tau) = \mathbb{E}\big[\, a - \varepsilon \ \big|\ a^\tau = x \,\big]
+      \]
+      <p>点 \(x\) を通る直線は何本もある。その速度の平均が、学習される速度である。そして、この速度場でノイズの分布を運ぶと、\(\tau = 1\) でちょうどお手本の分布になる。これがフローマッチングの中心になる定理である<a class="r" href="#r12">[12]</a>。</p>
+      <p>実験では、この問題の \(v^\star\) を式で書けるので、学習したネットと比べた。ずれは 0.099（二乗平均の平方根。速度の大きさは 0.92）だった。損失は 1.38 から 1.18 へ下がって止まった。0 にはならない。同じ点を通る直線の速度がばらつくので、その分は残る。損失が下がりきらないのは、失敗ではない。</p>
+
+      <h3>3.3　推論：ステップ数で何が変わるか</h3>
+      <p>学習した速度場を、オイラー法で積分する。ステップ数 \(N\) を変えて、取り出した行動の分布を比べた。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ex01_samples.png" width="444" height="785" alt="行動の分布を 6 段に並べた図。横軸は行動で、マイナス 1 が左へ避ける、プラス 1 が右へ避ける。1 段目はお手本で、マイナス 1 とプラス 1 に山がある。2 段目は二乗誤差の回帰で、0 に 1 本だけ立っている。3 段目はフローの 1 ステップで、0 の近くに集まっている。4 段目は 2 ステップで、マイナス 1 からプラス 1 の間に広がっている。5 段目は 10 ステップで、お手本と同じく 2 つの山になっている。6 段目は蒸留した生徒で、計算は 1 回だが、2 つの山になっている。">
+        </div>
+        <figcaption>図 3　取り出した行動の分布（2 万個）。点線は、お手本の山の中心。右上の数字は、どちらかの山の中心から 0.3 以内に入った割合。</figcaption>
+      </figure>
+      <div class="tw">
+        <table>
+          <thead><tr><th>方法</th><th class="n">山に入った割合</th><th class="n">計算</th></tr></thead>
+          <tbody>
+            <tr><td>お手本</td><td class="n">99.7%</td><td class="n">—</td></tr>
+            <tr><td>回帰（二乗誤差）</td><td class="n">0.0%</td><td class="n">1 回</td></tr>
+            <tr><td>フロー 1 ステップ</td><td class="n">0.0%</td><td class="n">1 回</td></tr>
+            <tr><td>フロー 2 ステップ</td><td class="n">39.7%</td><td class="n">2 回</td></tr>
+            <tr><td>フロー 4 ステップ</td><td class="n">86.7%</td><td class="n">4 回</td></tr>
+            <tr><td>フロー 10 ステップ</td><td class="n">96.5%</td><td class="n">10 回</td></tr>
+            <tr><td>フロー 100 ステップ</td><td class="n">98.8%</td><td class="n">100 回</td></tr>
+            <tr class="sum"><td>蒸留した生徒</td><td class="n">96.2%</td><td class="n">1 回</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">「計算」は、行動を 1 つ出すためにネットを計算する回数である。蒸留した生徒は 3.4 で作る。</p>
+      <p>1 ステップでは、回帰と同じく正面へ進んでしまう。これは式で説明できる。\(\tau = 0\) の点 \(a^0 = \varepsilon\) は、お手本と無関係に取り出したノイズである。だから、そこを通る直線の速度の平均は次のようになる。</p>
+      \[
+      v^\star(\varepsilon, 0) = \mathbb{E}[a] - \varepsilon
+      \]
+      <p>オイラー法の 1 ステップは \(\varepsilon + 1\cdot\big(\mathbb{E}[a] - \varepsilon\big) = \mathbb{E}[a]\) で、お手本の平均になる。ステップを重ねると、途中の点が「どちらの山に近いか」という情報を持つようになり、速度がそれぞれの山へ向く。計算を重ねることで、平均ではなく山そのものに着く。</p>
+
+      <h3>3.4　蒸留：解いた結果を、1 回で出せるように写す</h3>
+      <p>10 ステップの教師は、ノイズ \(\varepsilon\) を行動 \(a\) に写す。この写像を図にすると、0 を境にした段のような形になる。生徒は、ノイズを入れると行動を 1 回で出すネットで、教師の出力を目標にした二乗誤差で学習した。お手本のデータは使っていない。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ex01_map.png" width="444" height="374" alt="横軸がはじめのノイズ、縦軸が出てくる行動の図。教師の 1 ステップは、ノイズによらずほぼ 0 の横線。教師の 2 ステップは、なだらかな S 字。教師の 10 ステップは、ノイズが負ならマイナス 1 の近く、正ならプラス 1 の近くになる、段のような曲線。生徒の曲線は、教師の 10 ステップの曲線にほぼ重なっている。">
+        </div>
+        <figcaption>図 4　ノイズから行動への写像。生徒（橙）は、教師の 10 ステップ（青）にほぼ重なる。</figcaption>
+      </figure>
+      <p>生徒が山に入った割合は 96.2% で、教師の 96.5% とほぼ同じだった。ネットの計算は、10 回が 1 回になった。</p>
+      <p>教師を 1 ステップで使うと 0% なのに、同じ「計算 1 回」の生徒が 96.2% になるのはなぜか。教師のネットが覚えているのは速度場で、それは積分して初めて行動になる。生徒が覚えているのは、積分し終えた結果である。蒸留は、推論のたびにやっていた計算を、学習の段階に前倒ししたことになる。</p>
+      <div class="call warn">
+        <p><strong>この例の限界。</strong>行動が 1 次元で、条件もないので、教師の写像はとても単純である。実際のロボットでは、行動のまとまりは数百次元を超え（π0 の実装では 50 ステップ × 32 次元<a class="r" href="#r43">[43]</a>）、写像は観測と指示にも依る。それでも蒸留が成り立つか、どこで崩れるかは、段階 8 の論文が扱っている。</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 4 -->
+    <section id="s4">
+      <h2><span class="fl">4</span>ロードマップ</h2>
+      <p>必要な知識を、9 つの段階に分けた。段階 2 と 3 は、入力（画像と言葉）を扱う列である。段階 4 と 5 は、出力（行動）を扱う列である。2 つの列は、段階 6 で合流する。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 418" role="img" aria-labelledby="f5t f5d">
+          <title id="f5t">段階のつながり</title>
+          <desc id="f5d">段階 0 の前提の数学から、段階 1 の学習とは何かへ進む。そこから 2 つの列に分かれる。左の列は、段階 2 の Transformer と自己回帰、段階 3 の画像と言葉を 1 つの列に。右の列は、段階 4 の模倣学習とその弱点、段階 5 の拡散とフロー。2 つの列は、段階 6 の VLA を組み立てるで合流し、段階 7 の推論を実機の時間に合わせる、段階 8 の蒸留へ進む。</desc>
+          <defs>
+            <marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <rect x="100" y="6" width="200" height="34" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="112" y="28">0</text><text x="130" y="28">前提の数学</text>
+          <path d="M200 40V56" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+          <rect x="100" y="58" width="200" height="34" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="112" y="80">1</text><text x="130" y="80">学習とは何か</text>
+          <path d="M150 92L104 124M250 92L296 124" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+
+          <rect x="8" y="128" width="186" height="50" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="20" y="149">2</text><text x="38" y="149">Transformer と</text><text x="38" y="167">自己回帰</text>
+          <path d="M101 178V194" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+          <rect x="8" y="196" width="186" height="50" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="20" y="217">3</text><text x="38" y="217">画像と言葉を</text><text x="38" y="235">1 つの列に（VLM）</text>
+
+          <rect x="206" y="128" width="186" height="50" rx="4" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.2"/>
+          <text class="h" x="218" y="149">4</text><text x="236" y="149">模倣学習と、</text><text x="236" y="167">その弱点</text>
+          <path d="M299 178V194" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+          <rect x="206" y="196" width="186" height="50" rx="4" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.2"/>
+          <text class="h" x="218" y="217">5</text><text x="236" y="217">拡散と</text><text x="236" y="235">フローマッチング</text>
+
+          <path d="M104 246L150 276M296 246L250 276" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+          <rect x="100" y="278" width="200" height="34" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="112" y="300">6</text><text x="130" y="300">VLA を組み立てる</text>
+          <path d="M200 312V328" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+          <rect x="70" y="330" width="260" height="34" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="82" y="352">7</text><text x="100" y="352">推論を実機の時間に合わせる</text>
+          <path d="M200 364V380" stroke="#18222D" stroke-width="1.5" marker-end="url(#m5)"/>
+          <rect x="100" y="382" width="200" height="30" rx="4" fill="#1B232C" stroke="#1B232C"/>
+          <text class="h" x="112" y="402" style="fill:#F2A900">8</text><text x="130" y="402" style="fill:#FFFFFF">蒸留</text>
+        </svg>
+        </div>
+        <figcaption>図 5　段階のつながり。青は入力（画像と言葉）の列、橙は出力（行動）の列。段階 8 のうち「ステップを減らす蒸留」は、段階 5 が分かっていれば先に読める。</figcaption>
+      </figure>
+      <div class="tw">
+        <table class="stack c1">
+          <thead><tr><th>段階</th><th>題</th><th>中心になるもの</th><th>目安</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td data-l="題">前提の数学</td><td data-l="中心">行列、確率、勾配、常微分方程式</td><td data-l="目安">手持ちに応じて</td></tr>
+            <tr><td>1</td><td data-l="題">学習とは何か</td><td data-l="中心">最尤推定、交差エントロピー、逆伝播</td><td data-l="目安">6 時間</td></tr>
+            <tr><td>2</td><td data-l="題">Transformer と自己回帰</td><td data-l="中心">注意機構、次のトークンの予測</td><td data-l="目安">10 時間</td></tr>
+            <tr><td>3</td><td data-l="題">画像と言葉を 1 つの列に（VLM）</td><td data-l="中心">パッチ、対照学習、LoRA</td><td data-l="目安">8 時間</td></tr>
+            <tr><td>4</td><td data-l="題">模倣学習と、その弱点</td><td data-l="中心">誤差の積み重なり、行動のまとまり</td><td data-l="目安">8 時間</td></tr>
+            <tr><td>5</td><td data-l="題">拡散とフローマッチング</td><td data-l="中心">速度の回帰、常微分方程式</td><td data-l="目安">12 時間</td></tr>
+            <tr><td>6</td><td data-l="題">VLA を組み立てる</td><td data-l="中心">行動のトークン化、行動の専門家</td><td data-l="目安">10 時間</td></tr>
+            <tr><td>7</td><td data-l="題">推論を実機の時間に合わせる</td><td data-l="中心">遅れ、出し直す間隔、つなぎ目</td><td data-l="目安">6 時間</td></tr>
+            <tr><td>8</td><td data-l="題">蒸留</td><td data-l="中心">教師と生徒、3 つの意味</td><td data-l="目安">10 時間</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">目安は、要点の式を追い、「手を動かす」を 1 つやる時間として置いた。根拠のある値ではない。挙げた論文を全部読むと、もっとかかる。</p>
+    </section>
+
+    <!-- ============================================================ 5 -->
+    <section id="s5">
+      <h2><span class="fl">5</span>各段階</h2>
+      <p>段階ごとに、ねらい、中心の式、読むもの、手を動かすこと、目印を並べる。目印は、「これに答えられれば次へ進んでよい」という問いである。</p>
+
+      <!-- ---------------------------------------------------- stage 0 -->
+      <div class="stage" id="st0">
+        <h3><span class="no">0</span>前提の数学<small>目安　手持ちに応じて</small></h3>
+        <h4>ねらい</h4>
+        <p>4 つの道具をそろえる。全部を先に固める必要はない。段階を進めながら、足りないところへ戻ればよい。</p>
+        <div class="tw">
+          <table class="stack">
+            <thead><tr><th>分野</th><th>何に使うか</th><th>最低限の中身</th></tr></thead>
+            <tbody>
+              <tr><td>線形代数</td><td data-l="使う場面">注意機構（内積と行列の積）、LoRA（低ランクの行列）</td><td data-l="中身">行列の積、内積、転置、ランク</td></tr>
+              <tr><td>確率</td><td data-l="使う場面">損失の意味、分布からの取り出し方</td><td data-l="中身">条件付き確率、期待値、正規分布、最尤推定、KL ダイバージェンス</td></tr>
+              <tr><td>最適化</td><td data-l="使う場面">学習</td><td data-l="中身">勾配、連鎖律、勾配降下法</td></tr>
+              <tr><td>常微分方程式</td><td data-l="使う場面">フローと拡散の推論</td><td data-l="中身">初期値問題、オイラー法</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>MPC と MPPI を学んでいれば、連鎖律とヤコビアンは非線形 MPC で、正規分布と期待値と重みつき平均は MPPI で使ったものと同じである。新しく要るのは、最尤推定と KL ダイバージェンスくらいである。</p>
+        <h4>読むもの</h4>
+        <ul>
+          <li>Prince『Understanding Deep Learning』の付録 B（数学）と付録 C（確率）<a class="r" href="#r40">[40]</a>。必要な範囲が短くまとまっている。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 1 -->
+      <div class="stage" id="st1">
+        <h3><span class="no">1</span>学習とは何か<small>目安　6 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>「損失を決めて、勾配で下る」という手順が、確率の言葉で何をしているのかを押さえる。あとの段階に出てくる損失は、すべてここの変形である。</p>
+        <h4>中心の式</h4>
+        <p>出力が正規分布に従うと仮定すると、負の対数尤度は二乗誤差になる。</p>
+        \[
+        \begin{aligned}
+        &amp;-\log \mathcal N\big(y;\ f_\theta(x),\ \sigma^2 I\big) \\
+        &amp;\qquad = \frac{1}{2\sigma^2}\,\big\|y - f_\theta(x)\big\|^2 + \text{定数}
+        \end{aligned}
+        \]
+        <p>分類では、ネットの出力 \(z\) を softmax で確率 \(p_i = e^{z_i} / \sum_j e^{z_j}\) に直し、正解のクラス \(y\) の負の対数尤度 \(L = -\log p_y\) を損失にする（交差エントロピー）。このとき、出力についての勾配は「予測から正解を引いたもの」になる。</p>
+        \[
+        \frac{\partial L}{\partial z_i} = p_i - \mathbb{1}[\,i = y\,]
+        \]
+        <h4>読むもの</h4>
+        <ul>
+          <li>Prince『Understanding Deep Learning』5 章（損失を最尤推定から作る）、6 章（勾配降下法）、7 章（逆伝播）<a class="r" href="#r40">[40]</a>。</li>
+          <li>日本語なら、斎藤『ゼロから作る Deep Learning ❺ 生成モデル編』。正規分布と最尤推定から始まり、拡散モデルまで進む<a class="r" href="#r42">[42]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p><code>vla_math/ex01_learn_infer_distill.py</code> の <code>MLP</code> クラスを読む。順伝播、逆伝播、Adam が 40 行ほどで書いてある。<code>train_step</code> の最初に出てくる勾配 <code>g</code> が、「予測 − 目標」の定数倍になっていることを確かめる。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>二乗誤差で学習するとは、出力の分布に何を仮定したことなのかを説明できる。</li>
+          <li>負の対数尤度を小さくすることと、KL ダイバージェンスを小さくすることが同じである理由を、式で示せる。</li>
+          <li>softmax と交差エントロピーの勾配が「予測 − 正解」になることを導ける。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 2 -->
+      <div class="stage" id="st2">
+        <h3><span class="no">2</span>Transformer と自己回帰<small>目安　10 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>VLM と VLA の本体である Transformer と、それを言語モデルとして使う方法を押さえる。「学習は並列にでき、推論は 1 つずつになる」理由が要点である。</p>
+        <h4>中心の式</h4>
+        <p>注意機構は、各トークンが列の中のどのトークンをどれだけ見るかを、内積の softmax で決め、その重みで情報を集める<a class="r" href="#r1">[1]</a>。</p>
+        \[
+        \mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\Big(\frac{QK^\top}{\sqrt{d}}\Big)\,V
+        \]
+        <p>言語モデルは、列の確率を「次のトークンの確率」の積に分ける。損失は、その負の対数である。</p>
+        \[
+        p_\theta(w_1,\dots,w_n) = \prod_{t=1}^{n} p_\theta(w_t \mid w_{&lt;t})
+        \]
+        \[
+        L = -\sum_{t=1}^{n} \log p_\theta(w_t \mid w_{&lt;t})
+        \]
+        <ul>
+          <li><strong>学習。</strong>正解の列をまるごと入れる。各位置が自分より先を見られないようにしておき（因果マスク）、全部の位置の損失を 1 回の計算で求める。</li>
+          <li><strong>推論。</strong>出したトークンを入力に足して、次を出す。トークンの数だけ計算が要る。過去のトークンについての計算結果（注意機構の \(K\) と \(V\)）は、取っておいて使い回す。これを KV キャッシュという。</li>
+          <li><strong>温度。</strong>取り出すときの確率を \(p_i \propto e^{z_i/T}\) とする。\(T\) を 0 に近づけると、確率が最大のトークンだけを選ぶようになる。</li>
+        </ul>
+        <h4>読むもの</h4>
+        <ul>
+          <li>Vaswani ら「Attention Is All You Need」<a class="r" href="#r1">[1]</a>。</li>
+          <li>Prince『Understanding Deep Learning』12 章<a class="r" href="#r40">[40]</a>。</li>
+          <li>Karpathy の nanoGPT。モデルの定義が 300 行ほどに収まっている<a class="r" href="#r45">[45]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p>nanoGPT で、文字単位の小さな言語モデルを学習する。生成のときの温度を変えて、出てくる文の違いを見る。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>注意機構の softmax が、何についての重みなのかを言える。</li>
+          <li>学習は 1 回の計算で全部の位置を扱えるのに、推論はトークンの数だけ計算が要る理由を説明できる。</li>
+          <li>列の長さが 2 倍になると、注意機構の計算量がどうなるかを言える。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 3 -->
+      <div class="stage" id="st3">
+        <h3><span class="no">3</span>画像と言葉を 1 つの列に（VLM）<small>目安　8 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>画像を「言葉と同じ形」に直して、言語モデルに入れる方法を押さえる。VLA が持つ常識は、この段階で作られる。</p>
+        <h4>中心の式</h4>
+        <p><strong>画像をトークンにする。</strong>画像を \(P \times P\) 画素の小片（パッチ）に切る。解像度が \(R \times R\) なら \((R/P)^2\) 枚になる。小片の画素を 1 列に並べたベクトル \(x_i\) を、線形写像でトークンにする<a class="r" href="#r2">[2]</a>。</p>
+        \[
+        z_i = E\,x_i + e_i
+        \]
+        <p>\(E\) は学習する行列、\(e_i\) は位置を表すベクトルである。</p>
+        <p><strong>画像と文を結びつける（対照学習）。</strong>画像と文を、別々のネットでベクトル \(u\)、\(v\) にする。\(n\) 組をまとめて扱い、正しい組の内積が大きく、ほかの組の内積が小さくなるように学習する<a class="r" href="#r3">[3]</a>。</p>
+        \[
+        L = -\frac{1}{n}\sum_{i=1}^{n} \log \frac{\exp\!\big(u_i^\top v_i / T\big)}{\sum_{j=1}^{n} \exp\!\big(u_i^\top v_j / T\big)}
+        \]
+        <p>実際は、文から画像を当てる向きの損失も足す。SigLIP は、softmax の代わりに、組ごとに「合っているか、いないか」を当てる 2 値分類にしたものである<a class="r" href="#r4">[4]</a>。</p>
+        <p><strong>言語モデルにつなぐ。</strong>画像のトークンを、言語モデルの埋め込みの空間に写し、文のトークンの前に並べる。学習は、段階 2 と同じ「次のトークンの予測」である。π0 が土台にしている PaliGemma は、SigLIP の画像エンコーダと、言語モデル Gemma を組み合わせたものである<a class="r" href="#r5">[5]</a>。</p>
+        <p><strong>少ない重みで学習し直す（LoRA）。</strong>もとの重み \(W\) は固定し、低ランクの行列の積を足す<a class="r" href="#r6">[6]</a>。</p>
+        \[
+        W' = W + \frac{\alpha}{r}\,BA
+        \]
+        <p>\(W\) は \(d \times k\) の行列、\(B\) は \(d \times r\)、\(A\) は \(r \times k\) の行列である。学習するのは \(A\) と \(B\) だけである。\(r\) を小さく取れば、学習する重みは \(dk\) 個から \(r(d+k)\) 個に減る。VRAM が 24 GB の GPU で大きいモデルを学習し直せるのは、これによる。</p>
+        <h4>読むもの</h4>
+        <ul>
+          <li>ViT<a class="r" href="#r2">[2]</a>、CLIP<a class="r" href="#r3">[3]</a>、SigLIP<a class="r" href="#r4">[4]</a>、PaliGemma<a class="r" href="#r5">[5]</a>、LoRA<a class="r" href="#r6">[6]</a> の各論文。まず方法の節だけでよい。</li>
+          <li>Prince『Understanding Deep Learning』12.10 節（画像のための Transformer）<a class="r" href="#r40">[40]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p>Hugging Face の transformers で SigLIP を読み込む。手元の画像 1 枚と、文をいくつか（「机の上に赤いブロックがある」など）用意し、内積がいちばん大きい文を選ばせる。ロボットのカメラ画像で試すと、VLM が何を見分けられるかの感触がつかめる。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>解像度とパッチの大きさから、画像 1 枚が何個のトークンになるかを計算できる。</li>
+          <li>対照学習の損失の softmax が、何と何を比べているのかを言える。</li>
+          <li>LoRA で学習する重みの数を、\(d\)、\(k\)、\(r\) で書ける。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 4 -->
+      <div class="stage" id="st4">
+        <h3><span class="no">4</span>模倣学習と、その弱点<small>目安　8 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>ロボットの学習の基本形である行動クローニング（behavior cloning）と、その 2 つの弱点を押さえる。弱点が、段階 5 から先の動機になる。</p>
+        <h4>中心の式</h4>
+        <p>行動クローニングは、<a href="#s2">2.1</a> の最尤推定そのものである。お手本の組 \((c, A)\) を、教師あり学習のデータとして使う。</p>
+        <p><strong>弱点 1　誤差の積み重なり。</strong>学習に使う状態は、お手本が訪れたものだけである。方策が少し誤ると、お手本にない状態に入る。そこでの正しい行動は教わっていないので、さらに誤る。お手本が訪れる状態の上で、1 ステップあたり確率 \(q\) で誤る方策を考える。長さ \(T\) の課題を通したお手本との差は、最悪の場合、次の大きさになる<a class="r" href="#r7">[7]</a>。</p>
+        \[
+        O\big(q\,T^2\big)
+        \]
+        <p>普通の教師あり学習なら \(qT\) で済むところが、\(T\) の 2 乗で効く。DAgger は、方策が自分で訪れた状態に、教える側の行動を付け直してデータに足す。これで \(O(qT)\) に戻る<a class="r" href="#r8">[8]</a>。</p>
+        <p><strong>弱点 2　正解が複数ある。</strong><a href="#s3">3 章</a>で見たとおり、二乗誤差の回帰は平均を出す。</p>
+        <p><strong>行動のまとまり。</strong>1 回に \(H\) ステップ分を出すと、方策が決める回数が \(T\) 回から \(T/H\) 回に減り、積み重なりが減る。ACT は、Transformer で行動のまとまりを出す方策で、損失は、絶対値の誤差と、潜在変数についての KL の和である<a class="r" href="#r9">[9]</a>。</p>
+        \[
+        \begin{aligned}
+        L ={}&amp; \big\|A - \hat A\big\|_1 \\
+        &amp;+ \beta\ \mathrm{KL}\big(q_\phi(z \mid A, o)\ \big\|\ \mathcal N(0, I)\big)
+        \end{aligned}
+        \]
+        <p>潜在変数 \(z\) は、お手本ごとの「やり方の違い」を吸収する役をする（条件付き変分オートエンコーダ）。LeRobot の既定値は \(H = 100\)、\(\beta = 10\) である<a class="r" href="#r44">[44]</a>。毎ステップ推論して、同じ時刻についての複数の予測を \(w_i = \exp(-m\,i)\) の重みで平均する方法（temporal ensembling）も、この論文にある。</p>
+        <h4>読むもの</h4>
+        <ul>
+          <li>Ross と Bagnell（誤差の積み重なり）<a class="r" href="#r7">[7]</a>、Ross ら（DAgger）<a class="r" href="#r8">[8]</a>。定理の主張と、その前後の説明だけでよい。</li>
+          <li>Zhao ら（ACT）<a class="r" href="#r9">[9]</a>。</li>
+          <li>Capuano ら「Robot Learning: A Tutorial」4 章。行動クローニングの弱点から、生成モデルを使う方策までを、LeRobot のコードつきで説明している<a class="r" href="#r39">[39]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p>LeRobot の ACT を、公開されているデータセットか、シミュレーションの課題で学習する。ACT は重みが約 8000 万個で、LeRobot の文書には、GPU 1 枚で数時間とある<a class="r" href="#r44">[44]</a>。行動のまとまりの長さ \(H\) を変えて、成功率を比べる。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>誤差が \(T\) の 2 乗で効く理由を、図を描いて説明できる。</li>
+          <li>行動のまとまりが、積み重なりを減らす理由を言える。</li>
+          <li>お手本に 2 通りのやり方が混ざっているとき、二乗誤差の回帰が失敗する理由を、式で示せる。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 5 -->
+      <div class="stage" id="st5">
+        <h3><span class="no">5</span>拡散とフローマッチング<small>目安　12 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>複雑な分布から取り出せるモデルの作り方を押さえる。「学習は回帰、推論は微分方程式」という分担が要点である。3 つの動詞の意味がいちばんはっきり見える段階でもある。</p>
+        <h4>中心の式</h4>
+        <p><strong>フローマッチング。</strong>行動のまとまり \(A\) とノイズ \(\varepsilon\) を直線で結ぶ<a class="r" href="#r12">[12]</a>。</p>
+        \[
+        A^\tau = (1-\tau)\,\varepsilon + \tau A, \qquad \tau \in [0, 1]
+        \]
+        <p>損失は、直線の速度 \(A - \varepsilon\) への回帰である。推論は、<a href="#s2">2.2</a> の常微分方程式を解く。</p>
+        \[
+        L(\theta) = \mathbb{E}_{\tau,\,\varepsilon,\,(c,A)}\ \big\| v_\theta(A^\tau, \tau, c) - (A - \varepsilon) \big\|^2
+        \]
+        <p><strong>拡散（DDPM）。</strong>お手本にノイズを \(K\) 段階で少しずつ足していく過程を、先に決めておく<a class="r" href="#r10">[10]</a>。</p>
+        \[
+        A^k = \sqrt{\bar\alpha_k}\,A + \sqrt{1-\bar\alpha_k}\ \varepsilon
+        \]
+        <p>\(\bar\alpha_k\) は、1 から 0 へ減っていく、決めておいた数列である。ネットには、足されたノイズを当てさせる。</p>
+        \[
+        L(\theta) = \mathbb{E}_{k,\,\varepsilon,\,(c,A)}\ \big\| \varepsilon_\theta(A^k, k, c) - \varepsilon \big\|^2
+        \]
+        <p>推論は、\(k = K\)（ほぼノイズ）から \(k = 0\) へ向かって、当てたノイズを少しずつ除いていく。DDIM は、同じネットを使って、少ないステップで取り出す方法である<a class="r" href="#r11">[11]</a>。</p>
+        <p><strong>2 つは同じ家族である。</strong>どちらも、ノイズとデータの間の「道」を先に決め、道の上の点で回帰する。違うのは、道の形と、ネットが当てるもの（速度か、ノイズか）である。Diffusion Policy は、拡散で行動のまとまりを出し、その一部を実行してから出し直す<a class="r" href="#r15">[15]</a>。</p>
+        <div class="call">
+          <p><strong>記号の向きに注意。</strong>π0 の実装（openpi）は、時間の向きがこの資料と逆で、\(\tau = 1\) がノイズ、\(\tau = 0\) が行動である。目標の速度は \(\varepsilon - A\) と書かれている。同じことを逆向きに書いたものである。また、\(\tau\) は一様分布ではなく、ベータ分布から取り出している<a class="r" href="#r43">[43]</a>。論文や実装を読むときは、まず時間の向きを確かめるとよい。</p>
+        </div>
+        <h4>読むもの</h4>
+        <ul>
+          <li>Holderrieth と Erives の講義ノート（MIT 6.S184）。常微分方程式から順に導いていて、演習がついている。最初の 1 本として勧める<a class="r" href="#r14">[14]</a>。</li>
+          <li>Lipman ら「Flow Matching Guide and Code」<a class="r" href="#r13">[13]</a>と、元の論文<a class="r" href="#r12">[12]</a>。</li>
+          <li>Ho ら（DDPM）<a class="r" href="#r10">[10]</a>、Song ら（DDIM）<a class="r" href="#r11">[11]</a>、Chi ら（Diffusion Policy）<a class="r" href="#r15">[15]</a>。</li>
+          <li>Prince『Understanding Deep Learning』18 章<a class="r" href="#r40">[40]</a>。日本語なら、岡野原『拡散モデル』<a class="r" href="#r41">[41]</a>、斎藤『ゼロから作る Deep Learning ❺』<a class="r" href="#r42">[42]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p><code>ex01</code> を書き換える。</p>
+        <ul>
+          <li>お手本の山を 3 つにする。<code>MODES</code> を書き換えるだけでよい。まん中の山を 0 に置くと、平均がその山に重なるので、「山に入った割合」では、平均に落ちたことを見分けられなくなる。行動の分布の図で見る。</li>
+          <li>「どちらへ避けるべきか」の手がかりを、観測としてネットの入力に足す。条件付きの分布になる。</li>
+          <li>オイラー法を 2 次の方法（中点法）に替えて、同じ計算回数での違いを見る。</li>
+        </ul>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>学習で微分方程式を解かなくてよい理由を説明できる。</li>
+          <li>損失が 0 まで下がらない理由を説明できる。</li>
+          <li>1 ステップのオイラー法で、行動が平均に落ちる理由を、式で示せる。</li>
+          <li>拡散とフローの共通点と違いを、「道」と「当てるもの」の 2 点で言える。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 6 -->
+      <div class="stage" id="st6">
+        <h3><span class="no">6</span>VLA を組み立てる<small>目安　10 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>段階 3 の VLM に、段階 4 と 5 の「行動の出し方」をつなぐ。設計の選択肢を、損失と推論の違いとして整理する。</p>
+        <h4>中心の式と考え方</h4>
+        <p><strong>行動をトークンにする。</strong>行動の各次元を 256 個の区間に分け、区間の番号をトークンとして扱う（RT-2<a class="r" href="#r16">[16]</a>、OpenVLA<a class="r" href="#r17">[17]</a>）。学習も推論も、言語モデルとまったく同じになる。弱点は、トークンの数である。行動が \(D\) 次元で、\(H\) ステップ分を出すなら、\(H \times D\) 個を 1 つずつ出すことになる。FAST は、行動の列を離散コサイン変換で周波数の成分に直し、粗く丸めてから圧縮することで、トークンの数を減らす<a class="r" href="#r19">[19]</a>。</p>
+        <p><strong>連続値のまま出す。</strong>VLM の後ろに、行動だけを担当する小さい Transformer（行動の専門家、action expert）を付け、フローマッチングで学習する（π0<a class="r" href="#r18">[18]</a>）。または、行動のまとまりを 1 回の計算で並列に出し、絶対値の誤差の回帰で学習する（OpenVLA-OFT。もとの OpenVLA に比べて、行動を出す速さが 26 倍になったと報告している<a class="r" href="#r20">[20]</a>）。</p>
+        <p><strong>両方を使う。</strong>VLM の本体は、離散のトークンの交差エントロピーで学習する。行動の専門家は、フローマッチングで学習する。そして、専門家の損失の勾配を、本体へは流さない<a class="r" href="#r21">[21]</a>。</p>
+        \[
+        L = L_{\text{CE}}\big(\theta_{\text{本体}}\big) + L_{\text{フロー}}\big(\theta_{\text{専門家}};\ \mathrm{sg}[h]\big)
+        \]
+        <p>\(h\) は本体が出す特徴、\(\mathrm{sg}\) は「ここで勾配を止める」という印である。連続値の損失を本体に流すと、VLM がもともと持っていた画像と言葉の知識が崩れやすい、というのが動機である。π0.5 は、この形で学習されている<a class="r" href="#r43">[43]</a>。</p>
+        <p><strong>階層に分ける。</strong>π0.5 は、まず「次にやる小さな作業」を言葉で出し、それを条件にして行動を出す<a class="r" href="#r22">[22]</a>。GR00T N1 は、画像と言葉を扱う遅い系と、行動を出す速い系の 2 つに分ける<a class="r" href="#r23">[23]</a>。</p>
+        <p><strong>違う機体のデータを混ぜる。</strong>機体が違えば、行動の次元も意味も違う。AgiBot の GO-1 は、VLM がまず「潜在行動」のトークン（動画から学習した、動きを表す符号）を出し、それを条件にして行動の専門家が行動を出す<a class="r" href="#r24">[24]</a>。人の動画のように、行動の記録がないデータも学習に使えるようにするためである。</p>
+        <h4>読むもの</h4>
+        <ul>
+          <li>トークン型：RT-2<a class="r" href="#r16">[16]</a>、OpenVLA<a class="r" href="#r17">[17]</a>、FAST<a class="r" href="#r19">[19]</a>。</li>
+          <li>フロー型：π0<a class="r" href="#r18">[18]</a>、SmolVLA<a class="r" href="#r25">[25]</a>、GR00T N1<a class="r" href="#r23">[23]</a>。</li>
+          <li>組み合わせ：Knowledge Insulation<a class="r" href="#r21">[21]</a>、π0.5<a class="r" href="#r22">[22]</a>、OpenVLA-OFT<a class="r" href="#r20">[20]</a>。</li>
+          <li>AgiBot の機体を使うなら、GO-1 の論文<a class="r" href="#r24">[24]</a>。</li>
+          <li>Capuano らのチュートリアル 5 章<a class="r" href="#r39">[39]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p>openpi の <code>src/openpi/models/pi0.py</code> にある <code>compute_loss</code> と <code>sample_actions</code> を読む。2 つ合わせて 100 行ほどで、段階 5 の式がそのまま書いてある。画像と言葉の部分を 1 回だけ計算して使い回している場所を見つける<a class="r" href="#r43">[43]</a>。なお、openpi の公開コードが π0.5 について扱うのは、学習も推論も、フローの部分だけである。離散のトークンの損失は入っていない。余力があれば、SmolVLA（重みは約 4.5 億個）を LeRobot で学習し直す<a class="r" href="#r44">[44]</a>。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>同じ VLM からトークン型とフロー型の VLA を作るとき、損失と推論がそれぞれどう変わるかを言える。</li>
+          <li>\(H = 50\)、\(D = 14\) の行動を、次元ごとに 1 トークンで表すと何個になるか、それがなぜ遅いかを言える。</li>
+          <li>勾配を止めると何が守られるのかを説明できる。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 7 -->
+      <div class="stage" id="st7">
+        <h3><span class="no">7</span>推論を実機の時間に合わせる<small>目安　6 時間</small></h3>
+        <h4>ねらい</h4>
+        <p>実機では、推論にかかる時間そのものが、制御の性能を決める。行動のまとまりの長さ、遅れ、出し直す間隔の関係を、式で押さえる。</p>
+        <h4>中心の式</h4>
+        <p>制御の周期を \(\Delta t\)、推論にかかる時間を \(t_{\text{推論}}\) とする。推論の間もロボットは動く。結果が出たとき、もとの観測は次のステップ数だけ古くなっている。</p>
+        \[
+        d = \Big\lceil \frac{t_{\text{推論}}}{\Delta t} \Big\rceil
+        \]
+        <p>出てきた \(H\) ステップのうち、先頭の \(d\) ステップは、もう過ぎた時刻の行動なので使えない。\(s\) ステップごとに出し直すとき、行動が途切れないための条件は次のとおりである。</p>
+        \[
+        s \le H - d
+        \]
+        <p>たとえば、\(\Delta t = 1/30\) 秒、推論が 100 ミリ秒なら \(d = 3\) で、\(H = 50\) なら \(s\) は 47 以下でなければならない。</p>
+        <p><strong>つなぎ目。</strong>新しいまとまりは、新しいノイズから作る。古いまとまりの続きになるとは限らない。<a href="#s3">3 章</a>の例で言えば、古いほうは右へ避け、新しいほうは左へ避ける、ということが起こりうる。対策は 2 つある。重なった予測を平均する（段階 4 の temporal ensembling）。または、新しいまとまりの先頭 \(d\) ステップを、実行中のものと同じ値に固定し、残りをそれに合うように生成する（real-time chunking。画像の欠けた部分を埋める問題と同じ形になる）<a class="r" href="#r26">[26]</a>。</p>
+        <p><strong>速くする方法は 4 つに分けられる。</strong></p>
+        <div class="tw">
+          <table class="stack">
+            <thead><tr><th>方法</th><th>中身</th><th>出力は変わるか</th></tr></thead>
+            <tbody>
+              <tr><td>使い回す</td><td data-l="中身">KV キャッシュ。画像と言葉の部分は 1 回だけ計算する</td><td data-l="出力">変わらない</td></tr>
+              <tr><td>反復を減らす</td><td data-l="中身">フローのステップ数を減らす。トークンを並列に出す</td><td data-l="出力">変わる</td></tr>
+              <tr><td>1 回を軽くする</td><td data-l="中身">量子化（重みを少ないビットで表す）。小さいモデルを使う</td><td data-l="出力">変わる</td></tr>
+              <tr><td>作り直す</td><td data-l="中身">蒸留（段階 8）</td><td data-l="出力">変わる。教師に合わせて学習し直す</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>読むもの</h4>
+        <ul>
+          <li>Black ら（real-time chunking）<a class="r" href="#r26">[26]</a>。</li>
+          <li>Capuano らのチュートリアル 4.4 節（推論の工夫）<a class="r" href="#r39">[39]</a>。</li>
+          <li>Diffusion Policy の、まとまりを出し直す方法の節<a class="r" href="#r15">[15]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p>このリポジトリの <a href="https://github.com/mamoru1126/humanoid_study/tree/master/genie_sim_rtx3090">Genie Sim の環境</a>で、方策サーバの応答に遅れを入れて評価する。<code>DELAY=0.5 bash scripts/hold_server.sh</code> で、1 回の応答を 0.5 秒遅らせられる。Genie Sim には、推論を待つ間、シミュレーションの物理を止める設定（<code>pause_physics_during_inference</code>）がある。止めると「遅れのない理想」、止めないと「遅れのある現実」になる。動く方策を用意できたら、2 つの成績を比べる。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>自分の構成で、\(H\)、\(d\)、\(s\) の関係を書ける。</li>
+          <li>推論の間に物理を止める評価と、止めない評価で、成績が変わりうる理由を説明できる。</li>
+          <li>速くする 4 つの方法のうち、出力を変えないのはどれかを言える。</li>
+        </ul>
+      </div>
+
+      <!-- ---------------------------------------------------- stage 8 -->
+      <div class="stage" id="st8">
+        <h3><span class="no">8</span>蒸留<small>目安　10 時間</small></h3>
+        <h4>ねらい</h4>
+        <p><a href="#s2">2.3</a> で分けた 3 つの蒸留を、元の論文で確かめる。どれも「教師の出力を目標にした学習」だが、合わせるものと、合わせる場所が違う。</p>
+        <h4>中心の式と考え方</h4>
+        <p><strong>小さくする。</strong>式は 2.3 のとおりである。温度を十分に高くすると、損失は、教師と生徒のロジットの二乗誤差に近づく<a class="r" href="#r27">[27]</a>。</p>
+        <p><strong>ステップを減らす。</strong>流儀は 2 つある。軌道を合わせるもの（段階的蒸留<a class="r" href="#r28">[28]</a>、一貫性モデル<a class="r" href="#r29">[29]</a>）と、分布を合わせるもの（OneDP<a class="r" href="#r31">[31]</a>）である。一貫性モデルは、同じ軌道の上の 2 点 \(A^\tau\)、\(A^{\tau'}\) について、生徒 \(f_\phi\) に次の条件を課す。</p>
+        \[
+        f_\phi(A^\tau, \tau) = f_\phi(A^{\tau'}, \tau'), \qquad f_\phi(A^1, 1) = A^1
+        \]
+        <p>ロボットでは、Consistency Policy が Diffusion Policy を蒸留して、推論を 1 桁速くした<a class="r" href="#r30">[30]</a>。OneDP は、1 回の計算で行動を出す<a class="r" href="#r31">[31]</a>。軌道を合わせる方法は複数の山を平均しやすく、分布を合わせる方法は 1 つの山に寄りやすい、という指摘がある<a class="r" href="#r36">[36]</a>。3 章の例で言えば、前者は正面へ進む行動が混ざる危険、後者は左右の片方しか選ばなくなる危険である。</p>
+        <p><strong>方策をまとめる。</strong>式は 2.3 のとおりである。Learning by Cheating は自動運転の研究で、真の状態を見る教師を先に学習し、それを画像だけで動く生徒に写した<a class="r" href="#r32">[32]</a>。ヒューマノイドの全身制御でも、同じ 2 段構えが広く使われている。HOVER は、真の状態を使う教師から、いくつもの指令の形を受けられる 1 つの方策を、DAgger で蒸留した<a class="r" href="#r33">[33]</a>。RLDG は、強化学習で作った専門の方策にデータを作らせ、それで汎用の方策を学習し直す<a class="r" href="#r34">[34]</a>。</p>
+        <p><strong>最近の動き。</strong>2026 年には、フローで行動を出す方策を 1 ステップにする方法が続けて出ている。SnapFlow は、フロー型の VLA（π0、π0.5、SmolVLA）の 10 ステップを 1 ステップにまとめる<a class="r" href="#r35">[35]</a>。One-Step Flow Policy も、1 ステップで行動を出す方策を作る<a class="r" href="#r36">[36]</a>。どちらも、別の教師を用意せず、モデルが自分自身を教師にする形（自己蒸留）を取る。</p>
+        <h4>読むもの</h4>
+        <ul>
+          <li>小さくする：Hinton ら<a class="r" href="#r27">[27]</a>。短く、読みやすい。</li>
+          <li>ステップを減らす：Salimans と Ho<a class="r" href="#r28">[28]</a>、Song ら<a class="r" href="#r29">[29]</a>、Prasad ら（Consistency Policy）<a class="r" href="#r30">[30]</a>、Wang ら（OneDP）<a class="r" href="#r31">[31]</a>。</li>
+          <li>方策をまとめる：Chen ら（Learning by Cheating）<a class="r" href="#r32">[32]</a>、He ら（HOVER）<a class="r" href="#r33">[33]</a>、Xu ら（RLDG）<a class="r" href="#r34">[34]</a>。</li>
+        </ul>
+        <h4>手を動かす</h4>
+        <p><code>ex01</code> の (4) を変える。</p>
+        <ul>
+          <li>教師のステップ数を 100 にする。生徒が写しやすくなるか、写しにくくなるかを見る。</li>
+          <li>生徒のネットを小さくする。どこまで小さくできるかを見る。</li>
+          <li>生徒を「2 ステップで出す」形にする。段階的蒸留の 1 回分にあたる。</li>
+        </ul>
+        <p>MPC や MPPI の制御器が手元にあるなら、それを教師にして、小さなネットに蒸留するのもよい。教師は毎回の最適化で入力を出し、生徒は 1 回の計算で出す。生徒が訪れた状態に教師の答えを付け直す形（DAgger）にする。方策蒸留の 3 つの部品（教師、生徒、合わせる場所）を、自分の制御器で体験できる。</p>
+        <h4>目印</h4>
+        <ul class="chk">
+          <li>3 つの蒸留それぞれについて、教師、生徒、合わせるもの、合わせる入力の分布を言える。</li>
+          <li>教師を 1 ステップで使うより、蒸留した 1 ステップの生徒のほうが良い理由を説明できる。</li>
+          <li>蒸留と量子化の違いを言える。</li>
+        </ul>
+      </div>
+
+      <div class="stage" id="st9">
+        <h3><span class="no">＋</span>その先</h3>
+        <p>模倣学習は、お手本を超えにくい。この先にあるのは、強化学習で仕上げる方向である。π*0.6 は、行動の良し悪しを表す値（アドバンテージ）を条件として入力に足し、実機で集めた経験と、人による訂正から学習し直す<a class="r" href="#r37">[37]</a>。段階 8 までの道具（条件付きの分布、フロー、教師と生徒）が、そのまま使われている。</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 -->
+    <section id="s6">
+      <h2><span class="fl">6</span>MPC・MPPI からの橋</h2>
+      <p>MPC と MPPI を知っていると、VLA の数理のかなりの部分は、見覚えのある形をしている。対応を並べる。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>MPC・MPPI</th><th>VLA</th><th>同じところ、違うところ</th></tr></thead>
+          <tbody>
+            <tr><td>モデルとコストから、実行のたびに最適化で入力を出す</td><td data-l="VLA">お手本から、観測を行動に写す分布を、事前に学習する</td><td data-l="対応">計算の重さを、実行時に払うか、事前に払うかの違い</td></tr>
+            <tr><td>後退ホライズン。\(N\) ステップ先まで解き、先頭だけ使う</td><td data-l="VLA">行動のまとまり。\(H\) ステップ分を出し、先頭の \(s\) ステップを使う</td><td data-l="対応">同じ形。VLA は、推論が遅いので先頭の 1 つではなく何ステップか使う</td></tr>
+            <tr><td>MPPI の重み \(w_k \propto \exp(-S_k/\lambda)\)</td><td data-l="VLA">softmax \(p_i \propto \exp(z_i/T)\)</td><td data-l="対応">同じ関数。\(\lambda\) と \(T\) は、どちらも「温度」である</td></tr>
+            <tr><td>MPPI。ノイズを足した入力の列を、重みつきで平均する</td><td data-l="VLA">フロー、拡散。ノイズから始めて、学習した場に沿って行動へ運ぶ</td><td data-l="対応">どちらも、ノイズを出発点にして良い行動へ寄せる。寄せる向きを、コストから計算するか、お手本から学習するかが違う</td></tr>
+            <tr><td>MPPI の導出。理想の分布との KL を小さくする</td><td data-l="VLA">学習。お手本の分布との KL を小さくする。蒸留。教師の分布との KL を小さくする</td><td data-l="対応">同じ道具。何と何の KL かが違う</td></tr>
+            <tr><td>ウォームスタート。前回の解をずらして、次の初期値にする</td><td data-l="VLA">前のまとまりの残りに、次のまとまりを合わせる（real-time chunking）</td><td data-l="対応">ねらいは同じ。前回と今回の計画を食い違わせない</td></tr>
+            <tr><td>制約を式で書ける。なぜその入力になったかを追える</td><td data-l="VLA">制約は、お手本を通してしか入らない。理由を追いにくい</td><td data-l="対応">VLA の弱いところ。下の層に、従来の制御を残す理由になる</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>2 つをつなぐ研究もある。Model-Based Diffusion は、拡散モデルの「寄せる向き」を、学習ではなく、モデルとコストから計算する。サンプリングで解く最適化（MPPI など）とのつながりも論じられている<a class="r" href="#r38">[38]</a>。また、段階 8 で挙げたとおり、MPC や MPPI を教師にして方策のネットを作ることは、方策蒸留そのものである。</p>
+    </section>
+
+    <!-- ============================================================ 7 -->
+    <section id="s7">
+      <h2><span class="fl">7</span>進め方</h2>
+      <h3>おすすめの順</h3>
+      <ol>
+        <li><strong>この資料の 2 章と 3 章を読み、<code>ex01</code> を動かす。</strong>3 つの動詞の意味を、先につかんでおく。</li>
+        <li><strong>段階 1 で、損失の意味を固める。</strong></li>
+        <li><strong>入力の列（段階 2、3）と、出力の列（段階 4、5）を読む。</strong>2 つの列は独立なので、どちらからでもよい。交互に進めてもよい。</li>
+        <li><strong>段階 6 で 2 つをつなぎ、段階 7、8 で実機に近づける。</strong></li>
+      </ol>
+      <h3>近道</h3>
+      <ul>
+        <li><strong>学習、推論、蒸留の意味だけを先に知りたい。</strong>2 章、3 章、段階 5、段階 8。</li>
+        <li><strong>VLA にこだわらず、実機に決まった作業をさせたい。</strong>段階 1、4、5、7。ACT と Diffusion Policy は、言葉の指示を使わない小さい方策で、GPU 1 枚で学習できる。</li>
+        <li><strong>手元の VLA を速くしたい。</strong>段階 5、7、8。</li>
+      </ul>
+      <h3>RTX 3090（VRAM 24 GB）でできること</h3>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>やること</th><th>見込み</th><th>根拠</th></tr></thead>
+          <tbody>
+            <tr><td><code>ex01</code>（1 次元の問題）</td><td data-l="見込み"><span class="st y">できる</span>。GPU は要らない</td><td data-l="根拠">実行して確かめた</td></tr>
+            <tr><td>nanoGPT（文字単位）</td><td data-l="見込み"><span class="st p">できる見込み</span></td><td data-l="根拠">小さいモデルである。試してはいない</td></tr>
+            <tr><td>ACT の学習</td><td data-l="見込み"><span class="st p">できる見込み</span></td><td data-l="根拠">LeRobot の文書に、重みは約 8000 万個、GPU 1 枚で数時間とある<a class="r" href="#r44">[44]</a></td></tr>
+            <tr><td>SmolVLA の学習し直し</td><td data-l="見込み"><span class="st p">できる見込み</span></td><td data-l="根拠">重みは約 4.5 億個。必要な VRAM は確かめていない<a class="r" href="#r44">[44]</a></td></tr>
+            <tr><td>π0、π0.5 の推論</td><td data-l="見込み"><span class="st p">できる見込み</span></td><td data-l="根拠">openpi は、8 GB を超える VRAM が要るとしている<a class="r" href="#r43">[43]</a></td></tr>
+            <tr><td>π0 の LoRA での学習し直し</td><td data-l="見込み"><span class="st p">ぎりぎりの見込み</span></td><td data-l="根拠">openpi は、22.5 GB を超える VRAM が要るとし、例に RTX 4090（24 GB）を挙げている<a class="r" href="#r43">[43]</a>。24 GB に対して、余裕は 1.5 GB ほどである</td></tr>
+            <tr><td>π0 の全体の学習し直し</td><td data-l="見込み"><span class="st n">できない</span></td><td data-l="根拠">openpi は、70 GB を超える VRAM が要るとしている<a class="r" href="#r43">[43]</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">「見込み」としたものは、試していない。文書の記載から判断したものである。</p>
+      <p>学習した方策の評価には、このリポジトリの <a href="../genie-sim/">Genie Sim の資料</a>と環境が使える。方策の推論と、シミュレーションを、2 台の PC に分けられる。</p>
+    </section>
+
+    <!-- ============================================================ 8 -->
+    <section id="s8">
+      <h2><span class="fl">8</span>理解度チェック</h2>
+      <p>全部の段階を終えたとき、次の問いに、式を使って答えられるようになっているはずである。</p>
+      <ol class="q">
+        <li>VLA が「1 つの答え」ではなく「分布」を表す必要があるのは、なぜか。</li>
+        <li>負の対数尤度を小さくすることが、KL ダイバージェンスを小さくすることと同じなのは、なぜか。</li>
+        <li>自己回帰のモデルで、学習は並列にでき、推論は 1 つずつになるのは、なぜか。</li>
+        <li>行動クローニングの誤差が、課題の長さ \(T\) の 2 乗で効くのは、なぜか。</li>
+        <li>フローマッチングの学習で、微分方程式を解かなくてよいのは、なぜか。</li>
+        <li>フローの推論を 1 ステップにすると、行動が平均に落ちるのは、なぜか。</li>
+        <li>π0 の推論で、ネットの計算は何回か。そのうち、画像と言葉の部分の計算は何回か。</li>
+        <li>推論に \(d\) ステップかかるとき、行動のまとまりの長さ \(H\) と、出し直す間隔 \(s\) は、どんな関係を満たす必要があるか。</li>
+        <li>3 つの蒸留それぞれで、教師、生徒、合わせるもの、合わせる入力の分布は何か。</li>
+        <li>蒸留した 1 ステップの生徒が、教師を 1 ステップで使うより良い行動を出せるのは、なぜか。</li>
+      </ol>
+    </section>
+
+    <!-- ============================================================ 9 -->
+    <section id="s9">
+      <h2><span class="fl">9</span>確認できていること、できていないこと</h2>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>項目</th><th>状態</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td>論文の題名、著者、番号</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">2026-11-14 に、検索の結果と、公式のリポジトリの文献情報で照合した</td></tr>
+            <tr><td>openpi の実装（時間の向き、10 ステップ、\(H = 50\)、使い回し）</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">2026-08-25 の版（コミット 215abfb）のコードを読んだ</td></tr>
+            <tr><td>LeRobot の既定値と文書の記載</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">2026-11-13 の版（コミット fe1c545）を読んだ</td></tr>
+            <tr><td>演習 <code>ex01</code> の数値と図</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">Python 3.13、numpy 2.5、matplotlib 3.11 で実行した。数値は環境で少し変わりうる</td></tr>
+            <tr><td>「手を動かす」の課題</td><td data-l="状態"><span class="st p">一部</span></td><td data-l="中身"><code>ex01</code> の山を 3 つにする変更は、実行して確かめた。ほかの課題は試していない</td></tr>
+            <tr><td>論文の主張の中身</td><td data-l="状態"><span class="st p">一部</span></td><td data-l="中身">要旨と、関係する節で確かめた。式の導出を全部追ったわけではない。実験の再現はしていない</td></tr>
+            <tr><td>細かい記述の一部</td><td data-l="状態"><span class="st p">記憶による</span></td><td data-l="中身">行動を 256 個の区間に分けること<a class="r" href="#r16">[16]</a><a class="r" href="#r17">[17]</a>、nanoGPT の行数<a class="r" href="#r45">[45]</a>、Learning by Cheating の内容<a class="r" href="#r32">[32]</a>は、今回は原典に当たり直していない</td></tr>
+            <tr><td>SnapFlow の著者<a class="r" href="#r35">[35]</a></td><td data-l="状態"><span class="st n">未確認</span></td><td data-l="中身">題名と番号は照合した。著者名は確かめられなかったので、載せていない</td></tr>
+            <tr><td>段階ごとの目安の時間</td><td data-l="状態"><span class="st p">目安</span></td><td data-l="中身">根拠のある値ではない</td></tr>
+            <tr><td>RTX 3090 での学習と推論（nanoGPT、ACT、SmolVLA、π0）</td><td data-l="状態"><span class="st n">未確認</span></td><td data-l="中身">文書の記載からの見込みである。試していない</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>この分野は動きが速い。モデルの名前は半年で入れ替わるが、この資料で扱った部品（最尤推定、注意機構、自己回帰、拡散とフロー、行動のまとまり、教師と生徒）は、入れ替わりにくい。新しい論文は、「この部品を、どう組み替えたのか」という目で読むとよい。</p>
+    </section>
+
+    <!-- ============================================================ refs -->
+    <section id="refs">
+      <h2><span class="fl">※</span>参考文献</h2>
+      <ol class="refs">
+        <li id="r1">A. Vaswani et al., "Attention Is All You Need," 2017. <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a></li>
+        <li id="r2">A. Dosovitskiy et al., "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale," 2020. <a href="https://arxiv.org/abs/2010.11929">arXiv:2010.11929</a></li>
+        <li id="r3">A. Radford et al., "Learning Transferable Visual Models From Natural Language Supervision," 2021. <a href="https://arxiv.org/abs/2103.00020">arXiv:2103.00020</a></li>
+        <li id="r4">X. Zhai et al., "Sigmoid Loss for Language Image Pre-Training," 2023. <a href="https://arxiv.org/abs/2303.15343">arXiv:2303.15343</a></li>
+        <li id="r5">L. Beyer et al., "PaliGemma: A versatile 3B VLM for transfer," 2024. <a href="https://arxiv.org/abs/2407.07726">arXiv:2407.07726</a></li>
+        <li id="r6">E. J. Hu et al., "LoRA: Low-Rank Adaptation of Large Language Models," 2021. <a href="https://arxiv.org/abs/2106.09685">arXiv:2106.09685</a></li>
+        <li id="r7">S. Ross and D. Bagnell, "Efficient Reductions for Imitation Learning," AISTATS 2010, PMLR 9:661–668. <a href="https://proceedings.mlr.press/v9/ross10a.html">https://proceedings.mlr.press/v9/ross10a.html</a></li>
+        <li id="r8">S. Ross, G. J. Gordon and J. A. Bagnell, "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning," 2011. <a href="https://arxiv.org/abs/1011.0686">arXiv:1011.0686</a></li>
+        <li id="r9">T. Z. Zhao, V. Kumar, S. Levine and C. Finn, "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware," 2023. <a href="https://arxiv.org/abs/2304.13705">arXiv:2304.13705</a></li>
+        <li id="r10">J. Ho, A. Jain and P. Abbeel, "Denoising Diffusion Probabilistic Models," 2020. <a href="https://arxiv.org/abs/2006.11239">arXiv:2006.11239</a></li>
+        <li id="r11">J. Song, C. Meng and S. Ermon, "Denoising Diffusion Implicit Models," 2020. <a href="https://arxiv.org/abs/2010.02502">arXiv:2010.02502</a></li>
+        <li id="r12">Y. Lipman et al., "Flow Matching for Generative Modeling," 2022. <a href="https://arxiv.org/abs/2210.02747">arXiv:2210.02747</a></li>
+        <li id="r13">Y. Lipman et al., "Flow Matching Guide and Code," 2024. <a href="https://arxiv.org/abs/2412.06264">arXiv:2412.06264</a></li>
+        <li id="r14">P. Holderrieth and E. Erives, "An Introduction to Flow Matching and Diffusion Models," MIT 6.S184 の講義ノート, 2025. <a href="https://arxiv.org/abs/2506.02070">arXiv:2506.02070</a>。講義のページ：<a href="https://diffusion.csail.mit.edu/">https://diffusion.csail.mit.edu/</a></li>
+        <li id="r15">C. Chi et al., "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion," 2023. <a href="https://arxiv.org/abs/2303.04137">arXiv:2303.04137</a></li>
+        <li id="r16">A. Brohan et al., "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control," 2023. <a href="https://arxiv.org/abs/2307.15818">arXiv:2307.15818</a></li>
+        <li id="r17">M. J. Kim et al., "OpenVLA: An Open-Source Vision-Language-Action Model," 2024. <a href="https://arxiv.org/abs/2406.09246">arXiv:2406.09246</a></li>
+        <li id="r18">K. Black et al., "π0: A Vision-Language-Action Flow Model for General Robot Control," 2024. <a href="https://arxiv.org/abs/2410.24164">arXiv:2410.24164</a></li>
+        <li id="r19">K. Pertsch et al., "FAST: Efficient Action Tokenization for Vision-Language-Action Models," 2025. <a href="https://arxiv.org/abs/2501.09747">arXiv:2501.09747</a></li>
+        <li id="r20">M. J. Kim, C. Finn and P. Liang, "Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success," 2025. <a href="https://arxiv.org/abs/2502.19645">arXiv:2502.19645</a></li>
+        <li id="r21">D. Driess et al., "Knowledge Insulating Vision-Language-Action Models: Train Fast, Run Fast, Generalize Better," 2025. <a href="https://arxiv.org/abs/2505.23705">arXiv:2505.23705</a></li>
+        <li id="r22">Physical Intelligence, "π0.5: a Vision-Language-Action Model with Open-World Generalization," 2025. <a href="https://arxiv.org/abs/2504.16054">arXiv:2504.16054</a></li>
+        <li id="r23">J. Bjorck et al., "GR00T N1: An Open Foundation Model for Generalist Humanoid Robots," 2025. <a href="https://arxiv.org/abs/2503.14734">arXiv:2503.14734</a></li>
+        <li id="r24">AgiBot-World-Contributors, "AgiBot World Colosseo: A Large-scale Manipulation Platform for Scalable and Intelligent Embodied Systems," 2025. <a href="https://arxiv.org/abs/2503.06669">arXiv:2503.06669</a></li>
+        <li id="r25">M. Shukor et al., "SmolVLA: A Vision-Language-Action Model for Affordable and Efficient Robotics," 2025. <a href="https://arxiv.org/abs/2506.01844">arXiv:2506.01844</a></li>
+        <li id="r26">K. Black, M. Y. Galliker and S. Levine, "Real-Time Execution of Action Chunking Flow Policies," 2025. <a href="https://arxiv.org/abs/2506.07339">arXiv:2506.07339</a></li>
+        <li id="r27">G. Hinton, O. Vinyals and J. Dean, "Distilling the Knowledge in a Neural Network," 2015. <a href="https://arxiv.org/abs/1503.02531">arXiv:1503.02531</a></li>
+        <li id="r28">T. Salimans and J. Ho, "Progressive Distillation for Fast Sampling of Diffusion Models," 2022. <a href="https://arxiv.org/abs/2202.00512">arXiv:2202.00512</a></li>
+        <li id="r29">Y. Song, P. Dhariwal, M. Chen and I. Sutskever, "Consistency Models," 2023. <a href="https://arxiv.org/abs/2303.01469">arXiv:2303.01469</a></li>
+        <li id="r30">A. Prasad et al., "Consistency Policy: Accelerated Visuomotor Policies via Consistency Distillation," 2024. <a href="https://arxiv.org/abs/2405.07503">arXiv:2405.07503</a></li>
+        <li id="r31">Z. Wang et al., "One-Step Diffusion Policy: Fast Visuomotor Policies via Diffusion Distillation," 2024. <a href="https://arxiv.org/abs/2410.21257">arXiv:2410.21257</a></li>
+        <li id="r32">D. Chen, B. Zhou, V. Koltun and P. Krähenbühl, "Learning by Cheating," 2019. <a href="https://arxiv.org/abs/1912.12294">arXiv:1912.12294</a></li>
+        <li id="r33">T. He et al., "HOVER: Versatile Neural Whole-Body Controller for Humanoid Robots," 2024. <a href="https://arxiv.org/abs/2410.21229">arXiv:2410.21229</a></li>
+        <li id="r34">C. Xu, Q. Li, J. Luo and S. Levine, "RLDG: Robotic Generalist Policy Distillation via Reinforcement Learning," 2024. <a href="https://arxiv.org/abs/2412.09858">arXiv:2412.09858</a></li>
+        <li id="r35">"SnapFlow: One-Step Action Generation for Flow-Matching VLAs via Progressive Self-Distillation," 2026. <a href="https://arxiv.org/abs/2604.05656">arXiv:2604.05656</a></li>
+        <li id="r36">S. Li et al., "One-Step Flow Policy: Self-Distillation for Fast Visuomotor Policies," 2026. <a href="https://arxiv.org/abs/2603.12480">arXiv:2603.12480</a></li>
+        <li id="r37">Physical Intelligence, "π*0.6: a VLA That Learns From Experience," 2025. <a href="https://arxiv.org/abs/2511.14759">arXiv:2511.14759</a></li>
+        <li id="r38">C. Pan, Z. Yi, G. Shi and G. Qu, "Model-Based Diffusion for Trajectory Optimization," 2024. <a href="https://arxiv.org/abs/2407.01573">arXiv:2407.01573</a></li>
+        <li id="r39">F. Capuano et al., "Robot Learning: A Tutorial," 2025. <a href="https://arxiv.org/abs/2510.12403">arXiv:2510.12403</a></li>
+        <li id="r40">S. J. D. Prince, "Understanding Deep Learning," MIT Press, 2023. 本の全文が公開されている。<a href="https://udlbook.github.io/udlbook/">https://udlbook.github.io/udlbook/</a></li>
+        <li id="r41">岡野原大輔『拡散モデル　データ生成技術の数理』岩波書店, 2023.</li>
+        <li id="r42">斎藤康毅『ゼロから作る Deep Learning ❺　生成モデル編』オライリー・ジャパン, 2024.</li>
+        <li id="r43">Physical Intelligence, "openpi," GitHub リポジトリ。2026-08-25 の版（コミット 215abfb）を参照した。<a href="https://github.com/Physical-Intelligence/openpi">https://github.com/Physical-Intelligence/openpi</a></li>
+        <li id="r44">Hugging Face, "LeRobot," GitHub リポジトリ。2026-11-13 の版（コミット fe1c545）を参照した。<a href="https://github.com/huggingface/lerobot">https://github.com/huggingface/lerobot</a>。文書：<a href="https://huggingface.co/docs/lerobot">https://huggingface.co/docs/lerobot</a></li>
+        <li id="r45">A. Karpathy, "nanoGPT," GitHub リポジトリ。<a href="https://github.com/karpathy/nanoGPT">https://github.com/karpathy/nanoGPT</a></li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a>。数式の表示に KaTeX（MIT ライセンス）を使っている。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function renderMath(){
+    if(!window.renderMathInElement) return;
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false,
+      strict: "ignore"
+    });
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderMath);
+  else renderMath();
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

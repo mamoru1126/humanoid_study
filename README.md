@@ -17,3 +17,7 @@
 | 2026-11-14 | [Genie Sim を RTX 3090 で動かす環境（Genie Sim 3.6.0、Isaac Sim 6.2、Docker）](genie_sim_rtx3090/) |
 
 環境は、手順書と bash スクリプトからなる。RTX 3090 の実機では、まだ動かしていない。確認できていることと、できていないことは、手順書の最初に書いてある。
+
+## メモ
+
+GitHub Pages の公開元が、リポジトリの一番上（root）になっている。資料の本体は `docs/` にあるので、一番上の `index.html` と `genie-sim/index.html` で `docs/` へ転送している。公開元を `/docs` に変えたあとは、この 2 つは使われないので消してよい。

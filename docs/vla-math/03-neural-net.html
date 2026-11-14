@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 ニューラルネットと逆伝播｜VLM・VLA の数理</title>
+<meta name="description" content="1 章と 2 章のモデルは、入力の 1 次式か、人が選んだ特徴（\(x^2, x^3, \dots\)）の 1 次式だった。ニューラルネットは、特徴そのものもデータから作る。この章では、層を重ねたネットの形と、その勾配を効率よく求める方法（">
+<link rel="stylesheet" href="../assets/katex/katex.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+
+/* ---------- math ---------- */
+.katex{font-size:1.06em}
+.katex-display{margin:1.05em 0;padding:.3em 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex-display > .katex{white-space:nowrap}
+@media (max-width:345px){.katex-display > .katex{font-size:.95em}}
+td .katex,th .katex{font-size:1em}
+/* ---------- chapter pages ---------- */
+.kicker{margin:0 0 .5em;font-size:.86rem;font-weight:700;color:var(--steel);letter-spacing:.04em}
+h1 .chno{display:inline-grid;place-items:center;min-width:1.55em;height:1.35em;margin-right:.4em;padding:0 .2em;border:2px solid var(--ink);border-radius:6px;font-size:.8em;line-height:1;vertical-align:.08em;font-variant-numeric:tabular-nums}
+.fig img{display:block;width:100%;max-width:444px;height:auto;margin:0 auto}
+h4{font-size:.86rem;line-height:1.5;margin:1.5em 0 .35em;font-weight:700;color:var(--steel);letter-spacing:.04em}
+.ex{margin:1.6em 0;padding:1em 1.1em .4em;border:1px solid var(--line);border-top:4px solid var(--pol);border-radius:0 0 6px 6px;background:var(--sheet)}
+.ex > .ex-h{margin:0 0 .5em;font-weight:700}
+.ex > .ex-h span{display:inline-block;margin-right:.5em;padding:.05em .5em;border-radius:3px;background:var(--pol);color:#fff;font-size:.82em}
+pre.out{background:var(--faint);color:var(--ink);font-size:.76rem;line-height:1.6;white-space:pre;overflow-x:auto;overflow-wrap:normal;-webkit-overflow-scrolling:touch}
+ul.chk{list-style:none;padding-left:0}
+ul.chk li{position:relative;padding-left:1.7em}
+ul.chk li::before{content:"";position:absolute;left:.1em;top:.42em;width:.95em;height:.95em;border:1.5px solid var(--steel);border-radius:3px}
+ol.q{padding-left:1.7em}
+ol.q li{margin:.6em 0}
+.chnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:3.2em 0 0}
+.chnav a{display:block;padding:.75em .95em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);text-decoration:none;line-height:1.5}
+.chnav a:hover{border-color:var(--steel)}
+.chnav small{display:block;font-size:.76rem;color:var(--steel);margin-bottom:.15em}
+.chnav .next{grid-column:2;text-align:right}
+.chnav .up{grid-column:1/-1;text-align:center}
+table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a> › <a href="./">VLM・VLA の数理</a></p>
+    <p class="kicker">第 1 部　機械学習の基礎</p>
+    <h1><span class="chno">3</span>ニューラルネットと逆伝播<small>層を重ね、勾配を出口から求める</small></h1>
+    <p class="lead">1 章と 2 章のモデルは、入力の 1 次式か、人が選んだ特徴（\(x^2, x^3, \dots\)）の 1 次式だった。ニューラルネットは、特徴そのものもデータから作る。この章では、層を重ねたネットの形と、その勾配を効率よく求める方法（逆伝播）を、numpy で書いて確かめる。VLM と VLA の中身は、この部品を大きく積み上げたものである。</p>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#limit"><span class="fl">1</span>1 次式の限界</a></li>
+      <li><a href="#layers"><span class="fl">2</span>層を重ねる</a></li>
+      <li><a href="#backprop"><span class="fl">3</span>逆伝播：勾配を出口から求める</a></li>
+      <li><a href="#stable"><span class="fl">4</span>学習を安定させる</a></li>
+      <li><a href="#ex"><span class="fl">5</span>演習</a></li>
+      <li><a href="#sum"><span class="fl">6</span>まとめ</a></li>
+      <li><a href="#check"><span class="fl">7</span>確かめる問題</a></li>
+      <li><a href="#read"><span class="fl">8</span>読むもの</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#limit">1　1 次式の限界</a></li>
+        <li><a href="#layers">2　層を重ねる</a></li>
+        <li><a href="#backprop">3　逆伝播：勾配を出口から求める</a></li>
+        <li><a href="#stable">4　学習を安定させる工夫</a></li>
+        <li><a href="#ex">5　演習</a></li>
+        <li><a href="#sum">6　まとめ</a></li>
+        <li><a href="#check">7　確かめる問題</a></li>
+        <li><a href="#read">8　読むもの</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+
+    <section id="limit">
+      <h2><span class="fl">1</span>1 次式の限界</h2>
+      <p>2 本の渦巻きに沿って並んだ点を、2 つのクラスに分けたい。2 章の softmax 回帰は、ロジットが入力の 1 次式なので、境目は直線になる。渦巻きは直線では分けられない。演習 3 では、正解率は 64% にとどまる。</p>
+      <p>1 章のように特徴（\(x_1^2\)、\(x_1 x_2\)、\(\sin\) など）を人が足せば、曲がった境目も作れる。しかし、画像のような入力で、よい特徴を人が選ぶのは難しい。ニューラルネットは、特徴を作る部分も重みで表し、まとめて学習する。</p>
+    </section>
+
+    <section id="layers">
+      <h2><span class="fl">2</span>層を重ねる</h2>
+      <p>1 つの層は、「1 次式のあとに、決まった非線形の関数を通す」計算である。</p>
+      \[
+      h = \sigma(W x + b)
+      \]
+      <p>\(W\) は行列、\(b\) はベクトルで、どちらも重みである。\(\sigma\) は<strong>活性化関数</strong>で、成分ごとに働く。いまの主流は ReLU（\(\sigma(a) = \max(0, a)\)）か、それをなめらかにした GELU である。</p>
+      <p>これを重ねる。隠れ層が 2 つのネットは、次のとおりである。</p>
+      \[
+      \begin{aligned}
+      h_1 &amp;= \sigma(W_1 x + b_1)\\
+      h_2 &amp;= \sigma(W_2 h_1 + b_2)\\
+      z &amp;= W_3 h_2 + b_3
+      \end{aligned}
+      \]
+      <p>最後の \(z\) はロジットで、2 章と同じく softmax と交差エントロピーで学習する。途中の \(h_1, h_2\) が、ネットが自分で作った特徴である。この形を、多層パーセプトロン（MLP）または全結合ネットという。</p>
+      <p>活性化関数がないと、1 次式を何回重ねても 1 次式にしかならない（\(W_2(W_1 x) = (W_2 W_1) x\)）。非線形の \(\sigma\) をはさむことで、曲がった関数を表せる。幅（各層の数の個数）を十分に取れば、MLP はどんな連続関数でも好きな精度で近似できることが知られている（万能近似）。ただし、それに必要な幅や、学習で本当にそこへたどり着けるかは、別の問題である。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ch03_boundary.png" width="444" height="478" alt="4 つの小さな図。どれも、2 本の渦巻きに沿った青い点と橙の点が描かれ、背景がモデルの選ぶクラスで塗り分けられている。左上の線形のモデルは、直線で 2 つに分けているだけで、正解率は 64%。右上の隠れ層の幅 4 は、折れ線の境目で一部だけ渦に沿い、77%。左下の幅 8 と右下の幅 64 は、境目が渦巻きに沿って曲がり、ほぼ 100%。">
+        </div>
+        <figcaption>図 1　学習した境目。線形のモデルは直線しか引けない。隠れ層を持つネットは、幅が十分なら渦に沿った境目を作れる。数字は検証データの正解率。</figcaption>
+      </figure>
+      <p>重みの数は、層ごとに「入力の数 × 出力の数 + 出力の数」である。演習の 2 → 64 → 64 → 2 のネットなら、\((2\cdot 64 + 64) + (64 \cdot 64 + 64) + (64\cdot 2 + 2) = 4482\) 個になる。VLA の重みは数億〜数十億個あるが、数え方は同じである。</p>
+    </section>
+
+    <section id="backprop">
+      <h2><span class="fl">3</span>逆伝播：勾配を出口から求める</h2>
+      <p>学習には、損失の、すべての重みについての勾配が要る。重みが 1 億個あっても、勾配は、順に計算する 1 回（順伝播）と、出口から戻る 1 回（逆伝播）で、まとめて求められる<a class="r" href="#r-rumelhart">[1]</a>。</p>
+      <p>ここでは、演習のコードに合わせて、データ \(N\) 個を行に並べた行列で書く。層 \(l\) の入力を \(H_{l-1}\)（\(N\) 行）、1 次式の結果を \(A_l = H_{l-1} W_l + b_l\)、出力を \(H_l = \sigma(A_l)\) とする。出口の勾配は、2 章で求めた「予測 − 正解」である。</p>
+      \[
+      G_{\text{出口}} = \frac{\partial L}{\partial Z} = \frac{1}{N}\big(P - Y\big)
+      \]
+      <p>\(P\) は予測した確率、\(Y\) は正解を 1 にした並び（one-hot）を、行に並べたものである。ある層の \(A_l\) についての勾配 \(G_l = \partial L / \partial A_l\) がわかれば、連鎖律から、次の 3 つが出る。</p>
+      \[
+      \begin{aligned}
+      \frac{\partial L}{\partial W_l} &amp;= H_{l-1}^\top G_l\\
+      \frac{\partial L}{\partial b_l} &amp;= \sum_{\text{行}} G_l\\
+      \frac{\partial L}{\partial H_{l-1}} &amp;= G_l\, W_l^\top
+      \end{aligned}
+      \]
+      <p>最後のものを、活性化関数の微分と成分ごとに掛けると、1 つ前の層の \(G_{l-1}\) になる。ReLU なら、微分は「入力が正なら 1、負なら 0」である。</p>
+      \[
+      G_{l-1} = \big(G_l\, W_l^\top\big) \odot \mathbb 1\big[A_{l-1} &gt; 0\big]
+      \]
+      <p>これを出口から入口へ繰り返す。順伝播で \(H_l\) と \(A_l\) を取っておけば、逆伝播の計算量は順伝播とほぼ同じである。1 つずつ重みを動かして差を取る方法（数値微分）では、重みの数だけ順伝播が要るので、比べものにならない。</p>
+      <div class="call">
+        <p><strong>実際には書かなくてよい。</strong>PyTorch や JAX は、順伝播の計算を記録し、逆伝播を自動で行う（自動微分）。損失を計算して <code>loss.backward()</code> と書けば、全部の重みの勾配が入る。それでも一度は手で書いておくと、勾配が消える、爆発する、といった問題の意味がわかるようになる。演習 3 では、逆伝播の結果が数値微分と一致することを確かめる。</p>
+      </div>
+    </section>
+
+    <section id="stable">
+      <h2><span class="fl">4</span>学習を安定させる工夫</h2>
+      <p>層を深くすると、勾配が層を通るたびに小さくなったり大きくなったりして、学習が進まなくなる。このあとの章のモデルで必ず使われている工夫を、5 つ挙げる。</p>
+      <ul>
+        <li><strong>初期化。</strong>重みの初期値の大きさを、入力の数 \(n\) に合わせる。ReLU なら、分散 \(2/n\) の正規分布から取る（He の初期化）<a class="r" href="#r-he_init">[2]</a>。各層の出力の大きさが、深さによらずそろう。</li>
+        <li><strong>Adam。</strong>勾配の移動平均 \(m\) と、勾配の 2 乗の移動平均 \(v\) を持ち、重みごとに歩幅を調整する<a class="r" href="#r-adam">[3]</a>。
+          \[
+          \begin{aligned}
+          m &amp;\leftarrow \beta_1 m + (1-\beta_1)\,g\\
+          v &amp;\leftarrow \beta_2 v + (1-\beta_2)\,g^2\\
+          \theta &amp;\leftarrow \theta - \eta\,\frac{\hat m}{\sqrt{\hat v} + \epsilon}
+          \end{aligned}
+          \]
+          \(\hat m, \hat v\) は、はじめの偏りを補正したもの。深層学習の既定の最適化手法である（重みの減衰を分けた AdamW がよく使われる）。</li>
+        <li><strong>学習率の予定。</strong>はじめは小さくして徐々に上げ（ウォームアップ）、後半で下げていく。</li>
+        <li><strong>正規化。</strong>層の出力を、平均 0、分散 1 にそろえてから、学習する倍率とずらしを掛ける。Transformer では、トークンごとにそろえる LayerNorm を使う<a class="r" href="#r-layernorm">[4]</a>。
+          \[
+          \mathrm{LN}(h) = \gamma \odot \frac{h - \mu(h)}{\sqrt{\mathrm{var}(h) + \epsilon}} + \beta
+          \]</li>
+        <li><strong>残差接続。</strong>層の出力を \(h + F(h)\) のように、入力に足す形にする<a class="r" href="#r-resnet">[5]</a>。勾配が足し算の道を通って、深い層まで弱まらずに届く。<a href="05-transformer.html">5 章</a>の Transformer は、すべての部品がこの形でつながっている。</li>
+      </ul>
+    </section>
+
+    <section id="ex">
+      <h2><span class="fl">5</span>演習</h2>
+      <div class="ex">
+        <p class="ex-h"><span>演習 3</span>ニューラルネットと逆伝播</p>
+        <p>重みは numpy の配列で持ち、順伝播、逆伝播、Adam を手で書いてある（<code>MLP</code> クラス、60 行ほど）。10 秒ほどで終わる。</p>
+        <pre><code>python3 vla_math/ch03_mlp.py</code></pre>
+        <p>出力の一部：</p>
+<pre class="out">(1) 線形のモデル（入力 2 → 出力 2）
+    重み 6 個、学習後の交差エントロピー 0.604、検証データの正解率 63.7%
+
+(2) 隠れ層 2 つのニューラルネット（2 → 64 → 64 → 2、ReLU）
+       0 回目: 交差エントロピー 0.956、検証データの正解率 50.0%
+     200 回目: 交差エントロピー 0.003、検証データの正解率 99.7%
+    重みの数 4482 個
+
+(3) 勾配の確認（逆伝播 と 数値微分）
+    30 か所で比べた相対誤差: 最大 2.6e-07、中央値 1.8e-09
+
+(4) 隠れ層の幅を変える（2 → 幅 → 幅 → 2、各 3000 回）
+    幅   2: 重み    18 個、検証データの正解率 50.0%
+    幅   4: 重み    42 個、検証データの正解率 77.0%
+    幅   8: 重み   114 個、検証データの正解率 99.7%</pre>
+        <p>見るところ：</p>
+        <ul>
+          <li>(3) 逆伝播の勾配は、数値微分と 7 桁以上一致する。ReLU の折れ目をまたぐと数値微分のほうがずれるので、差分の幅を小さく取っている。</li>
+          <li>(4) 幅 2 では、まったく分けられない（50%）。ReLU の出力が 0 になったまま動かない「死んだ」ユニットが出やすい。幅を増やすと表せる形が増える。</li>
+        </ul>
+        <p>変えてみる：活性化関数を <code>np.tanh</code> にする（逆伝播の微分も \(1 - h^2\) に変える）。層を 5 つに増やし、初期化の \(\sqrt{2/n}\) を 1 にすると何が起こるかを見る。</p>
+      </div>
+    </section>
+
+    <section id="sum">
+      <h2><span class="fl">6</span>まとめ</h2>
+      <ol class="verdict">
+        <li><strong>ニューラルネットは、「1 次式 → 非線形の関数」を重ねたものである。</strong>途中の層が、特徴をデータから作る。</li>
+        <li><strong>逆伝播は、連鎖律を出口から順に使って、全部の重みの勾配を 1 往復で求める。</strong>出口の勾配は、2 章の「予測 − 正解」である。</li>
+        <li><strong>深いネットを学習できるのは、初期化、Adam、正規化、残差接続などの工夫による。</strong>このあとの Transformer は、これらを全部使っている。</li>
+      </ol>
+    </section>
+
+    <section id="check">
+      <h2><span class="fl">7</span>確かめる問題</h2>
+      <ol class="q">
+        <li>活性化関数を除くと、何層重ねても 1 次式になるのはなぜか。</li>
+        <li>層 \(A = HW + b\) について、\(\partial L/\partial W = H^\top G\) となることを、成分で書いて確かめよ。</li>
+        <li>重みが \(P\) 個あるとき、数値微分で勾配を求めると順伝播が何回要るか。逆伝播ならどうか。</li>
+        <li>残差接続 \(h + F(h)\) で、勾配が深い層まで届きやすくなるのはなぜか。\(\partial (h + F(h)) / \partial h\) を書いて考えよ。</li>
+      </ol>
+    </section>
+
+    <section id="read">
+      <h2><span class="fl">8</span>読むもの</h2>
+      <ul>
+        <li>Prince『Understanding Deep Learning』3 章、4 章（浅いネット、深いネット）、6 章（学習の手順）、7 章（勾配と初期化）、11 章（残差ネット）<a class="r" href="#r-prince">[6]</a>。</li>
+        <li>斎藤『ゼロから作る Deep Learning』<a class="r" href="#r-zero1">[7]</a>。逆伝播を計算グラフで説明し、numpy で実装する。</li>
+        <li>Karpathy の動画講義「Neural Networks: Zero to Hero」<a class="r" href="#r-karpathy">[8]</a>。最初の回で、自動微分を数十行で作る。英語。</li>
+      </ul>
+    </section>
+
+    <section id="refs">
+      <h2><span class="fl">※</span>参考文献</h2>
+      <ol class="refs">
+        <li id="r-rumelhart">D. E. Rumelhart, G. E. Hinton and R. J. Williams, "Learning representations by back-propagating errors," Nature 323, 533–536, 1986.</li>
+        <li id="r-he_init">K. He, X. Zhang, S. Ren and J. Sun, "Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification," 2015. <a href="https://arxiv.org/abs/1502.01852">arXiv:1502.01852</a></li>
+        <li id="r-adam">D. P. Kingma and J. Ba, "Adam: A Method for Stochastic Optimization," 2014. <a href="https://arxiv.org/abs/1412.6980">arXiv:1412.6980</a></li>
+        <li id="r-layernorm">J. L. Ba, J. R. Kiros and G. E. Hinton, "Layer Normalization," 2016. <a href="https://arxiv.org/abs/1607.06450">arXiv:1607.06450</a></li>
+        <li id="r-resnet">K. He, X. Zhang, S. Ren and J. Sun, "Deep Residual Learning for Image Recognition," 2015. <a href="https://arxiv.org/abs/1512.03385">arXiv:1512.03385</a></li>
+        <li id="r-prince">S. J. D. Prince, "Understanding Deep Learning," MIT Press, 2023. 本の全文が公開されている。<a href="https://udlbook.github.io/udlbook/">https://udlbook.github.io/udlbook/</a></li>
+        <li id="r-zero1">斎藤康毅『ゼロから作る Deep Learning　Python で学ぶディープラーニングの理論と実装』オライリー・ジャパン, 2016.</li>
+        <li id="r-karpathy">A. Karpathy, "Neural Networks: Zero to Hero," 動画の講義. <a href="https://karpathy.ai/zero-to-hero.html">https://karpathy.ai/zero-to-hero.html</a></li>
+      </ol>
+    </section>
+    <nav class="chnav" aria-label="章の移動">
+    <a class="prev" href="02-probability.html"><small>前の章</small>2　確率で考える</a>
+    <a class="next" href="04-language-model.html"><small>次の章</small>4　言葉を数にする</a>
+    <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14、更新 2026-11-15。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a>。数式の表示に KaTeX（MIT ライセンス）を使っている。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function renderMath(){
+    if(!window.renderMathInElement) return;
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false,
+      strict: "ignore"
+    });
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderMath);
+  else renderMath();
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

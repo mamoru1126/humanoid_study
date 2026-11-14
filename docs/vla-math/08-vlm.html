@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8 VLM の組み立て｜VLM・VLA の数理</title>
+<meta name="description" content="VLM（Vision-Language Model）は、画像を読んで、言葉で答える言語モデルである。中身は、6 章の画像のトークン化、7 章の画像エンコーダ、4〜5 章の言語モデルをつないだものにすぎない。この章では、つなぎ方、学習の段階、">
+<link rel="stylesheet" href="../assets/katex/katex.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+
+/* ---------- math ---------- */
+.katex{font-size:1.06em}
+.katex-display{margin:1.05em 0;padding:.3em 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex-display > .katex{white-space:nowrap}
+@media (max-width:345px){.katex-display > .katex{font-size:.95em}}
+td .katex,th .katex{font-size:1em}
+/* ---------- chapter pages ---------- */
+.kicker{margin:0 0 .5em;font-size:.86rem;font-weight:700;color:var(--steel);letter-spacing:.04em}
+h1 .chno{display:inline-grid;place-items:center;min-width:1.55em;height:1.35em;margin-right:.4em;padding:0 .2em;border:2px solid var(--ink);border-radius:6px;font-size:.8em;line-height:1;vertical-align:.08em;font-variant-numeric:tabular-nums}
+.fig img{display:block;width:100%;max-width:444px;height:auto;margin:0 auto}
+h4{font-size:.86rem;line-height:1.5;margin:1.5em 0 .35em;font-weight:700;color:var(--steel);letter-spacing:.04em}
+.ex{margin:1.6em 0;padding:1em 1.1em .4em;border:1px solid var(--line);border-top:4px solid var(--pol);border-radius:0 0 6px 6px;background:var(--sheet)}
+.ex > .ex-h{margin:0 0 .5em;font-weight:700}
+.ex > .ex-h span{display:inline-block;margin-right:.5em;padding:.05em .5em;border-radius:3px;background:var(--pol);color:#fff;font-size:.82em}
+pre.out{background:var(--faint);color:var(--ink);font-size:.76rem;line-height:1.6;white-space:pre;overflow-x:auto;overflow-wrap:normal;-webkit-overflow-scrolling:touch}
+ul.chk{list-style:none;padding-left:0}
+ul.chk li{position:relative;padding-left:1.7em}
+ul.chk li::before{content:"";position:absolute;left:.1em;top:.42em;width:.95em;height:.95em;border:1.5px solid var(--steel);border-radius:3px}
+ol.q{padding-left:1.7em}
+ol.q li{margin:.6em 0}
+.chnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:3.2em 0 0}
+.chnav a{display:block;padding:.75em .95em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);text-decoration:none;line-height:1.5}
+.chnav a:hover{border-color:var(--steel)}
+.chnav small{display:block;font-size:.76rem;color:var(--steel);margin-bottom:.15em}
+.chnav .next{grid-column:2;text-align:right}
+.chnav .up{grid-column:1/-1;text-align:center}
+table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a> › <a href="./">VLM・VLA の数理</a></p>
+    <p class="kicker">第 3 部　VLM</p>
+    <h1><span class="chno">8</span>VLM の組み立て<small>画像を読める言語モデル</small></h1>
+    <p class="lead">VLM（Vision-Language Model）は、画像を読んで、言葉で答える言語モデルである。中身は、6 章の画像のトークン化、7 章の画像エンコーダ、4〜5 章の言語モデルをつないだものにすぎない。この章では、つなぎ方、学習の段階、注意のマスク、推論の流れ、少ない重みで学習し直す方法（LoRA）を順に見る。VLA は、この VLM に行動を出させたものなので、この章の構成がそのまま 11 章の土台になる。</p>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#parts"><span class="fl">1</span>3 つの部品</a></li>
+      <li><a href="#connect"><span class="fl">2</span>つなぎ方の 3 つの流派</a></li>
+      <li><a href="#train"><span class="fl">3</span>学習の段階</a></li>
+      <li><a href="#mask"><span class="fl">4</span>注意のマスク：prefix-LM</a></li>
+      <li><a href="#infer"><span class="fl">5</span>推論：まとめて読み、1 つずつ答える</a></li>
+      <li><a href="#lora"><span class="fl">6</span>少ない重みで学習し直す（LoRA）</a></li>
+      <li><a href="#limits"><span class="fl">7</span>得意・不得意</a></li>
+      <li><a href="#try"><span class="fl">8</span>手を動かす</a></li>
+      <li><a href="#sum"><span class="fl">9</span>まとめ</a></li>
+      <li><a href="#check"><span class="fl">10</span>確かめる問題</a></li>
+      <li><a href="#read"><span class="fl">11</span>読むもの</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#parts">1　3 つの部品</a></li>
+        <li><a href="#connect">2　つなぎ方の 3 つの流派</a></li>
+        <li><a href="#train">3　学習の段階</a></li>
+        <li><a href="#mask">4　注意のマスク：prefix-LM</a></li>
+        <li><a href="#infer">5　推論：まとめて読み、1 つずつ答える</a></li>
+        <li><a href="#lora">6　少ない重みで学習し直す（LoRA）</a></li>
+        <li><a href="#limits">7　得意なこと、苦手なこと</a></li>
+        <li><a href="#try">8　手を動かす</a></li>
+        <li><a href="#sum">9　まとめ</a></li>
+        <li><a href="#check">10　確かめる問題</a></li>
+        <li><a href="#read">11　読むもの</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+
+    <section id="parts">
+      <h2><span class="fl">1</span>3 つの部品</h2>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 330" role="img" aria-labelledby="fv1t fv1d">
+          <title id="fv1t">VLM の構成</title>
+          <desc id="fv1d">左上の画像は、画像エンコーダ（ViT、CLIP や SigLIP で学習済み）を通って画像の特徴の列になり、射影（線形層）で言語モデルの次元にそろえられて、画像のトークンになる。右上の質問の文は、トークンに切られ、埋め込みでベクトルになる。画像のトークンと質問のトークンが 1 本の列につながり、言語モデル（Transformer のデコーダ）に入る。言語モデルは、答えのトークンを 1 つずつ出す。</desc>
+          <defs>
+            <marker id="mv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <rect x="10" y="8" width="185" height="40" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="102" y="33" text-anchor="middle">画像</text>
+          <rect x="205" y="8" width="185" height="40" rx="4" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="h" x="297" y="25" text-anchor="middle">質問の文</text>
+          <text class="s" x="297" y="41" text-anchor="middle">「赤いブロックはどこ？」</text>
+          <path d="M102 48V63" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <path d="M297 48V63" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <rect x="10" y="65" width="185" height="50" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="22" y="86">画像エンコーダ</text>
+          <text class="s" x="22" y="104">ViT。7 章の方法で学習済み</text>
+          <rect x="205" y="65" width="185" height="50" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="217" y="86">トークン化と埋め込み</text>
+          <text class="s" x="217" y="104">4 章</text>
+          <path d="M102 115V130" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <rect x="10" y="132" width="185" height="44" rx="4" fill="#FFFFFF" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="22" y="152">射影（つなぎ）</text>
+          <text class="s" x="22" y="168">言語モデルの次元にそろえる</text>
+          <path d="M102 176V197" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <path d="M297 115V197" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <rect x="10" y="199" width="380" height="30" rx="4" fill="#F4F5F7" stroke="#C9D1D9"/>
+          <text class="s" x="22" y="219">画像のトークン 256 個 ＋ 質問のトークン数個</text>
+          <path d="M200 229V244" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <rect x="10" y="246" width="380" height="44" rx="4" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="22" y="266">言語モデル（Transformer）</text>
+          <text class="s" x="22" y="282">5 章。次のトークンの分布を出す</text>
+          <path d="M200 290V305" stroke="#18222D" stroke-width="1.5" marker-end="url(#mv)"/>
+          <text class="h" x="200" y="322" text-anchor="middle">答えのトークンを 1 つずつ</text>
+        </svg>
+        </div>
+        <figcaption>図 1　VLM の構成（LLaVA や PaliGemma の形）。画像は、エンコーダと射影を通って「言語モデルが読めるトークン」になる。</figcaption>
+      </figure>
+      <ol>
+        <li><strong>画像エンコーダ。</strong>6 章の ViT を、7 章の対照学習で学習したもの。画像を特徴のベクトルの列にする。</li>
+        <li><strong>射影（コネクタ）。</strong>画像の特徴の次元を、言語モデルの埋め込みの次元にそろえる。線形層 1 つか、2 層の MLP であることが多い。</li>
+        <li><strong>言語モデル。</strong>4〜5 章の、次のトークンを当てる Transformer。</li>
+      </ol>
+      <p>式で書くと、画像のパッチの特徴を \(Z = f(\text{画像})\) として、射影した \(H = Z W\) を、質問の埋め込みの前に並べる。VLM が表すのは、画像と質問を条件にした、答えの文の分布である。</p>
+      \[
+      \begin{aligned}
+      &amp;p_\theta(\text{答え} \mid \text{画像}, \text{質問}) \\
+      &amp;\qquad = \prod_{t} p_\theta\big(a_t \mid a_{&lt;t},\ H,\ \text{質問}\big)
+      \end{aligned}
+      \]
+      <p>2 章の条件付き分布、4 章の言語モデルの形そのままである。違うのは、条件の中に画像のトークンが入っていることだけである。</p>
+    </section>
+
+    <section id="connect">
+      <h2><span class="fl">2</span>つなぎ方の 3 つの流派</h2>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>流派</th><th>やり方</th><th>画像のトークンの数</th></tr></thead>
+          <tbody>
+            <tr><td>列に並べる（LLaVA、PaliGemma）</td><td data-l="やり方">パッチの特徴を射影して、文のトークンの前に並べる。LLaVA は線形層 1 つ<a class="r" href="#r-llava">[1]</a>、LLaVA-1.5 は 2 層の MLP を使う<a class="r" href="#r-llava15">[2]</a></td><td data-l="トークン数">パッチの数そのまま（224 画素で 256 個など）</td></tr>
+            <tr><td>交差注意を差し込む（Flamingo）</td><td data-l="やり方">固定した言語モデルの層の間に、画像の特徴を見る注意機構の層を差し込む。画像の特徴は、決まった数のベクトルにまとめてから渡す<a class="r" href="#r-flamingo">[3]</a></td><td data-l="トークン数">文の列は増えない</td></tr>
+            <tr><td>問い合わせで要約する（BLIP-2）</td><td data-l="やり方">学習する問い合わせ用のトークン 32 個が、固定した画像エンコーダの出力から情報を集め、それを言語モデルに渡す（Q-Former）<a class="r" href="#r-blip2">[4]</a></td><td data-l="トークン数">32 個に固定</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>いまのオープンな VLM と、VLA の土台になる VLM は、ほとんどが 1 つ目の「列に並べる」形である。いちばん単純で、言語モデルの注意機構が、画像の全部のパッチと文を自由に見比べられる。代わりに、画像のトークンが多いぶん計算が重い。</p>
+    </section>
+
+    <section id="train">
+      <h2><span class="fl">3</span>学習の段階</h2>
+      <p>画像エンコーダも言語モデルも、別々に大量のデータで事前学習済みのものを使う。VLM の学習は、それを「つなぐ」作業である。LLaVA の 2 段階が分かりやすい<a class="r" href="#r-llava">[1]</a>。</p>
+      <ol>
+        <li><strong>特徴をそろえる。</strong>画像エンコーダと言語モデルは固定し、射影の行列だけを学習する。データは画像と短い説明文の組（約 60 万組）で、課題は「この画像を説明して」に説明文で答えることである。言語モデルが読める形に、画像の特徴を翻訳する段階といえる。</li>
+        <li><strong>指示に従わせる。</strong>画像エンコーダは固定のまま、射影と言語モデルを学習する。データは、画像についての会話、詳しい説明、推論を要する質問と答えの組（約 16 万組）である。</li>
+      </ol>
+      <p>どちらの段階でも、損失は 4 章の指示チューニングと同じく、<strong>答えのトークンだけ</strong>で計算する。</p>
+      \[
+      L(\theta) = -\sum_{t \in \text{答え}} \log p_\theta\big(w_t \mid w_{&lt;t},\ \text{画像}\big)
+      \]
+      <p>画像のトークンと質問のトークンは条件であって、当てる対象ではない。実装では、それらの位置の正解ラベルを「無視する」印にしておく。</p>
+    </section>
+
+    <section id="mask">
+      <h2><span class="fl">4</span>注意のマスク：prefix-LM</h2>
+      <p>5 章の因果マスクを全部のトークンにかけると、画像のトークンは、後ろにある質問を見られない。PaliGemma は、画像と質問の部分にはマスクをかけず（互いに全部見られる）、答えの部分だけに因果マスクをかける<a class="r" href="#r-paligemma">[5]</a>。これを prefix-LM という。画像のトークンが、質問を見たうえで自分の表現を作り直せる。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 352" role="img" aria-labelledby="fm1t fm1d">
+          <title id="fm1t">PaliGemma の注意のマスク</title>
+          <desc id="fm1d">縦が見るトークン、横が見られるトークンの 9 × 9 のマス目。並びは、画像のトークン 3 つ、文の始めと質問のトークン 3 つ、答えのトークン 3 つ。画像と質問のトークンどうしは、互いに全部を見られる（左上の 6 × 6 がすべて塗られている）。画像と質問のトークンは、答えのトークンを見られない。答えのトークンは、画像と質問の全部と、自分より前の答えを見られる（右下は下三角）。答えの 3 行の右に、損失を計算する行であることを示す印がある。</desc>
+          <text class="s" x="155.5" y="36" text-anchor="middle">画像</text>
+          <path d="M121 42H190" stroke="#56626E" stroke-width="1"/>
+          <text class="s" x="72" y="111.5" text-anchor="end">画像</text>
+          <path d="M78 73V142" stroke="#56626E" stroke-width="1"/>
+          <text class="s" x="230.5" y="36" text-anchor="middle">質問</text>
+          <path d="M196 42H265" stroke="#56626E" stroke-width="1"/>
+          <text class="s" x="72" y="186.5" text-anchor="end">質問</text>
+          <path d="M78 148V217" stroke="#56626E" stroke-width="1"/>
+          <text class="s" x="305.5" y="36" text-anchor="middle">答え</text>
+          <path d="M271 42H340" stroke="#56626E" stroke-width="1"/>
+          <text class="s" x="72" y="261.5" text-anchor="end">答え</text>
+          <path d="M78 223V292" stroke="#56626E" stroke-width="1"/>
+          <text class="s" x="130.5" y="60" text-anchor="middle">画</text>
+          <text class="s" x="155.5" y="60" text-anchor="middle">画</text>
+          <text class="s" x="180.5" y="60" text-anchor="middle">画</text>
+          <text class="s" x="205.5" y="60" text-anchor="middle">始</text>
+          <text class="s" x="230.5" y="60" text-anchor="middle">質</text>
+          <text class="s" x="255.5" y="60" text-anchor="middle">質</text>
+          <text class="s" x="280.5" y="60" text-anchor="middle">答</text>
+          <text class="s" x="305.5" y="60" text-anchor="middle">答</text>
+          <text class="s" x="330.5" y="60" text-anchor="middle">終</text>
+          <text class="s" x="108" y="86.5" text-anchor="end">画</text>
+          <text class="s" x="108" y="111.5" text-anchor="end">画</text>
+          <text class="s" x="108" y="136.5" text-anchor="end">画</text>
+          <text class="s" x="108" y="161.5" text-anchor="end">始</text>
+          <text class="s" x="108" y="186.5" text-anchor="end">質</text>
+          <text class="s" x="108" y="211.5" text-anchor="end">質</text>
+          <text class="s" x="108" y="236.5" text-anchor="end">答</text>
+          <text class="s" x="108" y="261.5" text-anchor="end">答</text>
+          <text class="s" x="108" y="286.5" text-anchor="end">終</text>
+          <rect x="119" y="71" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="71" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="71" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="71" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="71" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="71" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="71" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="71" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="71" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="96" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="96" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="96" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="96" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="96" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="96" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="96" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="96" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="96" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="121" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="121" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="121" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="121" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="121" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="121" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="121" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="121" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="121" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="146" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="146" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="146" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="146" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="146" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="146" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="146" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="146" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="146" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="171" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="171" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="171" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="171" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="171" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="171" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="171" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="171" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="171" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="196" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="196" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="196" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="196" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="196" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="196" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="196" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="196" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="196" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="221" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="221" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="221" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="246" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="246" width="23" height="23" rx="2" fill="#FFFFFF" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="119" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="144" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="169" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="194" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="219" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="244" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="269" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="294" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <rect x="319" y="271" width="23" height="23" rx="2" fill="#3949AB" stroke="#C9D1D9" stroke-width="0.8"/>
+          <text class="s" x="353" y="236.5">← 損失</text>
+          <text class="s" x="353" y="261.5">← 損失</text>
+          <text class="s" x="353" y="286.5">← 損失</text>
+          <rect x="118" y="313" width="14" height="14" rx="2" fill="#3949AB"/>
+          <text class="s" x="138" y="325">見られる</text>
+          <rect x="210" y="313" width="14" height="14" rx="2" fill="#FFFFFF" stroke="#C9D1D9"/>
+          <text class="s" x="230" y="325">見られない</text>
+          <text class="s" x="230.5" y="18" text-anchor="middle">見られるトークン →</text>
+        </svg>
+        </div>
+        <figcaption>図 2　PaliGemma 型の注意のマスク（トークンの数は減らして描いた）。左上の画像と質問はすべて見合う。答えは、画像と質問の全部と、自分より前の答えを見る。損失を計算するのは答えの行だけ。</figcaption>
+      </figure>
+      <p>PaliGemma の入力は、[画像のトークン、文の始め、質問、区切り、答え、文の終わり] の順に並ぶ。論文では、画像と質問にも因果マスクをかけると性能が下がったと報告している<a class="r" href="#r-paligemma">[5]</a>。<a href="11-vla.html">11 章</a>の π0 は、この形をさらに広げ、行動の部分に別のブロックのマスクを使う。</p>
+    </section>
+
+    <section id="infer">
+      <h2><span class="fl">5</span>推論：まとめて読み、1 つずつ答える</h2>
+      <p>VLM の推論は 2 つの段に分かれる。</p>
+      <ol>
+        <li><strong>まとめて読む（prefill）。</strong>画像のトークンと質問を 1 回で Transformer に通し、各層のキーとバリューを KV キャッシュに入れる。画像のトークンが多いので、ここが重い。</li>
+        <li><strong>1 つずつ答える（decode）。</strong>4 章のとおり、答えのトークンを 1 つずつ出す。毎回、キャッシュを使い回し、新しいトークンの分だけ計算する。</li>
+      </ol>
+      <p>画像を変えずに質問だけを変えるなら、画像の部分のキャッシュは使い回せる。π0 が、画像と指示の部分を 1 回だけ計算し、行動の計算を 10 回繰り返すのは、この構造を利用している（<a href="11-vla.html">11 章</a>）。</p>
+    </section>
+
+    <section id="lora">
+      <h2><span class="fl">6</span>少ない重みで学習し直す（LoRA）</h2>
+      <p>数十億個の重みを全部学習し直すには、重みのほかに、勾配と Adam の 2 つの移動平均も持つ必要があり、VRAM が足りなくなる。LoRA は、もとの重み \(W\)（\(d \times k\)）を固定し、低ランクの行列の積を足して、その部分だけを学習する<a class="r" href="#r-lora">[6]</a>。</p>
+      \[
+      W' = W + \frac{\alpha}{r}\, B A
+      \]
+      \[
+      B \in \mathbb R^{d\times r},\quad A \in \mathbb R^{r\times k}
+      \]
+      <p>学習する重みは \(dk\) 個から \(r(d + k)\) 個に減る。\(d = k = 2048\)、\(r = 16\) なら、419 万個から 6.6 万個（約 1.6%）である。\(B\) を 0 から始めるので、学習のはじめはもとのモデルとまったく同じ出力になる。</p>
+      <p>目安として、π0（PaliGemma を土台にした VLA）について openpi の文書は、推論に 8 GB 超、LoRA での学習に 22.5 GB 超、全部の重みの学習に 70 GB 超の VRAM が要るとしている<a class="r" href="#r-openpi">[7]</a>。RTX 3090 の 24 GB では、LoRA がぎりぎりで、全部の学習はできない。</p>
+    </section>
+
+    <section id="limits">
+      <h2><span class="fl">7</span>得意なこと、苦手なこと</h2>
+      <ul>
+        <li><strong>得意。</strong>画像の説明、画像についての質問への答え、写っている文字の読み取りなど、画像と言葉の両方の常識が要る課題。</li>
+        <li><strong>幻覚。</strong>写っていない物を、あると答えることがある。物があるかを「はい／いいえ」で問う形で、この誤りを測る方法が提案されている<a class="r" href="#r-pope">[8]</a>。</li>
+        <li><strong>位置、向き、数。</strong>7 章で見たとおり、画像エンコーダの段階で落ちやすい<a class="r" href="#r-eyeswide">[9]</a>。</li>
+        <li><strong>行動は出せない。</strong>出力は文だけである。ロボットを動かすには、行動を出す仕組みを足す必要がある。それが VLA である（<a href="11-vla.html">11 章</a>）。</li>
+      </ul>
+    </section>
+
+    <section id="try">
+      <h2><span class="fl">8</span>手を動かす</h2>
+      <div class="ex">
+        <p class="ex-h"><span>課題</span>VLM の部品を数える</p>
+        <p>この章には numpy の演習はない。代わりに、次を計算してみる。</p>
+        <ul>
+          <li>PaliGemma の 224 画素版で、画像のトークンが 256 個、質問が 10 トークン、答えが 5 トークンのとき、図 2 のマスクで「見られる」組は何個か。全部に因果マスクをかけた場合と比べよ。</li>
+          <li>重みが 30 億個のモデルを、1 個 2 バイト（bfloat16）で持つと、重みだけで何 GB か。全部の重みを Adam で学習するとき、勾配と 2 つの移動平均も同じ大きさで持つとすると、何 GB になるか。</li>
+        </ul>
+        <p>環境があれば、Hugging Face の transformers で PaliGemma を読み込み、手元のロボットのカメラ画像に「赤いブロックはどこ？」と聞いてみる。どんな質問に強く、どんな質問に弱いかを見る（この資料では試していない）。</p>
+      </div>
+    </section>
+
+    <section id="sum">
+      <h2><span class="fl">9</span>まとめ</h2>
+      <ol class="verdict">
+        <li><strong>VLM は、画像エンコーダ、射影、言語モデルの 3 つをつないだものである。</strong>画像は、言語モデルが読めるトークンの列になる。</li>
+        <li><strong>学習は「答えのトークンだけの交差エントロピー」で、4 章の指示チューニングと同じ形である。</strong>まず射影だけで特徴をそろえ、次に指示に従わせる。</li>
+        <li><strong>PaliGemma は、画像と質問を互いに見合わせ、答えだけを 1 つずつ出す（prefix-LM）。</strong></li>
+        <li><strong>推論は、画像と質問をまとめて読み、キャッシュを使い回して答えを 1 つずつ出す。</strong></li>
+        <li><strong>LoRA で、少ない VRAM でも学習し直せる。</strong>ただし、30 億個級のモデルは、24 GB ではぎりぎりである。</li>
+      </ol>
+    </section>
+
+    <section id="check">
+      <h2><span class="fl">10</span>確かめる問題</h2>
+      <ol class="q">
+        <li>VLM の学習の第 1 段階で、射影の行列だけを学習するのはなぜか。</li>
+        <li>損失を答えのトークンだけで計算するのはなぜか。画像のトークンの位置に損失を付けられないのはなぜか。</li>
+        <li>prefix-LM で、答えのトークンには因果マスクが要るのに、質問のトークンには要らないのはなぜか。</li>
+        <li>LoRA で \(B\) を 0 から始めるのはなぜか。</li>
+      </ol>
+    </section>
+
+    <section id="read">
+      <h2><span class="fl">11</span>読むもの</h2>
+      <ul>
+        <li>Liu ら（LLaVA）<a class="r" href="#r-llava">[1]</a>。いちばん単純な VLM の作り方。学習の 2 段階の節。</li>
+        <li>Beyer ら（PaliGemma）<a class="r" href="#r-paligemma">[5]</a>。π0 の土台。構成とマスクの節（2〜3 章）。</li>
+        <li>Li ら（BLIP-2）<a class="r" href="#r-blip2">[4]</a>、Alayrac ら（Flamingo）<a class="r" href="#r-flamingo">[3]</a>。ほかのつなぎ方を知りたいとき。</li>
+        <li>Hu ら（LoRA）<a class="r" href="#r-lora">[6]</a>。</li>
+      </ul>
+    </section>
+
+    <section id="refs">
+      <h2><span class="fl">※</span>参考文献</h2>
+      <ol class="refs">
+        <li id="r-llava">H. Liu, C. Li, Q. Wu and Y. J. Lee, "Visual Instruction Tuning," 2023. <a href="https://arxiv.org/abs/2304.08485">arXiv:2304.08485</a></li>
+        <li id="r-llava15">H. Liu, C. Li, Y. Li and Y. J. Lee, "Improved Baselines with Visual Instruction Tuning," 2023. <a href="https://arxiv.org/abs/2310.03744">arXiv:2310.03744</a></li>
+        <li id="r-flamingo">J.-B. Alayrac et al., "Flamingo: a Visual Language Model for Few-Shot Learning," 2022. <a href="https://arxiv.org/abs/2204.14198">arXiv:2204.14198</a></li>
+        <li id="r-blip2">J. Li, D. Li, S. Savarese and S. Hoi, "BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models," 2023. <a href="https://arxiv.org/abs/2301.12597">arXiv:2301.12597</a></li>
+        <li id="r-paligemma">L. Beyer et al., "PaliGemma: A versatile 3B VLM for transfer," 2024. <a href="https://arxiv.org/abs/2407.07726">arXiv:2407.07726</a></li>
+        <li id="r-lora">E. J. Hu et al., "LoRA: Low-Rank Adaptation of Large Language Models," 2021. <a href="https://arxiv.org/abs/2106.09685">arXiv:2106.09685</a></li>
+        <li id="r-openpi">Physical Intelligence, "openpi," GitHub リポジトリ. 2026-08-25 の版（コミット 215abfb）を参照した。<a href="https://github.com/Physical-Intelligence/openpi">https://github.com/Physical-Intelligence/openpi</a></li>
+        <li id="r-pope">Y. Li et al., "Evaluating Object Hallucination in Large Vision-Language Models," 2023. <a href="https://arxiv.org/abs/2305.10355">arXiv:2305.10355</a></li>
+        <li id="r-eyeswide">S. Tong et al., "Eyes Wide Shut? Exploring the Visual Shortcomings of Multimodal LLMs," 2024. <a href="https://arxiv.org/abs/2401.06209">arXiv:2401.06209</a></li>
+      </ol>
+    </section>
+    <nav class="chnav" aria-label="章の移動">
+    <a class="prev" href="07-clip.html"><small>前の章</small>7　画像と言葉を結ぶ</a>
+    <a class="next" href="09-imitation.html"><small>次の章</small>9　お手本から方策を学ぶ</a>
+    <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14、更新 2026-11-15。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a>。数式の表示に KaTeX（MIT ライセンス）を使っている。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function renderMath(){
+    if(!window.renderMathInElement) return;
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false,
+      strict: "ignore"
+    });
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderMath);
+  else renderMath();
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

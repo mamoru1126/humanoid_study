@@ -1,7 +1,7 @@
-"""演習 1: 学習・推論・蒸留を、1 次元のおもちゃの問題で確かめる
+"""演習 10: 拡散とフローマッチング、そして蒸留（学習・推論・蒸留を 1 次元の問題で確かめる）
 
-実行: python3 vla_math/ex01_learn_infer_distill.py
-出力: docs/vla-math/figures/ex01_paths.png, ex01_samples.png, ex01_map.png
+実行: python3 vla_math/ch10_flow_distill.py
+出力: docs/vla-math/figures/ch10_paths.png, ch10_samples.png, ch10_map.png
 必要: numpy, matplotlib（GPU は不要. CPU で 1 分以内）
 
 場面: ロボットの正面に障害物がある. お手本は、左へ避けるもの（行動 a = -1）と、
@@ -254,7 +254,7 @@ def fig_paths(plt, rng, net):
     axes[0].legend(handles, ["左（a = −1）へ行くもの", "右（a = +1）へ行くもの"], loc="upper center",
                    bbox_to_anchor=(0.5, 1.42), ncol=1, handlelength=1.6)
     fig.tight_layout()
-    fig.savefig(FIG_DIR / "ex01_paths.png")
+    fig.savefig(FIG_DIR / "ch10_paths.png")
     plt.close(fig)
 
 
@@ -282,7 +282,7 @@ def fig_samples(plt, rows):
     axes[-1].set_xlabel("行動 a（−1 が左へ避ける、+1 が右へ避ける）")
     axes[-1].set_xticks([-2, -1, 0, 1, 2])
     fig.tight_layout(h_pad=1.5)
-    fig.savefig(FIG_DIR / "ex01_samples.png")
+    fig.savefig(FIG_DIR / "ch10_samples.png")
     plt.close(fig)
 
 
@@ -300,7 +300,7 @@ def fig_map(plt, net, student):
     ax.set_ylim(-1.5, 1.5)
     ax.legend(loc="upper left", handlelength=2.2)
     fig.tight_layout()
-    fig.savefig(FIG_DIR / "ex01_map.png")
+    fig.savefig(FIG_DIR / "ch10_map.png")
     plt.close(fig)
 
 
@@ -365,7 +365,7 @@ def main():
         ("蒸留した生徒（計算は 1 回）", out),
     ])
     fig_map(plt, net, student)
-    print(f"\n図を保存しました: {FIG_DIR.relative_to(REPO_ROOT)}/ex01_paths.png, ex01_samples.png, ex01_map.png")
+    print(f"\n図を保存しました: {FIG_DIR.relative_to(REPO_ROOT)}/ch10_paths.png, ch10_samples.png, ch10_map.png")
 
 
 if __name__ == "__main__":

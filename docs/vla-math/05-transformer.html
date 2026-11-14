@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 注意機構と Transformer｜VLM・VLA の数理</title>
+<meta name="description" content="4 章のバイグラムは、1 つ前のトークンしか見られなかった。Transformer は、列の中のすべてのトークンを見て、次の予測に使う。その中心が注意機構（attention）である。VLM の画像エンコーダも、言語モデルも、VLA の行動">
+<link rel="stylesheet" href="../assets/katex/katex.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+
+/* ---------- math ---------- */
+.katex{font-size:1.06em}
+.katex-display{margin:1.05em 0;padding:.3em 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex-display > .katex{white-space:nowrap}
+@media (max-width:345px){.katex-display > .katex{font-size:.95em}}
+td .katex,th .katex{font-size:1em}
+/* ---------- chapter pages ---------- */
+.kicker{margin:0 0 .5em;font-size:.86rem;font-weight:700;color:var(--steel);letter-spacing:.04em}
+h1 .chno{display:inline-grid;place-items:center;min-width:1.55em;height:1.35em;margin-right:.4em;padding:0 .2em;border:2px solid var(--ink);border-radius:6px;font-size:.8em;line-height:1;vertical-align:.08em;font-variant-numeric:tabular-nums}
+.fig img{display:block;width:100%;max-width:444px;height:auto;margin:0 auto}
+h4{font-size:.86rem;line-height:1.5;margin:1.5em 0 .35em;font-weight:700;color:var(--steel);letter-spacing:.04em}
+.ex{margin:1.6em 0;padding:1em 1.1em .4em;border:1px solid var(--line);border-top:4px solid var(--pol);border-radius:0 0 6px 6px;background:var(--sheet)}
+.ex > .ex-h{margin:0 0 .5em;font-weight:700}
+.ex > .ex-h span{display:inline-block;margin-right:.5em;padding:.05em .5em;border-radius:3px;background:var(--pol);color:#fff;font-size:.82em}
+pre.out{background:var(--faint);color:var(--ink);font-size:.76rem;line-height:1.6;white-space:pre;overflow-x:auto;overflow-wrap:normal;-webkit-overflow-scrolling:touch}
+ul.chk{list-style:none;padding-left:0}
+ul.chk li{position:relative;padding-left:1.7em}
+ul.chk li::before{content:"";position:absolute;left:.1em;top:.42em;width:.95em;height:.95em;border:1.5px solid var(--steel);border-radius:3px}
+ol.q{padding-left:1.7em}
+ol.q li{margin:.6em 0}
+.chnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:3.2em 0 0}
+.chnav a{display:block;padding:.75em .95em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);text-decoration:none;line-height:1.5}
+.chnav a:hover{border-color:var(--steel)}
+.chnav small{display:block;font-size:.76rem;color:var(--steel);margin-bottom:.15em}
+.chnav .next{grid-column:2;text-align:right}
+.chnav .up{grid-column:1/-1;text-align:center}
+table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a> › <a href="./">VLM・VLA の数理</a></p>
+    <p class="kicker">第 2 部　言葉と Transformer</p>
+    <h1><span class="chno">5</span>注意機構と Transformer<small>列の中で情報を混ぜる</small></h1>
+    <p class="lead">4 章のバイグラムは、1 つ前のトークンしか見られなかった。Transformer は、列の中のすべてのトークンを見て、次の予測に使う。その中心が注意機構（attention）である。VLM の画像エンコーダも、言語モデルも、VLA の行動を出す部分も、すべて Transformer でできている。この章では、注意機構の式と、それを積み上げた Transformer のブロックを押さえる。</p>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#attn"><span class="fl">1</span>注意機構の式</a></li>
+      <li><a href="#pos"><span class="fl">2</span>位置の情報を足す</a></li>
+      <li><a href="#block"><span class="fl">3</span>Transformer のブロック</a></li>
+      <li><a href="#causal"><span class="fl">4</span>学習は並列、推論は逐次</a></li>
+      <li><a href="#cost"><span class="fl">5</span>計算量：トークンの数の 2 乗</a></li>
+      <li><a href="#encdec"><span class="fl">6</span>2 つの使い方</a></li>
+      <li><a href="#ex"><span class="fl">7</span>演習</a></li>
+      <li><a href="#sum"><span class="fl">8</span>まとめ</a></li>
+      <li><a href="#check"><span class="fl">9</span>確かめる問題</a></li>
+      <li><a href="#read"><span class="fl">10</span>読むもの</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#attn">1　注意機構：列の中で情報を集める</a></li>
+        <li><a href="#pos">2　位置の情報を足す</a></li>
+        <li><a href="#block">3　Transformer のブロック</a></li>
+        <li><a href="#causal">4　因果マスク：学習は並列、推論は逐次</a></li>
+        <li><a href="#cost">5　計算量：トークンの数の 2 乗</a></li>
+        <li><a href="#encdec">6　エンコーダとデコーダ</a></li>
+        <li><a href="#ex">7　演習</a></li>
+        <li><a href="#sum">8　まとめ</a></li>
+        <li><a href="#check">9　確かめる問題</a></li>
+        <li><a href="#read">10　読むもの</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+
+    <section id="attn">
+      <h2><span class="fl">1</span>注意機構：列の中で情報を集める</h2>
+      <p>入力は、\(n\) 個のトークンのベクトルを行に並べた行列 \(X\)（\(n \times d\)）である。各トークンは、列の中のほかのトークンから情報を集めて、自分のベクトルを作り直したい。どのトークンからどれだけ集めるかを、中身から決めるのが注意機構である<a class="r" href="#r-transformer">[1]</a>。</p>
+      <p>まず、3 つの行列を掛けて、トークンごとに 3 種類のベクトルを作る。</p>
+      \[
+      Q = X W_Q,\quad K = X W_K,\quad V = X W_V
+      \]
+      <p>\(Q\) の行（クエリ）は「何を探しているか」、\(K\) の行（キー）は「自分は何か」、\(V\) の行（バリュー）は「渡す中身」と考えるとよい。トークン \(i\) がトークン \(j\) をどれだけ見るかは、クエリ \(q_i\) とキー \(k_j\) の内積で決める。</p>
+      \[
+      \mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\Big(\frac{QK^\top}{\sqrt{d_k}}\Big)\, V
+      \]
+      <p>softmax は行ごとにかける。\(i\) 行目は、トークン \(i\) が各トークンに配る重みで、合計は 1 である。出力の \(i\) 行目は、バリューの重み付き平均になる。\(\sqrt{d_k}\) で割るのは、次元 \(d_k\) が大きいと内積の値が大きくばらつき、softmax がほぼ 0 と 1 に張り付いて、勾配が流れなくなるからである。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ch05_attention.png" width="444" height="373" alt="縦横 8 個のトークンのマス目。縦が見るトークン、横が見られるトークンで、色が濃いほど注意の重みが大きい。右上半分は空白（因果マスクで見られない）。ブロックの行は、赤いの列が 1.00。箱の行は、青いの列が 0.86。入れての行は、箱の列が 0.86 で、ブロックの列にも少し重みがある。">
+        </div>
+        <figcaption>図 1　手で作った例の注意の重み。物（ブロック、箱）は直前の色を、動詞（入れて）は物を見るように、\(W_Q\) と \(W_K\) を手で決めた。右上が空白なのは、先のトークンを見ないようにしているため（後述の因果マスク）。</figcaption>
+      </figure>
+      <p>この例では重みを手で決めたが、実際のモデルでは \(W_Q, W_K, W_V\) は学習で決まる。「どの単語がどの単語を見ると、次の予測に役立つか」を、データから見つけるのである。</p>
+    </section>
+
+    <section id="pos">
+      <h2><span class="fl">2</span>位置の情報を足す</h2>
+      <p>注意機構の式には、トークンの順番が入っていない。入力の行を並べ替えると、出力の行も同じように並べ替わるだけである（演習 5 の (3) で、差は \(10^{-16}\) 程度）。「赤いブロックと青い箱」と「青いブロックと赤い箱」を区別するには、位置の情報を足す必要がある。</p>
+      <ul>
+        <li><strong>位置の埋め込み。</strong>位置ごとのベクトル \(p_t\) を用意し、トークンの埋め込みに足す（\(e_t + p_t\)）。ViT（<a href="06-vit.html">6 章</a>）はこれを使う。</li>
+        <li><strong>回転による位置の表し方（RoPE）。</strong>クエリとキーを、位置に比例した角度だけ回転させる。2 つのトークンの内積が、位置の差だけで決まる形になる<a class="r" href="#r-rope">[2]</a>。いまの多くの言語モデルが使っている。</li>
+      </ul>
+      <p>図 1 の例では、「箱」が「赤い」でなく「青い」を見るように、近いトークンほど少し有利にする項を足した。これを外すと、「箱」は 2 つの色を 0.50 ずつ見て、どちらの色か決められなくなる。</p>
+    </section>
+
+    <section id="block">
+      <h2><span class="fl">3</span>Transformer のブロック</h2>
+      <p><strong>複数のヘッド。</strong>注意機構を、次元を \(h\) 個に分けて並列に \(h\) 回行い、結果をつないで行列 \(W_O\) を掛ける（multi-head attention）。ヘッドごとに違う関係（色と物、物と動詞など）を見られる。</p>
+      <p><strong>ブロック。</strong>注意機構で列の中の情報を混ぜたあと、トークンごとに MLP（3 章）を通す。どちらも、3 章の LayerNorm と残差接続でつなぐ。</p>
+      \[
+      \begin{aligned}
+      X &amp;\leftarrow X + \mathrm{MHA}\big(\mathrm{LN}(X)\big)\\
+      X &amp;\leftarrow X + \mathrm{MLP}\big(\mathrm{LN}(X)\big)
+      \end{aligned}
+      \]
+      <p>MLP は、幅を \(d \to 4d \to d\) と広げてから戻すものがよく使われる。このブロックを \(L\) 個重ねたものが Transformer である。最後に、語彙の数のロジットを出す線形層を付ければ言語モデルになる。</p>
+      <p><strong>重みの数。</strong>1 つのブロックの重みは、注意機構の 4 つの行列で \(4d^2\)、MLP の 2 つの行列で \(8d^2\)、合わせて約 \(12 d^2\) である。GPT-2 の最小の構成（12 層、\(d = 768\)、語彙 50257、位置 1024）に当てはめると、埋め込みも含めて 1 億 2444 万個になる（演習 5 の (5)）。nanoGPT が再現する「GPT-2（124M）」の数と合う<a class="r" href="#r-nanogpt">[3]</a>。</p>
+    </section>
+
+    <section id="causal">
+      <h2><span class="fl">4</span>因果マスク：学習は並列、推論は逐次</h2>
+      <p>言語モデルでは、トークン \(t\) の予測に、\(t\) より後のトークンを使ってはいけない（答えを見ることになる）。そこで、注意の重みを計算する前に、自分より後ろの位置の値を \(-\infty\) にする。softmax のあと、その重みは 0 になる。これを<strong>因果マスク</strong>という。</p>
+      \[
+      S_{ij} = \begin{cases} q_i^\top k_j / \sqrt{d_k} &amp; (j \le i) \\ -\infty &amp; (j &gt; i) \end{cases}
+      \]
+      <p>演習 5 の (2) では、7 番目より後ろのトークンを入れ替えても、0〜6 番目の出力が 1 ビットも変わらないことを確かめる（マスクを外すと、出力は大きく変わる）。</p>
+      <p>このマスクのおかげで、<strong>学習</strong>では、正解の文をまるごと入れ、全部の位置の予測と損失を 1 回の計算で求められる。各位置は、自分より前しか見ていないからである。一方、<strong>推論</strong>では、出したトークンを次の入力に使うので、1 つずつしか進めない。</p>
+      <p>推論で毎回すべてを計算し直すと無駄が多い。過去のトークンのキーとバリューは変わらないので、取っておいて使い回す。これを <strong>KV キャッシュ</strong>という。演習 5 の (4) では、KV キャッシュで 1 つずつ出した結果が、全部を一度に計算した結果と一致すること、1000 トークンを出すときの内積の数が約 670 分の 1 になることを確かめる。<a href="11-vla.html">11 章</a>の π0 は、画像と指示の部分のキャッシュを 1 回だけ作り、行動の計算で使い回す。</p>
+    </section>
+
+    <section id="cost">
+      <h2><span class="fl">5</span>計算量：トークンの数の 2 乗</h2>
+      <p>注意の重みは、トークンの組の数だけある。トークンが \(n\) 個なら、1 層・1 ヘッドで \(n^2\) 個である。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>トークン</th><th>注意の重み（1 層・1 ヘッド）</th><th>例</th></tr></thead>
+          <tbody>
+            <tr><td>196 個</td><td data-l="注意の重み">38,416 個</td><td data-l="例">224 画素の画像を 16 画素ずつに切る（6 章）</td></tr>
+            <tr><td>256 個</td><td data-l="注意の重み">65,536 個</td><td data-l="例">224 画素を 14 画素ずつに切る</td></tr>
+            <tr><td>1,024 個</td><td data-l="注意の重み">1,048,576 個</td><td data-l="例">448 画素を 14 画素ずつに切る</td></tr>
+            <tr><td>4,096 個</td><td data-l="注意の重み">16,777,216 個</td><td data-l="例">896 画素を 14 画素ずつに切る</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>画像の解像度を 2 倍にするとトークンは 4 倍、注意の計算は 16 倍になる。VLM と VLA で、画像の解像度とカメラの台数が速さを大きく左右するのは、このためである。</p>
+    </section>
+
+    <section id="encdec">
+      <h2><span class="fl">6</span>エンコーダとデコーダ</h2>
+      <p>Transformer には、マスクの付け方で 2 つの使い方がある。</p>
+      <ul>
+        <li><strong>エンコーダ。</strong>マスクなし。全部のトークンが全部を見る。入力をよい特徴に変えるのに使う。ViT（6 章）や、CLIP の画像と文のエンコーダ（7 章）がこれである。</li>
+        <li><strong>デコーダ。</strong>因果マスクあり。次のトークンを当てる言語モデルに使う。</li>
+      </ul>
+      <p>VLM は、画像をエンコーダで特徴にし、それをデコーダの言語モデルに入れる。PaliGemma は、画像と質問の部分はマスクなし、答えの部分は因果マスクという、2 つを混ぜたマスクを使う（<a href="08-vlm.html">8 章</a>）。</p>
+    </section>
+
+    <section id="ex">
+      <h2><span class="fl">7</span>演習</h2>
+      <div class="ex">
+        <p class="ex-h"><span>演習 5</span>注意機構の性質を確かめる</p>
+        <p>学習はしない。乱数の重みで、注意機構の性質を計算して確かめる。1 秒もかからない。</p>
+        <pre><code>python3 vla_math/ch05_attention.py</code></pre>
+        <p>出力の一部：</p>
+<pre class="out">(2) 因果マスク: 7 番目より後のトークンを入れ替える
+    マスクあり: 0〜6 番目の出力の変化の最大値 0.0e+00
+    マスクなし: 0〜6 番目の出力の変化の最大値 1.2e+00
+
+(3) 位置の情報がないとき、入力の順番を入れ替える
+    入れ替えた入力の出力 と 出力を同じく入れ替えたもの の差の最大値 5.6e-16
+
+(4) KV キャッシュ（1 つずつ出す場合）
+    全部を一度に計算した出力との差の最大値 8.9e-16
+    1000 個を 1 つずつ出すときの、内積の数: キャッシュなし 3.34e+08、あり 5.00e+05（667 倍）
+
+(5) 重みの数と、注意の計算量
+    1 層あたり 12d² + 13d = 7,087,872 個（d = 768）
+    12 層、語彙 50257、位置 1024 個のとき、全体で 124,439,808 個</pre>
+        <p>変えてみる：<code>toy_example</code> の \(W_Q\) を書き換えて、「入れて」が「ブロック」のほうを強く見るようにする。位置の項 <code>-0.6 * dist</code> の係数を 0 や −3 にする。</p>
+      </div>
+    </section>
+
+    <section id="sum">
+      <h2><span class="fl">8</span>まとめ</h2>
+      <ol class="verdict">
+        <li><strong>注意機構は、クエリとキーの内積の softmax を重みにして、バリューの重み付き平均を取る。</strong>どこを見るかを、中身から決める。</li>
+        <li><strong>注意機構だけでは順番がわからないので、位置の情報を足す。</strong></li>
+        <li><strong>Transformer は、「注意機構」と「トークンごとの MLP」を、残差接続と LayerNorm でつないで重ねたものである。</strong></li>
+        <li><strong>因果マスクのおかげで、学習は全部の位置を並列に計算でき、推論は 1 つずつ進む。</strong>推論は KV キャッシュで速くする。</li>
+        <li><strong>計算量はトークンの数の 2 乗で増える。</strong>画像の解像度が効くのはこのためである。</li>
+      </ol>
+    </section>
+
+    <section id="check">
+      <h2><span class="fl">9</span>確かめる問題</h2>
+      <ol class="q">
+        <li>注意の重みの各行の合計が 1 になるのはなぜか。出力の各行は、何の平均になっているか。</li>
+        <li>\(\sqrt{d_k}\) で割らないと、どんな問題が起こるか。</li>
+        <li>因果マスクがあると、学習で全部の位置の損失を 1 回で計算できるのはなぜか。</li>
+        <li>KV キャッシュで、キーとバリューは使い回せるのに、クエリは使い回さないのはなぜか。</li>
+        <li>\(d = 1024\)、24 層の Transformer のブロック部分の重みは、およそ何個か。</li>
+      </ol>
+    </section>
+
+    <section id="read">
+      <h2><span class="fl">10</span>読むもの</h2>
+      <ul>
+        <li>Vaswani ら「Attention Is All You Need」<a class="r" href="#r-transformer">[1]</a>。3 章（モデルの構成）だけでよい。</li>
+        <li>Prince『Understanding Deep Learning』12 章（Transformer）<a class="r" href="#r-prince">[4]</a>。</li>
+        <li>斎藤『ゼロから作る Deep Learning ❷』8 章（Attention）<a class="r" href="#r-zero2">[5]</a>。</li>
+        <li>Karpathy の nanoGPT<a class="r" href="#r-nanogpt">[3]</a>。GPT の定義が 300 行ほどに収まっている。同じ人の動画講義に、これを一から書く回がある<a class="r" href="#r-karpathy">[6]</a>。</li>
+      </ul>
+    </section>
+
+    <section id="refs">
+      <h2><span class="fl">※</span>参考文献</h2>
+      <ol class="refs">
+        <li id="r-transformer">A. Vaswani et al., "Attention Is All You Need," 2017. <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a></li>
+        <li id="r-rope">J. Su et al., "RoFormer: Enhanced Transformer with Rotary Position Embedding," 2021. <a href="https://arxiv.org/abs/2104.09864">arXiv:2104.09864</a></li>
+        <li id="r-nanogpt">A. Karpathy, "nanoGPT," GitHub リポジトリ. <a href="https://github.com/karpathy/nanoGPT">https://github.com/karpathy/nanoGPT</a></li>
+        <li id="r-prince">S. J. D. Prince, "Understanding Deep Learning," MIT Press, 2023. 本の全文が公開されている。<a href="https://udlbook.github.io/udlbook/">https://udlbook.github.io/udlbook/</a></li>
+        <li id="r-zero2">斎藤康毅『ゼロから作る Deep Learning ❷　自然言語処理編』オライリー・ジャパン, 2018.</li>
+        <li id="r-karpathy">A. Karpathy, "Neural Networks: Zero to Hero," 動画の講義. <a href="https://karpathy.ai/zero-to-hero.html">https://karpathy.ai/zero-to-hero.html</a></li>
+      </ol>
+    </section>
+    <nav class="chnav" aria-label="章の移動">
+    <a class="prev" href="04-language-model.html"><small>前の章</small>4　言葉を数にする</a>
+    <a class="next" href="06-vit.html"><small>次の章</small>6　画像をトークンにする</a>
+    <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14、更新 2026-11-15。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a>。数式の表示に KaTeX（MIT ライセンス）を使っている。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function renderMath(){
+    if(!window.renderMathInElement) return;
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false,
+      strict: "ignore"
+    });
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderMath);
+  else renderMath();
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 4 部　ロボットの行動と VLA</p>
     <h1><span class="chno">13</span>蒸留<small>教師のふるまいを生徒に写す</small></h1>
     <p class="lead">最後の章は蒸留である。蒸留も学習の一種で、損失を勾配法で小さくするところは同じである。違うのは目標で、人のお手本ではなく、学習済みのモデル（教師）の出力を目標にする。ロボットの分野では、「蒸留」が 3 つの違う意味で使われる。この章では、3 つを 1 つの式で整理し、10 章の演習の続きで、10 ステップの教師を 1 回の計算で動く生徒に写す。</p>
+    
   </div>
 </header>
 

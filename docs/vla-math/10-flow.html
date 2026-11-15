@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 4 部　ロボットの行動と VLA</p>
     <h1><span class="chno">10</span>分布から行動を取り出す<small>拡散とフローマッチング</small></h1>
     <p class="lead">9 章の 2 つ目の弱点は、「正解が複数あると、回帰は平均を出す」だった。この章では、複数の山を持つ分布を表して、そこから行動を取り出す方法（拡散とフローマッチング）を学ぶ。学習は二乗誤差の回帰、推論は微分方程式を解く計算、という分担が要点である。π0 も SmolVLA も GR00T N1 も、行動はこの方法で出している。</p>
+    
   </div>
 </header>
 

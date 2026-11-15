@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 4 部　ロボットの行動と VLA</p>
     <h1><span class="chno">9</span>お手本から方策を学ぶ<small>模倣学習と、その弱点</small></h1>
     <p class="lead">ここからロボットの話に入る。ロボットの学習のいちばん基本の形は、人のお手本をまねること（模倣学習）である。やることは 1〜3 章の教師あり学習そのものだが、ロボットでは「自分の出した行動で、次の入力が変わる」ために、普通の教師あり学習にはない弱点が 2 つ出る。この章では、その弱点を式と演習で確かめ、対策として DAgger と「行動のまとまり」を見る。</p>
+    
   </div>
 </header>
 

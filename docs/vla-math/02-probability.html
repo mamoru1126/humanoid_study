@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 1 部　機械学習の基礎</p>
     <h1><span class="chno">2</span>確率で考える<small>損失の正体は、負の対数尤度</small></h1>
     <p class="lead">1 章では、損失として二乗誤差を使った。なぜ二乗なのか。分類では何を使えばよいのか。モデルの出力を「確率分布」と見ると、どちらも 1 つの原理（最尤推定）から出てくる。この原理は、言語モデルの次の単語の予測にも、VLA の行動の学習にも、蒸留にも、そのまま使われる。この資料でいちばん大事な章である。</p>
+    
   </div>
 </header>
 
@@ -310,7 +319,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
         </div>
         <figcaption>図 1　softmax 回帰で、床の種類を当てる。塗り分けはモデルが選ぶクラス、点線の内側は確率が 0.9 を超える領域。</figcaption>
       </figure>
-      <p>境目は直線になる。ロジットが入力の 1 次式だからである。曲がった境目が要るときは、<a href="03-neural-net.html">3 章</a>のニューラルネットを使う。</p>
+      <p>境目は直線になる。ロジットが入力の 1 次式だからである。曲がった境目が要るときは、<a href="03-3-layers.html">3.3 節</a>のニューラルネットを使う。</p>
       <p>出力が確率なので、「どれくらい自信があるか」もわかる。演習の結果では、確率 0.9 以上と答えた点の 99% が正解で、0.6 未満と答えた点の正解は 59% だった。</p>
     </section>
 
@@ -437,7 +446,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     </section>
     <nav class="chnav" aria-label="章の移動">
     <a class="prev" href="01-ml.html"><small>前の章</small>1　機械学習とは何か</a>
-    <a class="next" href="03-neural-net.html"><small>次の章</small>3　ニューラルネットと逆伝播</a>
+    <a class="next" href="03-1-history.html"><small>次の章</small>3.1　ニューラルネットはどう生まれたか</a>
     <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
     </nav>
   </main>

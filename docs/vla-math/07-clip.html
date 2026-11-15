@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 3 部　VLM</p>
     <h1><span class="chno">7</span>画像と言葉を結ぶ<small>CLIP と SigLIP の対照学習</small></h1>
     <p class="lead">6 章の ViT は、画像を特徴のベクトルに変える。では、その特徴が「赤いブロック」という言葉と結びつくのは、どうしてか。答えは、画像と、その説明文の組を大量に集め、2 つが同じ場所に来るように学習することにある（対照学習）。この章では、CLIP と SigLIP の損失を式で追い、演習で、学習で一度も見ていない組み合わせまで言葉で当てられることを確かめる。VLM と VLA の「目」は、ほとんどがこの方法で作られている。</p>
+    
   </div>
 </header>
 

@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 1 部　機械学習の基礎</p>
     <h1><span class="chno">1</span>機械学習とは何か<small>データから関数を作る</small></h1>
     <p class="lead">ロボットに何かをさせるとき、これまでは人が手順や式を書いてきた。機械学習は、その代わりに、データから関数を作る方法である。この章では、機械学習の 3 つの部品（モデル、損失、最適化）と、いちばん大事な注意点（過学習）を、多項式の当てはめで確かめる。</p>
+    
   </div>
 </header>
 
@@ -270,7 +279,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
       \[
       f_w(x) = w_0 + w_1 x + w_2 x^2 + \dots + w_M x^M
       \]
-      <p>重みは \(w_0, \dots, w_M\) の \(M+1\) 個である。<a href="03-neural-net.html">3 章</a>のニューラルネットも、VLA も、形が複雑で重みが多い（数億〜数十億個）だけで、「重みを持つ関数」であることは同じである。</p>
+      <p>重みは \(w_0, \dots, w_M\) の \(M+1\) 個である。<a href="03-1-history.html">3 章</a>のニューラルネットも、VLA も、形が複雑で重みが多い（数億〜数十億個）だけで、「重みを持つ関数」であることは同じである。</p>
       <h3>損失</h3>
       <p>モデルの出力が正解からどれだけずれているかを、1 つの数で表す。回帰でよく使うのは、二乗誤差の平均である。</p>
       \[
@@ -306,7 +315,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
       \]
       <p>\(\eta\) を<strong>学習率</strong>という。損失が 2 次関数なら、勾配降下法が収束する条件は、損失のヘッセ行列の最大固有値 \(\lambda_{\max}\) を使って \(\eta &lt; 2/\lambda_{\max}\) と書ける。大きすぎると発散し、小さすぎると遅い。</p>
       <p>式で解けるのに勾配降下法を使うのは、ニューラルネットでは損失が重みの 2 次関数にならず、式で解けないからである。深層学習の学習は、ほぼすべて勾配降下法の仲間で行う。</p>
-      <p>データが多いときは、毎回すべてのデータで勾配を計算する代わりに、ランダムに選んだ一部（<strong>ミニバッチ</strong>）で計算する。勾配にばらつきが乗るが、1 回の計算が軽くなる。これを確率的勾配降下法（SGD）という。<a href="03-neural-net.html">3 章</a>では、学習率を自動で調整する Adam も使う<a class="r" href="#r-adam">[1]</a>。</p>
+      <p>データが多いときは、毎回すべてのデータで勾配を計算する代わりに、ランダムに選んだ一部（<strong>ミニバッチ</strong>）で計算する。勾配にばらつきが乗るが、1 回の計算が軽くなる。これを確率的勾配降下法（SGD）という。<a href="03-5-training.html">3.5 節</a>では、ミニバッチの勾配のばらつきを測り、学習率を重みごとに調整する Adam も使う<a class="r" href="#r-adam">[1]</a>。</p>
     </section>
 
     <section id="overfit">

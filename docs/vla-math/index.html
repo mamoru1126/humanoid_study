@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -294,7 +302,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
           <a href="02-probability.html"><rect x="80" y="56" width="240" height="34" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
           <text class="h" x="90" y="78">2</text><text x="110" y="78">確率で考える</text></a>
           <path d="M200 90L200 103" stroke="#18222D" stroke-width="1.4" fill="none" marker-end="url(#mm)"/>
-          <a href="03-neural-net.html"><rect x="80" y="104" width="240" height="34" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <a href="03-1-history.html"><rect x="80" y="104" width="240" height="34" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
           <text class="h" x="90" y="126">3</text><text x="110" y="126">ニューラルネットと逆伝播</text></a>
           <path d="M170 138L100 173" stroke="#18222D" stroke-width="1.4" fill="none" marker-end="url(#mm)"/>
           <path d="M230 138L300 173" stroke="#18222D" stroke-width="1.4" fill="none" marker-end="url(#mm)"/>
@@ -342,7 +350,12 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
             <tr class="partrow"><td colspan="3">第 1 部　機械学習の基礎</td></tr>
             <tr><td>1</td><td data-l="章"><a href="01-ml.html">機械学習とは何か</a><br><small>データから関数を作る</small></td><td data-l="演習"><code>ch01_regression.py</code></td></tr>
             <tr><td>2</td><td data-l="章"><a href="02-probability.html">確率で考える</a><br><small>損失の正体は、負の対数尤度</small></td><td data-l="演習"><code>ch02_softmax.py</code></td></tr>
-            <tr><td>3</td><td data-l="章"><a href="03-neural-net.html">ニューラルネットと逆伝播</a><br><small>層を重ね、勾配を出口から求める</small></td><td data-l="演習"><code>ch03_mlp.py</code></td></tr>
+            <tr class="grouprow"><td>3</td><td colspan="2" data-l="章">ニューラルネットと逆伝播<br><small>層を重ね、勾配を出口から求める。5 つの節に分けている</small></td></tr>
+            <tr><td>3.1</td><td data-l="節"><a href="03-1-history.html">ニューラルネットはどう生まれたか</a><br><small>1943 年の形式ニューロンから、2012 年の AlexNet まで</small></td><td data-l="演習">なし（読む節）</td></tr>
+            <tr><td>3.2</td><td data-l="節"><a href="03-2-perceptron.html">ニューロンとパーセプトロン</a><br><small>直線で分ける学習と、その限界</small></td><td data-l="演習"><code>ch03_2_perceptron.py</code></td></tr>
+            <tr><td>3.3</td><td data-l="節"><a href="03-3-layers.html">層を重ねる</a><br><small>隠れ層は、問題を解きやすい形に並べ替える</small></td><td data-l="演習"><code>ch03_3_expressivity.py</code></td></tr>
+            <tr><td>3.4</td><td data-l="節"><a href="03-4-backprop.html">逆伝播</a><br><small>連鎖律で、勾配を出口から配る</small></td><td data-l="演習"><code>ch03_4_autograd.py</code>、<code>ch03_mlp.py</code></td></tr>
+            <tr><td>3.5</td><td data-l="節"><a href="03-5-training.html">深いネットを学習させる</a><br><small>初期化、最適化、正規化、残差接続</small></td><td data-l="演習"><code>ch03_5_training.py</code></td></tr>
             <tr class="partrow"><td colspan="3">第 2 部　言葉と Transformer</td></tr>
             <tr><td>4</td><td data-l="章"><a href="04-language-model.html">言葉を数にする</a><br><small>トークンと言語モデル</small></td><td data-l="演習"><code>ch04_language_model.py</code></td></tr>
             <tr><td>5</td><td data-l="章"><a href="05-transformer.html">注意機構と Transformer</a><br><small>列の中で情報を混ぜる</small></td><td data-l="演習"><code>ch05_attention.py</code></td></tr>
@@ -415,11 +428,12 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
         <table class="stack">
           <thead><tr><th>項目</th><th>状態</th><th>中身</th></tr></thead>
           <tbody>
-            <tr><td>演習 9 本の数値と図</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">Python 3.13、numpy 2.5、matplotlib 3.11 で実行した。資料の数値は、そのときの出力である。環境によって少し変わりうる</td></tr>
+            <tr><td>演習 13 本の数値と図</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">Python 3.13、numpy 2.5、matplotlib 3.11 で実行した。資料の数値は、そのときの出力である。環境によって少し変わりうる。3.4 節の計算時間は計算機によって変わる</td></tr>
+            <tr><td>3.1 節の歴史の年と数字</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">2026-11-15 に、検索の結果で照合した（Mark I Perceptron の構成、ILSVRC の誤り率、AlexNet の学習の条件、受賞の年など）。「〜の一因とされる」のような評価は、引用した解説の見方である</td></tr>
             <tr><td>論文の題名、著者、番号</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">2026-11-14〜15 に、検索の結果で照合した。SnapFlow は著者名を確かめられなかったので、載せていない</td></tr>
             <tr><td>openpi と LeRobot の記述</td><td data-l="状態"><span class="st y">確認済み</span></td><td data-l="中身">openpi は 2026-08-25 の版、LeRobot は 2026-11-13 の版のコードと文書を読んだ</td></tr>
             <tr><td>論文の主張の中身</td><td data-l="状態"><span class="st p">一部</span></td><td data-l="中身">要旨と、関係する節で確かめた。式の導出を全部追ったわけではない。実験の再現はしていない</td></tr>
-            <tr><td>細かい記述の一部</td><td data-l="状態"><span class="st p">記憶による</span></td><td data-l="中身">行動を 256 区間に分けること、CLIP のバッチの大きさ、Learning by Cheating の内容、逆伝播・Adam・LayerNorm・ResNet・He の初期化の文献情報は、今回は原典に当たり直していない</td></tr>
+            <tr><td>細かい記述の一部</td><td data-l="状態"><span class="st p">記憶による</span></td><td data-l="中身">行動を 256 区間に分けること、CLIP のバッチの大きさ、Learning by Cheating の内容、逆伝播・Adam・LayerNorm・He の初期化の文献情報は、今回は原典に当たり直していない。3 章で足した文献のうち、Widrow と Hoff、Hopfield、Cybenko、Hornik、Bengio ら（1994）、LSTM、LeNet、Hinton ら（2006）、AlexNet、GoogLeNet、GELU、RMSNorm、Leshno らの巻・号・ページや番号も、記憶によるものを含む</td></tr>
             <tr><td>RTX 3090 での学習と推論</td><td data-l="状態"><span class="st n">未確認</span></td><td data-l="中身">ACT、SmolVLA、π0 について、文書の記載から見込みを書いた（11 章）。試していない</td></tr>
           </tbody>
         </table>

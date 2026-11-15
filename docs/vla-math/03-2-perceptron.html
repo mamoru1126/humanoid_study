@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3.2 ニューロンとパーセプトロン｜VLM・VLA の数理</title>
+<meta name="description" content="1 個のニューロンは、入力の重み付きの和を取り、しきい値と比べるだけの計算である。それでも、重みを選べば AND や OR が作れ、例から重みを学習させる規則（パーセプトロンの学習則）もあり、その規則が必ず止まることまで証明できる。一方で、">
+<link rel="stylesheet" href="../assets/katex/katex.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+
+/* ---------- math ---------- */
+.katex{font-size:1.06em}
+.katex-display{margin:1.05em 0;padding:.3em 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex-display > .katex{white-space:nowrap}
+@media (max-width:345px){.katex-display > .katex{font-size:.95em}}
+td .katex,th .katex{font-size:1em}
+/* ---------- chapter pages ---------- */
+.kicker{margin:0 0 .5em;font-size:.86rem;font-weight:700;color:var(--steel);letter-spacing:.04em}
+h1 .chno{display:inline-grid;place-items:center;min-width:1.55em;height:1.35em;margin-right:.4em;padding:0 .2em;border:2px solid var(--ink);border-radius:6px;font-size:.8em;line-height:1;vertical-align:.08em;font-variant-numeric:tabular-nums}
+.fig img{display:block;width:100%;max-width:444px;height:auto;margin:0 auto}
+h4{font-size:.86rem;line-height:1.5;margin:1.5em 0 .35em;font-weight:700;color:var(--steel);letter-spacing:.04em}
+.ex{margin:1.6em 0;padding:1em 1.1em .4em;border:1px solid var(--line);border-top:4px solid var(--pol);border-radius:0 0 6px 6px;background:var(--sheet)}
+.ex > .ex-h{margin:0 0 .5em;font-weight:700}
+.ex > .ex-h span{display:inline-block;margin-right:.5em;padding:.05em .5em;border-radius:3px;background:var(--pol);color:#fff;font-size:.82em}
+pre.out{background:var(--faint);color:var(--ink);font-size:.76rem;line-height:1.6;white-space:pre;overflow-x:auto;overflow-wrap:normal;-webkit-overflow-scrolling:touch}
+ul.chk{list-style:none;padding-left:0}
+ul.chk li{position:relative;padding-left:1.7em}
+ul.chk li::before{content:"";position:absolute;left:.1em;top:.42em;width:.95em;height:.95em;border:1.5px solid var(--steel);border-radius:3px}
+ol.q{padding-left:1.7em}
+ol.q li{margin:.6em 0}
+.chnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:3.2em 0 0}
+.chnav a{display:block;padding:.75em .95em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);text-decoration:none;line-height:1.5}
+.chnav a:hover{border-color:var(--steel)}
+.chnav small{display:block;font-size:.76rem;color:var(--steel);margin-bottom:.15em}
+.chnav .next{grid-column:2;text-align:right}
+.chnav .up{grid-column:1/-1;text-align:center}
+table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a> › <a href="./">VLM・VLA の数理</a></p>
+    <p class="kicker">第 1 部　機械学習の基礎　／　3 章　ニューラルネットと逆伝播</p>
+    <h1><span class="chno">3.2</span>ニューロンとパーセプトロン<small>直線で分ける学習と、その限界</small></h1>
+    <p class="lead">1 個のニューロンは、入力の重み付きの和を取り、しきい値と比べるだけの計算である。それでも、重みを選べば AND や OR が作れ、例から重みを学習させる規則（パーセプトロンの学習則）もあり、その規則が必ず止まることまで証明できる。一方で、直線で分けられない XOR は、どんな重みでも表せない。この節では、この 3 つを式と演習で確かめる。</p>
+    <nav class="subnav" aria-label="3 章の節"><ol><li><a href="03-1-history.html">3.1　誕生の経緯</a></li><li><a href="03-2-perceptron.html" aria-current="page">3.2　パーセプトロン</a></li><li><a href="03-3-layers.html">3.3　層を重ねる</a></li><li><a href="03-4-backprop.html">3.4　逆伝播</a></li><li><a href="03-5-training.html">3.5　深いネットの学習</a></li></ol></nav>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#neuron"><span class="fl">1</span>1 個のニューロン</a></li>
+      <li><a href="#logic"><span class="fl">2</span>論理回路を作る</a></li>
+      <li><a href="#rule"><span class="fl">3</span>学習則</a></li>
+      <li><a href="#novikoff"><span class="fl">4</span>ノビコフの定理</a></li>
+      <li><a href="#xor"><span class="fl">5</span>XOR は表せない</a></li>
+      <li><a href="#smooth"><span class="fl">6</span>なめらかにしても同じ</a></li>
+      <li><a href="#next"><span class="fl">7</span>1 個では足りない</a></li>
+      <li><a href="#ex"><span class="fl">8</span>演習</a></li>
+      <li><a href="#sum"><span class="fl">9</span>まとめ</a></li>
+      <li><a href="#check"><span class="fl">10</span>確かめる問題</a></li>
+      <li><a href="#read"><span class="fl">11</span>読むもの</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#neuron">1　1 個のニューロンの計算</a></li>
+        <li><a href="#logic">2　重みを手で入れて、論理回路を作る</a></li>
+        <li><a href="#rule">3　パーセプトロンの学習則</a></li>
+        <li><a href="#novikoff">4　必ず止まることの証明：ノビコフの定理</a></li>
+        <li><a href="#xor">5　直線で分けられないもの：XOR</a></li>
+        <li><a href="#smooth">6　しきい値をなめらかにしても同じ</a></li>
+        <li><a href="#next">7　1 個では足りない、では何を足すか</a></li>
+        <li><a href="#ex">8　演習</a></li>
+        <li><a href="#sum">9　まとめ</a></li>
+        <li><a href="#check">10　確かめる問題</a></li>
+        <li><a href="#read">11　読むもの</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+
+    <section id="neuron">
+      <h2><span class="fl">1</span>1 個のニューロンの計算</h2>
+      <p>入力を \(d\) 個の数の並び（ベクトル）\(x = (x_1, \dots, x_d)\) とする。ニューロンは、入力ごとに重み \(w_i\) を掛けて足し、さらに \(b\) を足して \(z\) を作る。\(z\) が 0 以上なら 1、負なら 0 を出す。</p>
+      \[
+      \begin{aligned}
+      z &amp;= w_1 x_1 + \cdots + w_d x_d + b = w^\top x + b\\
+      y &amp;= \mathbb 1[z \ge 0]
+      \end{aligned}
+      \]
+      <p>\(\mathbb 1[\cdot]\) は、中の条件が成り立てば 1、成り立たなければ 0 を表す。\(w^\top x\) は、2 つのベクトルの成分ごとの積の和（内積）である。\(b\) を<strong>バイアス</strong>という。「和がしきい値 \(\theta\) を超えたら 1」と書くこともあるが、\(\theta = -b\) と置けば同じことである。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 214" role="img" aria-labelledby="c32nt c32nd">
+          <title id="c32nt">1 個のニューロンの計算</title>
+          <desc id="c32nd">左に入力 x1、x2、…、xd と、いつも 1 の入力が並ぶ。それぞれに重み w1、w2、…、wd と b を掛けて、真ん中の Σ で足し、z を作る。z をしきい値の関数（ステップ関数）に通し、z が 0 以上なら y = 1、負なら y = 0 を出す。</desc>
+          <defs>
+            <marker id="c32na" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <text x="20" y="34">x<tspan dy="3" font-size="10">1</tspan></text>
+          <text x="20" y="74">x<tspan dy="3" font-size="10">2</tspan></text>
+          <text class="h" x="24" y="110">⋮</text>
+          <text x="20" y="144">x<tspan dy="3" font-size="10">d</tspan></text>
+          <text x="22" y="186">1</text>
+          <path d="M40 30L170 92" stroke="#18222D" stroke-width="1.3" marker-end="url(#c32na)"/>
+          <path d="M40 70L169 98" stroke="#18222D" stroke-width="1.3" marker-end="url(#c32na)"/>
+          <path d="M40 140L169 110" stroke="#18222D" stroke-width="1.3" marker-end="url(#c32na)"/>
+          <path d="M40 182L171 116" stroke="#56626E" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#c32na)"/>
+          <text class="s" x="96" y="48" style="fill:#3949AB">w<tspan dy="3" font-size="9">1</tspan></text>
+          <text class="s" x="96" y="78" style="fill:#3949AB">w<tspan dy="3" font-size="9">2</tspan></text>
+          <text class="s" x="96" y="138" style="fill:#3949AB">w<tspan dy="3" font-size="9">d</tspan></text>
+          <text class="s" x="96" y="168" style="fill:#3949AB">b</text>
+          <circle cx="192" cy="104" r="21" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.5"/>
+          <text class="h" x="192" y="109" text-anchor="middle">Σ</text>
+          <path d="M213 104H240" stroke="#18222D" stroke-width="1.3" marker-end="url(#c32na)"/>
+          <text class="s" x="226" y="96" text-anchor="middle">z</text>
+          <rect x="242" y="84" width="50" height="40" rx="4" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <path d="M249 115H267V93H285" stroke="#18222D" stroke-width="1.6" fill="none"/>
+          <path d="M292 104H322" stroke="#18222D" stroke-width="1.3" marker-end="url(#c32na)"/>
+          <text class="h" x="330" y="109">y</text>
+          <text class="s" x="192" y="146" text-anchor="middle">z = w<tspan dy="-5" font-size="8">⊤</tspan><tspan dy="5">x + b</tspan></text>
+          <text class="s" x="267" y="146" text-anchor="start">y = 1[z ≥ 0]</text>
+          <text class="s" x="20" y="206">学習とは、重み w と b を決めることである。</text>
+        </svg>
+        </div>
+        <figcaption>図 1　1 個のニューロン。いつも 1 を出す入力を 1 つ足して、その重みを \(b\) と見ることもできる（破線）。</figcaption>
+      </figure>
+      <h3>境目は直線になる</h3>
+      <p>入力が 2 個なら、入力は平面の点である。出力が 1 になる点と 0 になる点の境目は、\(w^\top x + b = 0\) を満たす点の集まりで、これは直線である（入力が 3 個なら平面、もっと多ければ超平面）。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 262" role="img" aria-labelledby="c32ht c32hd">
+          <title id="c32ht">ニューロンの境目は直線になる</title>
+          <desc id="c32hd">横軸 x1、縦軸 x2 の平面に、左上から右下へ斜めの直線 w⊤x + b = 0 が引かれている（この例では x1 + x2 = 3）。直線の右上は w⊤x + b が正で出力 1、左下は負で出力 0 になる。直線の上の点から右上へ、直線に直角な矢印 w がのびている。右上の点 x から直線へ下ろした垂線の長さが、点と直線の距離 (w⊤x + b)/‖w‖ である。</desc>
+          <defs>
+            <marker id="c32ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3949AB"/></marker>
+            <marker id="c32hk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <path d="M40 80L40 230L190 230Z" fill="#FCEBDD"/>
+          <path d="M40 80L40 14L390 14L390 230L190 230Z" fill="#E8EAF6"/>
+          <path d="M40 236V14" stroke="#18222D" stroke-width="1.2" marker-end="url(#c32hk)"/>
+          <path d="M34 230H390" stroke="#18222D" stroke-width="1.2" marker-end="url(#c32hk)"/>
+          <text class="s" x="376" y="250">x<tspan dy="3" font-size="9">1</tspan></text>
+          <text class="s" x="14" y="26">x<tspan dy="3" font-size="9">2</tspan></text>
+          <path d="M40 80L190 230" stroke="#18222D" stroke-width="2"/>
+          <text class="s" x="66" y="134" transform="rotate(45 66 134)">w<tspan dy="-5" font-size="8">⊤</tspan><tspan dy="5">x + b = 0</tspan></text>
+          <path d="M115 155L156 114" stroke="#3949AB" stroke-width="2" marker-end="url(#c32ha)"/>
+          <text class="h" x="146" y="104" style="fill:#3949AB">w</text>
+          <path d="M240 130L165 205" stroke="#56626E" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <path d="M170 210L175 205L170 200" stroke="#56626E" stroke-width="1" fill="none"/>
+          <circle cx="240" cy="130" r="5" fill="#3949AB" stroke="#FFFFFF" stroke-width="1.5"/>
+          <text class="h" x="250" y="128">x</text>
+          <text class="s" x="214" y="186">距離 ＝</text>
+          <text class="s" x="214" y="202">(w<tspan dy="-5" font-size="8">⊤</tspan><tspan dy="5">x + b) / ||w||</tspan></text>
+          <text class="h" x="230" y="44">w<tspan dy="-5" font-size="9">⊤</tspan><tspan dy="5">x + b &gt; 0</tspan></text>
+          <text class="s" x="230" y="62">ここでは出力 1</text>
+          <text class="s" x="48" y="206">負：</text>
+          <text class="s" x="48" y="222">出力 0</text>
+        </svg>
+        </div>
+        <figcaption>図 2　ニューロンの境目（この例は \(w = (1, 1)\)、\(b = -3\)）。重み \(w\) は境目に直角で、\(w\) の向いている側が出力 1 になる。</figcaption>
+      </figure>
+      <p>図 2 の 2 つの性質は、式から確かめられる。境目の上の 2 点 \(p, q\) では \(w^\top p + b = w^\top q + b = 0\) なので、引いて \(w^\top (p - q) = 0\)、つまり \(w\) は境目の向き \(p - q\) と直角である。また、点 \(x\) から境目までの距離（\(w\) の向きを正として測る）は、次のようになる。</p>
+      \[
+      \text{距離} = \frac{w^\top x + b}{\|w\|}
+      \]
+      <p>境目の上の点 \(p\) から \(x\) へのベクトルを、\(w\) の向きの長さ 1 のベクトル \(w/\|w\|\) に射影すると、\(w^\top (x - p)/\|w\| = (w^\top x + b)/\|w\|\) になるからである。\(z = w^\top x + b\) は、境目からの距離に \(\|w\|\) を掛けたものと見ることができる。この見方は、あとのノビコフの定理で使う。</p>
+    </section>
+
+    <section id="logic">
+      <h2><span class="fl">2</span>重みを手で入れて、論理回路を作る</h2>
+      <p>入力を 0 か 1 の 2 個にすると、点は \((0,0), (0,1), (1,0), (1,1)\) の 4 つしかない。重みと \(b\) を次のように選ぶと、論理の AND、OR、NAND（AND の否定）になる。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>回路</th><th>重み \(w\)</th><th>\(b\)</th><th>出力（入力 00, 01, 10, 11）</th></tr></thead>
+          <tbody>
+            <tr><td>AND</td><td data-l="重み">\((1, 1)\)</td><td data-l="b">\(-1.5\)</td><td data-l="出力">0, 0, 0, 1</td></tr>
+            <tr><td>OR</td><td data-l="重み">\((1, 1)\)</td><td data-l="b">\(-0.5\)</td><td data-l="出力">0, 1, 1, 1</td></tr>
+            <tr><td>NAND</td><td data-l="重み">\((-1, -1)\)</td><td data-l="b">\(1.5\)</td><td data-l="出力">1, 1, 1, 0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>たとえば AND では、\(x_1 + x_2 - 1.5\) が 0 以上になるのは \(x_1 = x_2 = 1\) のときだけである。図 3 は、それぞれの境目を描いたものである。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ch03_2_gates.png" width="444" height="197" alt="3 つの小さな図。どれも 4 つの点 (0,0)、(0,1)、(1,0)、(1,1) が描かれ、出力 0 の点は橙の丸、出力 1 の点は青の四角。左の AND では、右上の 1 点だけが青で、それを右上に切り離す斜めの直線が引かれている。真ん中の OR では、左下の 1 点だけが橙で、それを切り離す直線が引かれている。右の XOR では、左上と右下が青、左下と右上が橙で、斜めの破線が 2 本引かれ、直線 1 本では分けられないことを示している。">
+        </div>
+        <figcaption>図 3　AND と OR は、直線 1 本で分けられる。XOR（右）は分けられない。破線のように 2 本使えば分けられる。これは 3.3 節で使う。</figcaption>
+      </figure>
+      <p>NAND があれば、それを組み合わせて、どんな論理回路でも作れる（計算機の回路の基本的な事実である）。1943 年の McCulloch と Pitts の主張は、この意味で「ニューロンをつなげば何でも計算できる」というものだった<a class="r" href="#r-mcculloch">[1]</a>。ただし、そのためにはニューロンを何段にも重ねる必要がある。</p>
+    </section>
+
+    <section id="rule">
+      <h2><span class="fl">3</span>パーセプトロンの学習則</h2>
+      <p>次に、重みを例から学習させる。正解のラベルを \(t \in \{+1, -1\}\) で表す（出力 1 を \(+1\)、出力 0 を \(-1\) とする）。式を短くするため、入力に 1 を付け足して \(\tilde x = (x, 1)\)、重みに \(b\) を付け足して \(\tilde w = (w, b)\) と書く。すると \(z = \tilde w^\top \tilde x\) で、予測が正しいのは \(t\, \tilde w^\top \tilde x &gt; 0\) のときである。</p>
+      <p>Rosenblatt の学習則は、例を 1 つずつ見て、間違えたときだけ重みを直す<a class="r" href="#r-rosenblatt">[2]</a>。</p>
+      \[
+      \begin{aligned}
+      &amp;t\, \tilde w^\top \tilde x \le 0 \ \text{（間違い）のとき}\\
+      &amp;\qquad \tilde w \leftarrow \tilde w + t\, \tilde x
+      \end{aligned}
+      \]
+      <p>直すと、その例について \(t\, \tilde w^\top \tilde x\) は次のように増える（\(t^2 = 1\) を使う）。</p>
+      \[
+      t\, (\tilde w + t \tilde x)^\top \tilde x = t\, \tilde w^\top \tilde x + \|\tilde x\|^2
+      \]
+      <p>つまり、1 回直すごとに、その例は正しい側へ \(\|\tilde x\|^2\) だけ近づく。1 回で正しくなるとは限らないし、別の例が間違いに変わることもある。それでも全体として止まることを、次の節で示す。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 252" role="img" aria-labelledby="c32ut c32ud">
+          <title id="c32ut">パーセプトロンの学習則で、重みと境目が回る</title>
+          <desc id="c32ud">原点から左上へのびる矢印が、直す前の重み w。灰色の破線が、それに直角な、直す前の境目である。右下の点 x は正解が +1 なのに、境目の負の側にある（間違い）。学習則は w に x を足す。w の先から x の分だけ進んだ矢印 w + x が、直した後の重みで、右上を向く。直した後の境目（黒の実線）は w + x に直角で、点 x はその正の側に入る。</desc>
+          <defs>
+            <marker id="c32ua" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+            <marker id="c32ub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3949AB"/></marker>
+            <marker id="c32uc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#C2570C"/></marker>
+          </defs>
+          <path d="M38 221L362 59" stroke="#8A96A3" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <path d="M85 64L315 216" stroke="#18222D" stroke-width="2"/>
+          <text class="s" x="300" y="56">直す前の境目</text>
+          <text class="s" x="246" y="236">直した後の境目</text>
+          <path d="M200 140L157 54" stroke="#8A96A3" stroke-width="2" marker-end="url(#c32ua)"/>
+          <path d="M155 50L240 71" stroke="#C2570C" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#c32uc)"/>
+          <path d="M200 140L243 74" stroke="#3949AB" stroke-width="2.2" marker-end="url(#c32ub)"/>
+          <circle cx="200" cy="140" r="3" fill="#18222D"/>
+          <text class="h" x="96" y="44">w（直す前）</text>
+          <text class="h" x="250" y="84" style="fill:#3949AB">w + x（直した後）</text>
+          <text class="s" x="190" y="50" style="fill:#C2570C">x を足す</text>
+          <circle cx="290" cy="162" r="6" fill="#3949AB" stroke="#FFFFFF" stroke-width="1.5"/>
+          <text class="h" x="300" y="167">x</text>
+          <text class="s" x="300" y="183">正解は +1</text>
+        </svg>
+        </div>
+        <figcaption>図 4　学習則の幾何（\(b = 0\) の場合）。正解が \(+1\) の点 \(x\) が負の側にあったので、重みに \(x\) を足す。重みが \(x\) のほうへ回り、境目も回って、\(x\) が正の側に入る。原点は、矢印の根元の黒い点。</figcaption>
+      </figure>
+      <p>演習では、直線 \(x_1 + 2x_2 = 0.5\) の両側に、0.1 以上のすき間をあけて置いた 80 個の点を、この学習則で分ける。図 5 は、学習の途中の境目である。合計 17 回の修正で、すべての点を正しく分ける直線に止まった。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ch03_2_learning.png" width="444" height="464" alt="2 行 2 列の 4 つの小さな図。どれも、右上に青の四角の点、左下に橙の丸の点が散らばり、本当の境目が灰色の破線で引かれている。黒い実線が学習中の境目で、1 回目の修正のあとは点を半分ほど間違えて分け、2 回目、5 回目と修正するたびに傾きが変わり、右下の『収束（修正 17 回）』では、すべての点を正しく分けている。">
+        </div>
+        <figcaption>図 5　パーセプトロンの学習の途中経過。灰色の破線がデータを作った本当の境目、黒の実線が学習中の境目。止まった直線は、本当の境目とは少し違う。すべての点を分ける直線はたくさんあり、学習則はそのどれか 1 本に止まる。</figcaption>
+      </figure>
+      <p class="tnote">この学習則は、損失 \(\ell(\tilde w) = \max(0, -t\, \tilde w^\top \tilde x)\) に、学習率 1 の確率的勾配降下法を使ったものとも見られる<a class="r" href="#r-chiang">[3]</a>。間違えたときの勾配が \(-t \tilde x\) だからである。また、\(\tilde w = 0\) から始めると、学習率を何にしても、重み全体が定数倍になるだけで、予測は変わらない。</p>
+    </section>
+
+    <section id="novikoff">
+      <h2><span class="fl">4</span>必ず止まることの証明：ノビコフの定理</h2>
+      <p>1962 年に Novikoff が示した定理は、データが直線（超平面）で分けられるなら、パーセプトロンの修正の回数には上限がある、というものである<a class="r" href="#r-novikoff">[4]</a>。</p>
+      <div class="call">
+        <p><strong>定理。</strong>すべての例で \(\|\tilde x_i\| \le R\) とする。また、長さ 1 のベクトル \(u\) と \(\gamma &gt; 0\) があって、すべての例で \(t_i\, u^\top \tilde x_i \ge \gamma\) が成り立つとする（\(u\) の境目で、余白 \(\gamma\) を残して分けられる）。このとき、\(\tilde w = 0\) から始めた学習則の修正の回数 \(M\) は、次を満たす。</p>
+        \[
+        M \le \left(\frac{R}{\gamma}\right)^2
+        \]
+      </div>
+      <p><strong>証明。</strong>\(k\) 回目の修正のあとの重みを \(\tilde w_k\) とする（\(\tilde w_0 = 0\)）。\(k\) 回目の修正が例 \((\tilde x, t)\) で起きたとする。</p>
+      <p>(1) \(u\) の向きの成分は、修正のたびに \(\gamma\) 以上増える。</p>
+      \[
+      \begin{aligned}
+      u^\top \tilde w_k &amp;= u^\top \tilde w_{k-1} + t\, u^\top \tilde x\\
+      &amp;\ge u^\top \tilde w_{k-1} + \gamma\\
+      \Longrightarrow\quad u^\top \tilde w_M &amp;\ge M \gamma
+      \end{aligned}
+      \]
+      <p>(2) 長さの 2 乗は、修正のたびに \(R^2\) までしか増えない。</p>
+      \[
+      \begin{aligned}
+      \|\tilde w_k\|^2 &amp;= \|\tilde w_{k-1}\|^2 + 2t\, \tilde w_{k-1}^\top \tilde x\\
+      &amp;\qquad + \|\tilde x\|^2 \\
+      &amp;\le \|\tilde w_{k-1}\|^2 + R^2\\
+      \Longrightarrow\quad \|\tilde w_M\|^2 &amp;\le M R^2
+      \end{aligned}
+      \]
+      <p>3 行目で、\(2t\, \tilde w_{k-1}^\top \tilde x\) の項を捨てた。修正は間違えたときにしか起きないので、\(t\, \tilde w_{k-1}^\top \tilde x \le 0\) だからである。</p>
+      <p>(3) コーシー・シュワルツの不等式 \(u^\top \tilde w \le \|u\|\,\|\tilde w\| = \|\tilde w\|\) で (1) と (2) をつなぐ。</p>
+      \[
+      \begin{aligned}
+      &amp;M\gamma \le u^\top \tilde w_M \le \|\tilde w_M\| \le \sqrt{M}\, R\\
+      &amp;\Longrightarrow\quad M \le \left(\frac{R}{\gamma}\right)^2 \qquad \blacksquare
+      \end{aligned}
+      \]
+      <p>直感的には、重みは \(u\) の向きに毎回 \(\gamma\) ずつ進む（修正の回数に比例して伸びる）が、長さは \(\sqrt{M}\) に比例してしか伸びない。修正を続けると、重みの向きが \(u\) にいくらでも近づくことになるが、向きの近さ（コサイン）は 1 を超えられないので、どこかで止まる。上限にはデータの数も次元も入っていない<a class="r" href="#r-chiang">[3]</a>。</p>
+      <h3>演習で確かめる</h3>
+      <p>図 5 のデータでは、\(R = 2.94\)、本当の境目で測った余白は \(\gamma = 0.1108\) で、上限は \((R/\gamma)^2 \approx 705\) 回になる。実際の修正は 17 回だった。上限は最悪の場合の値なので、実際はずっと少ない。</p>
+      <p>すき間（境目から点までの最小の距離）を変えると、次のようになる。点は 1000 個で、データと並べ方を変えて 100 回ずつ平均した。</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>すき間</th><th>修正の回数（平均）</th><th>最大</th><th>上限 \((R/\gamma)^2\)</th></tr></thead>
+          <tbody>
+            <tr><td>0.40</td><td>5.1</td><td>10</td><td>57</td></tr>
+            <tr><td>0.20</td><td>10.3</td><td>31</td><td>225</td></tr>
+            <tr><td>0.10</td><td>17.6</td><td>46</td><td>885</td></tr>
+            <tr><td>0.05</td><td>36.0</td><td>77</td><td>3,427</td></tr>
+            <tr><td>0.02</td><td>73.0</td><td>178</td><td>19,469</td></tr>
+            <tr><td>0.01</td><td>129.6</td><td>390</td><td>72,487</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>すき間を半分にすると、上限は 4 倍になる（\(\gamma\) が 2 乗で効く）。この実験では、実際の回数はほぼ 2 倍ずつ増えた。すき間が狭いほど、境目の近くの点の扱いに手間取る、という傾向は上限と同じである。</p>
+    </section>
+
+    <section id="xor">
+      <h2><span class="fl">5</span>直線で分けられないもの：XOR</h2>
+      <p>XOR は、2 つの入力のうち、ちょうど 1 つが 1 のときだけ 1 を出す。図 3 の右のように、出力 1 の点（左上と右下）と出力 0 の点（左下と右上）が、たすき掛けに並んでいる。1 個のニューロンでは表せないことを、式で示す。</p>
+      <p><strong>証明。</strong>\(y = \mathbb 1[w_1 x_1 + w_2 x_2 + b \ge 0]\) が XOR に一致したとする。4 つの点について、次が成り立つ必要がある。</p>
+      \[
+      \begin{aligned}
+      (0,0) \to 0:&amp;\quad b &lt; 0\\
+      (1,0) \to 1:&amp;\quad w_1 + b \ge 0\\
+      (0,1) \to 1:&amp;\quad w_2 + b \ge 0\\
+      (1,1) \to 0:&amp;\quad w_1 + w_2 + b &lt; 0
+      \end{aligned}
+      \]
+      <p>2 行目と 3 行目を足すと \(w_1 + w_2 + 2b \ge 0\)、つまり \(w_1 + w_2 + b \ge -b\) である。1 行目から \(-b &gt; 0\) なので \(w_1 + w_2 + b &gt; 0\) となり、4 行目と矛盾する。\(\blacksquare\)</p>
+      <p>演習で、XOR に学習則を使うと、1 周（4 つの例を 1 回ずつ見る）ごとに 4 回とも間違え、100 周しても止まらない。重みは \((0,0,0) \to (0,0,-1) \to (0,1,0) \to (1,1,1) \to (0,0,0)\) と回り、1 周で元に戻る。重みを \(-2\) から \(2\) まで 0.1 刻みで総当たりしても、4 点のうち当てられるのは最大 3 点だった。</p>
+      <p>入力が \(d\) 個のとき、「1 の個数が奇数なら 1」というパリティも、同じ理由で 1 個のニューロンでは表せない（XOR は \(d = 2\) のパリティである）。Minsky と Papert の本は、この種の限界を詳しく調べたものだった<a class="r" href="#r-minsky">[5]</a>。</p>
+    </section>
+
+    <section id="smooth">
+      <h2><span class="fl">6</span>しきい値をなめらかにしても同じ</h2>
+      <p>しきい値のかわりに、シグモイド関数 \(\sigma(z) = 1/(1 + e^{-z})\) を使い、出力を「1 である確率」と読むことにする。これは 2 章の softmax 回帰の、クラスが 2 つの場合（ロジスティック回帰）である。交差エントロピーを勾配降下法で小さくできる。</p>
+      \[
+      \begin{aligned}
+      p &amp;= \sigma(w^\top x + b)\\
+      L &amp;= -\frac{1}{N}\sum_{i} \Big[t_i \log p_i\\
+      &amp;\qquad + (1 - t_i) \log (1 - p_i)\Big]
+      \end{aligned}
+      \]
+      <p>（ここでは正解を \(t_i \in \{0, 1\}\) で表す。）しかし、確率が 0.5 になる境目は \(w^\top x + b = 0\) で、やはり直線である。演習の結果は次のとおりである。</p>
+      <ul>
+        <li>AND：出力の確率は \((0.00, 0.01, 0.01, 0.99)\) で、正解率 100%。</li>
+        <li>XOR：出力の確率は 4 点とも 0.50 で、正解率 50%。</li>
+      </ul>
+      <p>XOR の結果が「全部 0.5」になる理由は計算できる。\(w = 0, b = 0\) では 4 点とも \(p = 0.5\) で、損失の勾配 \(\frac{1}{4}\sum_i (p_i - t_i)\, \tilde x_i\) は</p>
+      \[
+      \begin{aligned}
+      &amp;\tfrac14\Big[\,0.5\,(0,0,1) - 0.5\,(0,1,1)\\
+      &amp;\quad - 0.5\,(1,0,1) + 0.5\,(1,1,1)\Big]\\
+      &amp;= (0, 0, 0)
+      \end{aligned}
+      \]
+      <p>となる。ロジスティック回帰の交差エントロピーは重みについて凸（谷が 1 つしかない）なので、勾配が 0 の点が最小である。直線で分けられないデータに対して、1 個のニューロンができる最善は「どの点も五分五分と答える」ことになる。</p>
+    </section>
+
+    <section id="next">
+      <h2><span class="fl">7</span>1 個では足りない、では何を足すか</h2>
+      <p>入力をそのまま使う 1 個のニューロンは、直線（超平面）しか引けない。これを越える方法は 2 つある。</p>
+      <ol>
+        <li><strong>入力から特徴を作ってから、ニューロンに入れる。</strong>たとえば XOR は、特徴 \(x_1 x_2\) を足して \((x_1, x_2, x_1 x_2)\) の 3 入力にすれば、1 個のニューロンで表せる（確かめる問題 3）。1 章で \(x^2, x^3\) を足したのと同じ考え方である。Mark I の A ユニットは、乱数で決めた特徴をたくさん作る役だった（3.1 節）。ただし、どんな特徴が要るかを人が考えるか、乱数に任せるしかない。</li>
+        <li><strong>特徴を作る部分も、ニューロンにして学習させる。</strong>ニューロンを層に並べて重ねれば、前の層の出力が後ろの層の特徴になる。これが 3.3 節の多層のネットで、その学習に 3.4 節の逆伝播を使う。</li>
+      </ol>
+    </section>
+
+    <section id="ex">
+      <h2><span class="fl">8</span>演習</h2>
+      <div class="ex">
+        <p class="ex-h"><span>演習 3.2</span>パーセプトロン</p>
+        <p>論理回路、学習則、ノビコフの上限、XOR、ロジスティック回帰を、numpy で確かめる。数秒で終わる。</p>
+        <pre><code>python3 vla_math/ch03_2_perceptron.py</code></pre>
+        <p>出力の一部：</p>
+<pre class="out">(2) パーセプトロンの学習則で、2 つの集まりを分ける
+    点 80 個. 1 周ごとの誤りの回数: [9, 5, 1, 2, 0]
+    誤りの合計 17 回で収束した（最後の 1 周で誤り 0）
+    ノビコフの上限 (R/γ)²: R = 2.94, γ = 0.1108（本当の境目で測った余白）→ 705 回
+
+(3) XOR に同じ学習則を使う（100 周）
+    1 周ごとの誤りの回数（最初の 10 周）: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+    100 周たっても誤りは 0 にならない（最後の周の誤り 4 回、合計 400 回）
+    重みを細かく総当たりしても、4 点のうち正解できるのは最大 3 点
+
+(4) シグモイドと交差エントロピー（ロジスティック回帰）で学習する
+    AND: 出力の確率 [0.0, 0.01, 0.01, 0.99]、正解率 100%
+    XOR: 出力の確率 [0.5, 0.5, 0.5, 0.5]、正解率 50%</pre>
+        <p>見るところ：</p>
+        <ul>
+          <li>(2) 1 周目に 9 回直し、5 周目で 1 回も間違えなくなる。上限 705 回よりずっと少ない。</li>
+          <li>(3) XOR では、毎周ちょうど 4 回間違える。重みが 1 周で元に戻っているからである。</li>
+        </ul>
+        <p>変えてみる：<code>make_separable</code> のすき間を 0 にして（点を境目のすぐそばにも置く）、修正の回数がどう変わるかを見る。XOR の入力に 3 つ目の特徴 \(x_1 x_2\) を足して、学習則が止まることを確かめる。</p>
+      </div>
+    </section>
+
+    <section id="sum">
+      <h2><span class="fl">9</span>まとめ</h2>
+      <ol class="verdict">
+        <li><strong>1 個のニューロンは \(y = \mathbb 1[w^\top x + b \ge 0]\) で、境目は直線（超平面）である。</strong>\(w\) は境目に直角で、\(z = w^\top x + b\) は境目からの距離の \(\|w\|\) 倍である。</li>
+        <li><strong>パーセプトロンの学習則は、間違えたときだけ \(\tilde w \leftarrow \tilde w + t\tilde x\) と直す。</strong>余白 \(\gamma\) で分けられるデータなら、修正は \((R/\gamma)^2\) 回以下で止まる。</li>
+        <li><strong>XOR は、1 個のニューロンでは表せない。</strong>しきい値をシグモイドにしても、境目が直線である限り同じである。越えるには、特徴を作る層が要る。</li>
+      </ol>
+    </section>
+
+    <section id="check">
+      <h2><span class="fl">10</span>確かめる問題</h2>
+      <ol class="q">
+        <li>重みと \(b\) を決めて、NOR（2 つの入力がどちらも 0 のときだけ 1）を作れ。</li>
+        <li>1 回の修正で、その例の \(t\, \tilde w^\top \tilde x\) が \(\|\tilde x\|^2\) だけ増えることを確かめよ。</li>
+        <li>3 つの入力 \((x_1, x_2, x_1 x_2)\) を使えば、XOR を 1 個のニューロンで表せる。重みと \(b\) を 1 組求めよ。</li>
+        <li>ノビコフの定理の証明で、「間違えたときだけ直す」ことは、どの式で使ったか。</li>
+        <li>学習則を \(\tilde w \leftarrow \tilde w + \eta\, t\, \tilde x\)（\(\eta &gt; 0\)）に変えても、\(\tilde w = 0\) から始めれば予測は \(\eta\) によらない。なぜか。</li>
+      </ol>
+    </section>
+
+    <section id="read">
+      <h2><span class="fl">11</span>読むもの</h2>
+      <ul>
+        <li>Chiang の講義ノート 2 章<a class="r" href="#r-chiang">[3]</a>。パーセプトロンの定義、XOR、ノビコフの定理の証明が短くまとまっている。英語。</li>
+        <li>Goodfellow ら『Deep Learning』6.1 節<a class="r" href="#r-goodfellow">[6]</a>。XOR を 2 層のネットで解く例。3.3 節の準備になる。</li>
+        <li>Rosenblatt の 1958 年の論文<a class="r" href="#r-rosenblatt">[2]</a>と、Minsky と Papert の本<a class="r" href="#r-minsky">[5]</a>。原典。</li>
+      </ul>
+    </section>
+
+    <section id="refs">
+      <h2><span class="fl">※</span>参考文献</h2>
+      <ol class="refs">
+        <li id="r-mcculloch">W. S. McCulloch and W. Pitts, "A logical calculus of the ideas immanent in nervous activity," Bulletin of Mathematical Biophysics 5, 115–133, 1943.</li>
+        <li id="r-rosenblatt">F. Rosenblatt, "The perceptron: A probabilistic model for information storage and organization in the brain," Psychological Review 65(6), 386–408, 1958.</li>
+        <li id="r-chiang">D. Chiang, "Theory of Neural Networks," 講義ノート 2 章（Perceptrons）, University of Notre Dame, 2024. <a href="https://www3.nd.edu/~dchiang/teaching/tonn/2024/chapter2.pdf">https://www3.nd.edu/~dchiang/teaching/tonn/2024/chapter2.pdf</a></li>
+        <li id="r-novikoff">A. B. J. Novikoff, "On convergence proofs on perceptrons," Proceedings of the Symposium on the Mathematical Theory of Automata, 1962.</li>
+        <li id="r-minsky">M. Minsky and S. Papert, "Perceptrons: An Introduction to Computational Geometry," MIT Press, 1969.</li>
+        <li id="r-goodfellow">I. Goodfellow, Y. Bengio and A. Courville, "Deep Learning," MIT Press, 2016. 本の全文が公開されている。<a href="https://www.deeplearningbook.org/">https://www.deeplearningbook.org/</a></li>
+      </ol>
+    </section>
+    <nav class="chnav" aria-label="章の移動">
+    <a class="prev" href="03-1-history.html"><small>前の節</small>3.1　ニューラルネットはどう生まれたか</a>
+    <a class="next" href="03-3-layers.html"><small>次の節</small>3.3　層を重ねる</a>
+    <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14、更新 2026-11-15。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a>。数式の表示に KaTeX（MIT ライセンス）を使っている。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function renderMath(){
+    if(!window.renderMathInElement) return;
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false,
+      strict: "ignore"
+    });
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderMath);
+  else renderMath();
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

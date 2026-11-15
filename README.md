@@ -23,7 +23,7 @@
 
 | 日付 | コード |
 | --- | --- |
-| 2026-11-15 | [VLM・VLA の数理：各章の演習 9 本（numpy と matplotlib だけ。GPU は不要）](vla_math/) |
+| 2026-11-15 | [VLM・VLA の数理：各章の演習 13 本（numpy と matplotlib だけ。GPU は不要）](vla_math/) |
 
 演習コードは、実行して確かめてある。確かめた環境は、`vla_math/README.md` に書いてある。
 

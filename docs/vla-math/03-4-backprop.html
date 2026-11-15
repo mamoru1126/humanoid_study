@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3.4 逆伝播｜VLM・VLA の数理</title>
+<meta name="description" content="学習には、損失の、すべての重みについての勾配が要る。重みが何億個あっても、勾配は「入力から出力へ計算する 1 回」と「出力から入力へ戻る 1 回」で、まとめて求まる。これが逆伝播である。この節では、連鎖律から始めて、計算グラフ、自動微分（5">
+<link rel="stylesheet" href="../assets/katex/katex.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<style>
+
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18222D; --steel:#56626E; --line:#C9D1D9; --faint:#E6EAEE;
+  --panel:#1B232C; --lamp:#F2A900;
+  --sim:#3949AB; --sim-t:#E8EAF6;
+  --pol:#C2570C; --pol-t:#FCEBDD;
+  --ok:#00796B; --ok-t:#E0F2F1;
+  --safe:#B3261E; --safe-t:#FCE8E6;
+  --grid:#E1E5E9; --axis:#B4BDC6;
+  --sans:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --mono:"BIZ UDGothic",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono CJK JP",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85}
+a{color:var(--sim);text-underline-offset:.2em}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--lamp);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--sheet);border-bottom:1px solid var(--line);padding:24px 0 36px}
+.crumb{margin:0 0 22px;font-size:.86rem}
+h1{font-size:clamp(1.55rem,5.4vw,2.5rem);line-height:1.42;margin:0 0 .65em;font-weight:700;letter-spacing:.01em;word-break:auto-phrase;text-wrap:balance;max-width:21em}
+h1 small{display:block;font-size:.5em;font-weight:700;color:var(--steel);margin-top:.5em;letter-spacing:0}
+.lead{max-width:41em;margin:0 0 28px}
+.tiles{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.tiles li{margin:0;padding:14px 16px 13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.tiles b{display:block;font-size:1.75rem;line-height:1.3;font-weight:700}
+.tiles span{display:block;font-size:.88rem;line-height:1.6;color:var(--steel);margin-top:.25em}
+@media (min-width:760px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+
+/* ---------- page grid ---------- */
+.page{padding-top:26px;padding-bottom:72px}
+main{min-width:0;max-width:41rem}
+.toc{display:none}
+@media (min-width:1000px){
+  .page{display:grid;grid-template-columns:200px minmax(0,1fr);gap:60px;align-items:start}
+  .toc{display:block;position:sticky;top:24px;font-size:.88rem;line-height:1.5}
+  .toc-m{display:none}
+}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:.65em;align-items:center;padding:.34em 0;color:var(--steel);text-decoration:none}
+.toc a:hover{color:var(--ink)}
+.toc .fl{flex:none;display:inline-grid;place-items:center;width:2em;height:1.55em;border-radius:3px;background:#DDE3E8;color:#7A8792;font-size:.8em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:background .2s,color .2s}
+.toc a[aria-current="true"]{color:var(--ink);font-weight:700}
+.toc a[aria-current="true"] .fl{background:var(--panel);color:var(--lamp)}
+@media (prefers-reduced-motion:reduce){.toc .fl{transition:none}}
+.toc-m{margin:0 0 1.6em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);font-size:.92rem}
+.toc-m summary{padding:.7em 1em;cursor:pointer;font-weight:700}
+.toc-m ul{list-style:none;margin:0;padding:0 1em .9em;line-height:1.6}
+.toc-m li{margin:.45em 0}
+
+/* ---------- text ---------- */
+section{margin:0}
+h2{display:flex;align-items:baseline;gap:.6em;font-size:1.38rem;line-height:1.45;margin:3.1em 0 .9em;font-weight:700;word-break:auto-phrase}
+section:first-of-type h2{margin-top:.2em}
+h2 .fl{flex:none;display:inline-grid;place-items:center;min-width:2em;height:1.6em;padding:0 .35em;background:var(--panel);color:var(--lamp);border-radius:4px;font-size:.8em;font-variant-numeric:tabular-nums;line-height:1}
+h3{font-size:1.06rem;line-height:1.5;margin:2.2em 0 .6em;font-weight:700;word-break:auto-phrase}
+p{margin:0 0 1.1em}
+ul,ol{margin:0 0 1.2em;padding-left:1.5em}
+li{margin:.4em 0}
+strong{font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:var(--faint);padding:.1em .35em;border-radius:3px;overflow-wrap:break-word}
+td code,th code,code.k{white-space:nowrap}
+table.wrap td code{white-space:normal;overflow-wrap:anywhere}
+pre{margin:1.2em 0;background:var(--panel);color:#E8EDF2;padding:14px 16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;word-break:normal}
+a.r{font-size:.74em;vertical-align:super;line-height:0;text-decoration:none;margin-left:.08em;font-variant-numeric:tabular-nums}
+
+ol.verdict{list-style:none;padding:0;margin:0 0 1.4em;counter-reset:v}
+ol.verdict li{counter-increment:v;position:relative;padding-left:2.5em;margin:1.05em 0}
+ol.verdict li::before{content:counter(v);position:absolute;left:0;top:.18em;width:1.75em;height:1.75em;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.86em;line-height:1}
+
+.call{margin:1.4em 0;padding:.9em 1.1em;border-left:4px solid var(--sim);background:var(--sim-t);border-radius:0 6px 6px 0}
+.call.warn{border-left-color:var(--safe);background:var(--safe-t)}
+.call p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.tw{margin:1.3em 0;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:.62em .8em;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--faint);font-weight:700}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:700;background:transparent}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.sum td,tr.sum th{font-weight:700;border-top:2px solid var(--line)}
+@media (max-width:640px){
+  table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  table.stack tbody tr{display:block;padding:.8em .9em;border-bottom:1px solid var(--line)}
+  table.stack tbody tr:last-child{border-bottom:0}
+  table.stack tbody th,table.stack tbody td{display:block;border:0;padding:.14em 0}
+  table.stack tbody tr > :first-child{font-weight:700;margin-bottom:.25em}
+  table.stack tbody td[data-l]::before{content:attr(data-l);font-size:.8em;font-weight:700;color:var(--steel);margin-right:.7em}
+  table.stack tbody td.n{text-align:left}
+}
+@media (min-width:641px){
+  table.c1 tr > :first-child{white-space:nowrap}
+  table.c1w tr > :first-child{min-width:8.5em}
+}
+.tnote{font-size:.86rem;color:var(--steel);line-height:1.65;margin:-.6em 0 1.4em}
+.st{font-weight:700;white-space:nowrap}
+.st.y{color:var(--ok)}.st.n{color:var(--safe)}.st.p{color:#8A5A00}
+
+/* ---------- figures ---------- */
+.fig{margin:1.9em 0}
+.fig .cv{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px 12px}
+.fig svg{display:block;width:100%;max-width:500px;height:auto;margin:0 auto}
+.fig figcaption{font-size:.86rem;line-height:1.65;color:var(--steel);margin-top:.65em}
+.fig text{font-family:var(--sans);fill:var(--ink);font-size:13px}
+.fig text.h{font-weight:700}
+.fig text.s{font-size:11.5px;fill:var(--steel)}
+@media (max-width:560px){
+  .fig{margin-left:-12px;margin-right:-12px}
+  .fig .cv{padding:12px 4px;border-radius:0;border-left:0;border-right:0}
+  .fig figcaption{padding:0 12px}
+}
+
+/* ---------- chart ---------- */
+.chart .cv{padding:16px 16px 12px}
+.chart .ct{margin:0 0 .15em;font-weight:700;font-size:.98rem;line-height:1.5}
+.chart .cs{margin:0 0 .9em;font-size:.84rem;line-height:1.6;color:var(--steel)}
+.legend{display:flex;flex-wrap:wrap;gap:.25em 1.4em;margin:0 0 .9em;padding:0;list-style:none;font-size:.86rem;line-height:1.5}
+.legend li{display:flex;align-items:center;gap:.5em;margin:0}
+.sw{flex:none;width:12px;height:12px;border-radius:2px}
+.sw.a{background:var(--sim)}.sw.b{background:var(--pol)}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{margin:0;padding:6px 0 7px}
+.rows li.avg{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
+.rows .nm{display:block;font-size:.86rem;line-height:1.45;margin-bottom:4px}
+.rows li.avg .nm{font-weight:700}
+.plot{position:relative;margin-right:2.6em;border-left:1px solid var(--axis);background-image:linear-gradient(to right,transparent calc(100% - 1px),var(--grid) calc(100% - 1px));background-size:25% 100%}
+.bar{display:block;position:relative;height:10px;border-radius:0 4px 4px 0;outline-offset:2px}
+.bar + .bar{margin-top:2px}
+.bar.a{background:var(--sim)}.bar.b{background:var(--pol)}
+.bar::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+.bar:focus-visible{outline:3px solid var(--lamp)}
+.bar:hover::after,.bar:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 5px);z-index:2;background:var(--panel);color:#fff;font-size:.78rem;line-height:1.4;padding:.2em .6em;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar i{position:absolute;left:100%;top:50%;transform:translate(6px,-50%);font-style:normal;font-weight:700;font-size:.8rem;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ticks{position:relative;height:1.5em;margin:4px 2.6em 0 0;font-size:.76rem;color:var(--steel);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;top:0;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+details.tv{margin-top:.9em;border-top:1px solid var(--line);padding-top:.7em;font-size:.88rem}
+details.tv summary{cursor:pointer;font-weight:700}
+details.tv .tw{margin:.8em 0 .2em}
+
+/* ---------- refs / footer ---------- */
+ol.refs{font-size:.86rem;line-height:1.6;padding-left:2em}
+ol.refs li{margin:.55em 0;overflow-wrap:anywhere}
+footer{border-top:1px solid var(--line);background:var(--sheet);padding:22px 0 30px;font-size:.84rem;color:var(--steel)}
+footer p{margin:0}
+
+@media print{
+  body{background:#fff}
+  .toc,.toc-m,.crumb{display:none}
+  .page{display:block}
+  pre{white-space:pre-wrap}
+}
+
+/* ---------- math ---------- */
+.katex{font-size:1.06em}
+.katex-display{margin:1.05em 0;padding:.3em 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.katex-display > .katex{white-space:nowrap}
+@media (max-width:345px){.katex-display > .katex{font-size:.95em}}
+td .katex,th .katex{font-size:1em}
+/* ---------- chapter pages ---------- */
+.kicker{margin:0 0 .5em;font-size:.86rem;font-weight:700;color:var(--steel);letter-spacing:.04em}
+h1 .chno{display:inline-grid;place-items:center;min-width:1.55em;height:1.35em;margin-right:.4em;padding:0 .2em;border:2px solid var(--ink);border-radius:6px;font-size:.8em;line-height:1;vertical-align:.08em;font-variant-numeric:tabular-nums}
+.fig img{display:block;width:100%;max-width:444px;height:auto;margin:0 auto}
+h4{font-size:.86rem;line-height:1.5;margin:1.5em 0 .35em;font-weight:700;color:var(--steel);letter-spacing:.04em}
+.ex{margin:1.6em 0;padding:1em 1.1em .4em;border:1px solid var(--line);border-top:4px solid var(--pol);border-radius:0 0 6px 6px;background:var(--sheet)}
+.ex > .ex-h{margin:0 0 .5em;font-weight:700}
+.ex > .ex-h span{display:inline-block;margin-right:.5em;padding:.05em .5em;border-radius:3px;background:var(--pol);color:#fff;font-size:.82em}
+pre.out{background:var(--faint);color:var(--ink);font-size:.76rem;line-height:1.6;white-space:pre;overflow-x:auto;overflow-wrap:normal;-webkit-overflow-scrolling:touch}
+ul.chk{list-style:none;padding-left:0}
+ul.chk li{position:relative;padding-left:1.7em}
+ul.chk li::before{content:"";position:absolute;left:.1em;top:.42em;width:.95em;height:.95em;border:1.5px solid var(--steel);border-radius:3px}
+ol.q{padding-left:1.7em}
+ol.q li{margin:.6em 0}
+.chnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:3.2em 0 0}
+.chnav a{display:block;padding:.75em .95em;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);text-decoration:none;line-height:1.5}
+.chnav a:hover{border-color:var(--steel)}
+.chnav small{display:block;font-size:.76rem;color:var(--steel);margin-bottom:.15em}
+.chnav .next{grid-column:2;text-align:right}
+.chnav .up{grid-column:1/-1;text-align:center}
+table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../">資料の一覧</a> › <a href="./">VLM・VLA の数理</a></p>
+    <p class="kicker">第 1 部　機械学習の基礎　／　3 章　ニューラルネットと逆伝播</p>
+    <h1><span class="chno">3.4</span>逆伝播<small>連鎖律で、勾配を出口から配る</small></h1>
+    <p class="lead">学習には、損失の、すべての重みについての勾配が要る。重みが何億個あっても、勾配は「入力から出力へ計算する 1 回」と「出力から入力へ戻る 1 回」で、まとめて求まる。これが逆伝播である。この節では、連鎖律から始めて、計算グラフ、自動微分（50 行ほどで書く）、行列の層の式の順に進む。3.1 節で見たとおり、1986 年に広まったこの方法が、隠れ層を学習させる問題を解いた。</p>
+    <nav class="subnav" aria-label="3 章の節"><ol><li><a href="03-1-history.html">3.1　誕生の経緯</a></li><li><a href="03-2-perceptron.html">3.2　パーセプトロン</a></li><li><a href="03-3-layers.html">3.3　層を重ねる</a></li><li><a href="03-4-backprop.html" aria-current="page">3.4　逆伝播</a></li><li><a href="03-5-training.html">3.5　深いネットの学習</a></li></ol></nav>
+  </div>
+</header>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#why"><span class="fl">1</span>数値微分ではだめか</a></li>
+      <li><a href="#chain"><span class="fl">2</span>連鎖律</a></li>
+      <li><a href="#graph"><span class="fl">3</span>計算グラフで追う</a></li>
+      <li><a href="#branch"><span class="fl">4</span>枝分かれでは足す</a></li>
+      <li><a href="#order"><span class="fl">5</span>戻る順番</a></li>
+      <li><a href="#autograd"><span class="fl">6</span>自動微分を書く</a></li>
+      <li><a href="#matrix"><span class="fl">7</span>行列の層の式</a></li>
+      <li><a href="#memory"><span class="fl">8</span>取っておくもの</a></li>
+      <li><a href="#ex"><span class="fl">9</span>演習</a></li>
+      <li><a href="#sum"><span class="fl">10</span>まとめ</a></li>
+      <li><a href="#check"><span class="fl">11</span>確かめる問題</a></li>
+      <li><a href="#read"><span class="fl">12</span>読むもの</a></li>
+      <li><a href="#refs"><span class="fl">※</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <details class="toc-m">
+      <summary>目次</summary>
+      <ul>
+        <li><a href="#why">1　なぜ数値微分ではだめか</a></li>
+        <li><a href="#chain">2　連鎖律</a></li>
+        <li><a href="#graph">3　計算グラフで追う</a></li>
+        <li><a href="#branch">4　枝分かれでは、勾配を足す</a></li>
+        <li><a href="#order">5　戻る順番：出口から入口へ</a></li>
+        <li><a href="#autograd">6　自動微分を 50 行で書く</a></li>
+        <li><a href="#matrix">7　行列の層の式</a></li>
+        <li><a href="#memory">8　順伝播で取っておくもの</a></li>
+        <li><a href="#ex">9　演習</a></li>
+        <li><a href="#sum">10　まとめ</a></li>
+        <li><a href="#check">11　確かめる問題</a></li>
+        <li><a href="#read">12　読むもの</a></li>
+        <li><a href="#refs">参考文献</a></li>
+      </ul>
+    </details>
+
+
+    <section id="why">
+      <h2><span class="fl">1</span>なぜ数値微分ではだめか</h2>
+      <p>勾配のいちばん素朴な求め方は、重みを 1 つずつ少し動かして、損失の変化を見ることである（数値微分）。</p>
+      \[
+      \frac{\partial L}{\partial \theta_i} \approx \frac{L(\theta + h e_i) - L(\theta - h e_i)}{2h}
+      \]
+      <p>\(e_i\) は \(i\) 番目だけが 1 のベクトル、\(h\) は小さな数である。重みが \(P\) 個なら、損失の計算（順伝播）が \(2P\) 回要る。演習の 2 → 64 → 64 → 2 のネット（\(P = 4482\)）では 8964 回になる。</p>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ch03_4_cost.png" width="444" height="314" alt="両対数のグラフ。横軸はパラメータの数（42 から 4482）、縦軸は時間（秒）。橙の数値微分の線は右上がりで、パラメータ 42 個で約 0.005 秒、4482 個で約 2 秒。青の逆伝播（順伝播込み）の線は、0.0001 秒から 0.0005 秒の低い位置をほぼ横ばいに進む。灰色の点線の順伝播 1 回は、その少し下。">
+        </div>
+        <figcaption>図 1　全部の重みの勾配を求める時間（このページを作った計算機での値）。数値微分は重みの数とともに増えるが、逆伝播は順伝播 1 回の 2〜3 倍程度のまま。</figcaption>
+      </figure>
+      <p>演習で測ると、\(P = 4482\) で、数値微分は約 1.8 秒、逆伝播は約 0.5 ミリ秒（順伝播 1 回の約 2.7 倍）で、差は 3000 倍を超えた。重みが数十億個の VLA では、数値微分は使いものにならない。逆伝播（自動微分の逆向きの方式）では、勾配の計算の手間が、関数を 1 回計算する手間の小さな定数倍で済む。これを「勾配は安い」原理と呼ぶことがある<a class="r" href="#r-griewank">[1]</a>。</p>
+      <p>数値微分にも使い道はある。自分で書いた逆伝播が正しいかを、小さなネットで確かめるときである（勾配の確認）。演習でもそうしている。</p>
+    </section>
+
+    <section id="chain">
+      <h2><span class="fl">2</span>連鎖律</h2>
+      <p>逆伝播の中身は、微分の連鎖律だけである。1 変数なら、\(y = f(u)\)、\(u = g(x)\) のとき、</p>
+      \[
+      \frac{dy}{dx} = \frac{dy}{du}\,\frac{du}{dx}
+      \]
+      <p>である。変数が途中で何本にも分かれるときは、\(L\) が \(x\) から中間の変数 \(u_1, \dots, u_m\) を通って決まるなら、</p>
+      \[
+      \frac{\partial L}{\partial x} = \sum_{j=1}^{m} \frac{\partial L}{\partial u_j}\,\frac{\partial u_j}{\partial x}
+      \]
+      <p>となる。「\(x\) から \(L\) へ行く道ごとに、微分を掛け合わせ、すべての道について足す」と読める。この式を、出力側から順に使っていくのが逆伝播である。</p>
+    </section>
+
+    <section id="graph">
+      <h2><span class="fl">3</span>計算グラフで追う</h2>
+      <p>1 個のニューロン（活性化関数なし）と 2 乗誤差の、数値の入った例で追う。\(w = 2\)、\(x = 3\)、\(b = 1\)、正解 \(y = 5\) とする。</p>
+      \[
+      L = (w x + b - y)^2
+      \]
+      <p>計算を 1 つずつの手順に分けて、\(u = wx\)、\(z = u + b\)、\(e = z - y\)、\(L = e^2\) と書く。この手順と、値の流れを描いたものを<strong>計算グラフ</strong>という。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 488" role="img" aria-labelledby="c34gt c34gd">
+          <title id="c34gt">計算グラフと逆伝播（L = (wx + b − y)²）</title>
+          <desc id="c34gd">上から下へ、順伝播の計算が進む。w = 2 と x = 3 を掛けて u = 6、u に b = 1 を足して z = 7、z から y = 5 を引いて e = 2、e を 2 乗して L = 4。各箱の下の段に、逆伝播で求めた勾配を書いてある。L から始めて上へ戻ると、∂L/∂L = 1、∂L/∂e = 2e = 4、∂L/∂z = 4、∂L/∂y = −4、∂L/∂u = 4、∂L/∂b = 4、∂L/∂w = 4 × x = 12、∂L/∂x = 4 × w = 8。掛け算は相手の値を掛けて勾配を配り、足し算はそのまま配る。</desc>
+          <defs>
+            <marker id="c34ga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <path d="M82 76L135.4 99.5" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M222 76L164.8 99.8" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M150 120V133" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <circle cx="150" cy="106" r="14" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <text class="h" x="150" y="111" text-anchor="middle">×</text>
+          <text class="s" x="172" y="110">相手の値を掛けて配る</text>
+          <path d="M152 176L200.6 199.1" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M282 176L229.6 199.5" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M215 220V233" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <circle cx="215" cy="206" r="14" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <text class="h" x="215" y="211" text-anchor="middle">+</text>
+          <text class="s" x="237" y="210">そのまま両方へ配る</text>
+          <path d="M217 276L260.8 298.6" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M342 276L289.6 299.5" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M275 320V333" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <circle cx="275" cy="306" r="14" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <text class="h" x="275" y="311" text-anchor="middle">−</text>
+          <text class="s" x="253" y="310" text-anchor="end">z へ ×1、y へ ×(−1)</text>
+          <path d="M277 376L276.1 390.0" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <path d="M275 420V433" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ga)"/>
+          <circle cx="275" cy="406" r="14" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <text class="h" x="275" y="411" text-anchor="middle">²</text>
+          <text class="s" x="297" y="410">2e を掛けて配る</text>
+          <rect x="30" y="34" width="104" height="42" rx="5" fill="#F4F5F7" stroke="#C9D1D9" stroke-width="1.2"/>
+          <text class="h" x="38" y="51">w<tspan style="fill:#3949AB"> = 2</tspan></text>
+          <text class="s" x="38" y="68" style="fill:#C2570C">∂L/∂w = 12</text>
+          <rect x="170" y="34" width="104" height="42" rx="5" fill="#F4F5F7" stroke="#C9D1D9" stroke-width="1.2"/>
+          <text class="h" x="178" y="51">x<tspan style="fill:#3949AB"> = 3</tspan></text>
+          <text class="s" x="178" y="68" style="fill:#C2570C">∂L/∂x = 8</text>
+          <rect x="100" y="134" width="104" height="42" rx="5" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="108" y="151">u = wx<tspan style="fill:#3949AB"> = 6</tspan></text>
+          <text class="s" x="108" y="168" style="fill:#C2570C">∂L/∂u = 4</text>
+          <rect x="230" y="134" width="104" height="42" rx="5" fill="#F4F5F7" stroke="#C9D1D9" stroke-width="1.2"/>
+          <text class="h" x="238" y="151">b<tspan style="fill:#3949AB"> = 1</tspan></text>
+          <text class="s" x="238" y="168" style="fill:#C2570C">∂L/∂b = 4</text>
+          <rect x="165" y="234" width="104" height="42" rx="5" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="173" y="251">z = u + b<tspan style="fill:#3949AB"> = 7</tspan></text>
+          <text class="s" x="173" y="268" style="fill:#C2570C">∂L/∂z = 4</text>
+          <rect x="290" y="234" width="104" height="42" rx="5" fill="#F4F5F7" stroke="#C9D1D9" stroke-width="1.2"/>
+          <text class="h" x="298" y="251">y<tspan style="fill:#3949AB"> = 5</tspan></text>
+          <text class="s" x="298" y="268" style="fill:#C2570C">∂L/∂y = −4</text>
+          <rect x="225" y="334" width="104" height="42" rx="5" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="233" y="351">e = z − y<tspan style="fill:#3949AB"> = 2</tspan></text>
+          <text class="s" x="233" y="368" style="fill:#C2570C">∂L/∂e = 4</text>
+          <rect x="225" y="434" width="104" height="42" rx="5" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="233" y="451">L = e²<tspan style="fill:#3949AB"> = 4</tspan></text>
+          <text class="s" x="233" y="468" style="fill:#C2570C">∂L/∂L = 1</text>
+          <text class="s" x="30" y="18"><tspan style="fill:#3949AB">青：順伝播の値</tspan>　<tspan style="fill:#C2570C">橙：逆伝播で求めた勾配</tspan></text>
+        </svg>
+        </div>
+        <figcaption>図 2　計算グラフ。上から下へ値を計算し（順伝播、青の数）、下から上へ勾配を求める（逆伝播、橙の数）。丸の横の文は、その演算が勾配をどう配るか。</figcaption>
+      </figure>
+      <p>順伝播で \(u = 6\)、\(z = 7\)、\(e = 2\)、\(L = 4\) と計算したあと、出口の \(\partial L/\partial L = 1\) から上へ戻る。</p>
+      \[
+      \begin{aligned}
+      \frac{\partial L}{\partial e} &amp;= 2e = 4\\
+      \frac{\partial L}{\partial z} &amp;= \frac{\partial L}{\partial e}\cdot 1 = 4\\
+      \frac{\partial L}{\partial y} &amp;= \frac{\partial L}{\partial e}\cdot(-1) = -4\\
+      \frac{\partial L}{\partial u} &amp;= \frac{\partial L}{\partial z}\cdot 1 = 4\\
+      \frac{\partial L}{\partial b} &amp;= \frac{\partial L}{\partial z}\cdot 1 = 4\\
+      \frac{\partial L}{\partial w} &amp;= \frac{\partial L}{\partial u}\cdot x = 12\\
+      \frac{\partial L}{\partial x} &amp;= \frac{\partial L}{\partial u}\cdot w = 8
+      \end{aligned}
+      \]
+      <p>どの行も、「1 つ下の勾配」×「その演算の、入力についての微分」になっている。演算ごとの微分は、次の表のように決まった形である。</p>
+      <div class="tw">
+        <table class="stack">
+          <thead><tr><th>演算</th><th>入力についての微分</th><th>勾配の配り方</th></tr></thead>
+          <tbody>
+            <tr><td>\(u = a + c\)</td><td data-l="微分">\(\partial u/\partial a = 1,\ \partial u/\partial c = 1\)</td><td data-l="配り方">そのまま両方へ</td></tr>
+            <tr><td>\(u = a\,c\)</td><td data-l="微分">\(\partial u/\partial a = c,\ \partial u/\partial c = a\)</td><td data-l="配り方">相手の値を掛けて配る</td></tr>
+            <tr><td>\(u = a^2\)</td><td data-l="微分">\(2a\)</td><td data-l="配り方">\(2a\) を掛ける</td></tr>
+            <tr><td>\(u = \sigma(a)\)</td><td data-l="微分">\(\sigma'(a)\)</td><td data-l="配り方">活性化関数の微分を掛ける（3.3 節の表）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>演習で数値微分と比べると、\(\partial L/\partial w \approx 12.000000\)、\(\partial L/\partial x \approx 8.000000\)、\(\partial L/\partial b \approx 4.000000\) で一致した。</p>
+    </section>
+
+    <section id="branch">
+      <h2><span class="fl">4</span>枝分かれでは、勾配を足す</h2>
+      <p>同じ変数が 2 か所以上で使われると、勾配は、それぞれの道から来た分の和になる。連鎖律の \(\sum_j\) の部分である。\(f = xy + x\)（\(x = 3, y = -2\)）で確かめる。</p>
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 232" role="img" aria-labelledby="c34bt c34bd">
+          <title id="c34bt">同じ変数を 2 回使うと、勾配は足し合わせになる</title>
+          <desc id="c34bd">f = x y + x の計算グラフ。x = 3 は 2 本の道で使われる。1 本目は y = −2 と掛け算されて p = −6 になり、2 本目は直接、足し算に入る。足し算の結果が f = −3。f から戻る勾配は、足し算の道では 1、掛け算の道では y × 1 = −2 になり、x の勾配はその和の −1 になる。y の勾配は x × 1 = 3。</desc>
+          <defs>
+            <marker id="c34ba" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+          </defs>
+          <path d="M80 58L298 92" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ba)"/>
+          <path d="M70 76L158 136" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ba)"/>
+          <path d="M80 172L156 152" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ba)"/>
+          <path d="M188 144L224 144" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ba)"/>
+          <path d="M270 132L302 108" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ba)"/>
+          <path d="M330 98H354" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34ba)"/>
+          <circle cx="58" cy="58" r="22" fill="#F4F5F7" stroke="#C9D1D9" stroke-width="1.2"/>
+          <text class="h" x="58" y="63" text-anchor="middle">x</text>
+          <circle cx="58" cy="174" r="22" fill="#F4F5F7" stroke="#C9D1D9" stroke-width="1.2"/>
+          <text class="h" x="58" y="179" text-anchor="middle">y</text>
+          <circle cx="174" cy="144" r="14" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <text class="h" x="174" y="149" text-anchor="middle">×</text>
+          <rect x="226" y="126" width="48" height="36" rx="5" fill="#FFFFFF" stroke="#56626E" stroke-width="1.2"/>
+          <text class="h" x="250" y="149" text-anchor="middle">p</text>
+          <circle cx="316" cy="98" r="14" fill="#FFFFFF" stroke="#56626E" stroke-width="1.3"/>
+          <text class="h" x="316" y="103" text-anchor="middle">+</text>
+          <text class="h" x="372" y="103" text-anchor="middle">f</text>
+          <text class="s" x="58" y="24" text-anchor="middle" style="fill:#3949AB">x = 3</text>
+          <text class="s" x="58" y="214" text-anchor="middle" style="fill:#3949AB">y = −2</text>
+          <text class="s" x="250" y="180" text-anchor="middle" style="fill:#3949AB">p = xy = −6</text>
+          <text class="s" x="372" y="80" text-anchor="middle" style="fill:#3949AB">f = −3</text>
+          <text class="s" x="190" y="66" style="fill:#C2570C">道 1：1</text>
+          <text class="s" x="120" y="96" style="fill:#C2570C">道 2：y × 1 = −2</text>
+          <text class="s" x="104" y="182" style="fill:#C2570C">x × 1 = 3</text>
+          <text class="h" x="200" y="214" style="fill:#C2570C">∂f/∂x = 1 + (−2) = −1</text>
+        </svg>
+        </div>
+        <figcaption>図 3　\(x\) は、掛け算を通る道と、直接足し算に入る道の 2 本で \(f\) に効く。\(x\) の勾配は、2 本の道の勾配の和になる。</figcaption>
+      </figure>
+      <p>直接の道からは 1、掛け算を通る道からは \(y \times 1 = -2\) が来て、\(\partial f/\partial x = 1 + (-2) = -1\) である。式で微分しても \(\partial f/\partial x = y + 1 = -1\) で一致する。実装では、勾配を代入（<code>=</code>）ではなく足し込み（<code>+=</code>）で書き、毎回の計算の前に 0 に戻す。ニューラルネットでは、1 つの層の出力が次の層のすべてのニューロンに使われるので、この「足す」がいつも起きている。</p>
+    </section>
+
+    <section id="order">
+      <h2><span class="fl">5</span>戻る順番：出口から入口へ</h2>
+      <p>ある変数の勾配を配ってよいのは、その変数を使っているすべての先から、勾配が届いたあとである。そこで、順伝播で変数ができた順番を記録しておき、その逆の順に勾配を配る。グラフの言葉では、「材料が先に来る並び」（トポロジカル順）を作り、逆からたどる。</p>
+      <p>各演算の逆伝播は、その演算の順伝播と同じくらいの手間で済む（掛け算なら、掛け算 2 回）。だから、全体の手間も順伝播の数倍で済む。図 1 の「順伝播の 2〜3 倍」はこのことである。</p>
+    </section>
+
+    <section id="autograd">
+      <h2><span class="fl">6</span>自動微分を 50 行で書く</h2>
+      <p>ここまでの規則を、そのままプログラムにする。数 1 つを入れる箱 <code>Value</code> を作り、足し算や掛け算のたびに「何から作られたか」と「勾配の配り方」を覚えさせる。最後に、出口の箱で <code>backward()</code> を呼ぶ。演習のコードから、骨組みだけを抜き出す。</p>
+<pre><code>class Value:
+    def __init__(self, data, parents=(), op=""):
+        self.data, self.grad = float(data), 0.0
+        self.parents, self.op = parents, op
+        self._back = lambda: None        # 自分の勾配を、材料へ配る関数
+
+    def __add__(self, other):
+        out = Value(self.data + other.data, (self, other), "+")
+        def back():                      # 足し算: 勾配をそのまま両方へ
+            self.grad += out.grad
+            other.grad += out.grad
+        out._back = back
+        return out
+
+    def __mul__(self, other):
+        out = Value(self.data * other.data, (self, other), "×")
+        def back():                      # 掛け算: 相手の値を掛けて配る
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._back = back
+        return out
+
+    def backward(self):
+        order = topological_order(self)  # 材料が先に来る並び
+        self.grad = 1.0
+        for v in reversed(order):        # 出口から入口へ
+            v._back()</code></pre>
+      <p>演習の <code>ch03_4_autograd.py</code> には、これに累乗、tanh、exp、log、ReLU と、トポロジカル順を作る部分を足した、全体で 50 行ほどのものが入っている。これで 2 → 4 → 1 のネットを組み、XOR を学習させた。</p>
+      <ul>
+        <li><strong>勾配の確認。</strong>重み 17 個の勾配は、数値微分と最大 \(9.8 \times 10^{-11}\)、次の節の行列の式と最大 \(5.6 \times 10^{-17}\) の差で一致した。</li>
+        <li><strong>グラフの大きさ。</strong>4 点ぶんの損失を 1 回計算すると、計算グラフの節点は 245 個になる。</li>
+        <li><strong>学習。</strong>初期値の乱数 1 では、損失は \(0.671 \to 0.123\)（100 歩）\(\to 0.0024\)（2000 歩）と下がり、出力の確率は \((0.00, 0.997, 0.997, 0.004)\) になった。乱数 0 では、損失が \(0.3487\) で止まり、確率は \((0.002, 0.499, 0.999, 0.501)\) のままだった。2 点を五分五分と答える状態で、損失は \(2\log 2 / 4 \approx 0.347\) にほぼ等しい。3.3 節で、隠れ層 4 個のネットが 100 回中 1 回だけ失敗した、その 1 回である。</li>
+      </ul>
+      <figure class="fig">
+        <div class="cv">
+          <img src="figures/ch03_4_xor.png" width="444" height="197" alt="左右 2 つの図。左は損失（交差エントロピー）の変化で、縦軸は対数。0 歩で約 0.67、100 歩までに急に下がり、2000 歩で約 0.002 になる。右は、入力の平面での出力の確率の色分けで、濃い青が 1、白が 0。左上と右下の白い四角（XOR = 1）は濃い青の帯の中に、左下と右上の橙の丸（XOR = 0）は白い帯の中にあり、確率 0.5 の境目の曲線が 2 本、斜めに走っている。">
+        </div>
+        <figcaption>図 4　自分で書いた自動微分で、XOR を学習させた結果（初期値の乱数 1）。左は損失、右は出力の確率（線は 0.5）。境目が曲がっていて、直線 1 本では作れない形になっている。</figcaption>
+      </figure>
+      <div class="call">
+        <p><strong>実際には書かなくてよい。</strong>PyTorch や JAX は、ここで書いた <code>Value</code> と同じことを、数 1 つではなく行列や多次元の配列を単位にして行う（自動微分）。損失を計算して <code>loss.backward()</code> と書けば、全部の重みの <code>.grad</code> に勾配が入る。中で起きていることは、図 2 と同じである。</p>
+      </div>
+    </section>
+
+    <section id="matrix">
+      <h2><span class="fl">7</span>行列の層の式</h2>
+      <p>数 1 つずつでは遅いので、実際のネットでは行列の単位で逆伝播を書く。演習のコードに合わせて、データ \(N\) 個を行に並べた行列で書く。層の入力を \(X\)（\(N \times n\)）、重みを \(W\)（\(n \times m\)）、バイアスを \(b\)（長さ \(m\)）とし、</p>
+      \[
+      A = X W + b
+      \]
+      <p>とする（\(b\) は各行に足す）。後ろから \(G = \partial L/\partial A\)（\(N \times m\)）が届いたとき、次の 3 つが成り立つ。</p>
+      \[
+      \begin{aligned}
+      \frac{\partial L}{\partial W} &amp;= X^\top G\\
+      \frac{\partial L}{\partial b} &amp;= \sum_{\text{行}} G\\
+      \frac{\partial L}{\partial X} &amp;= G\, W^\top
+      \end{aligned}
+      \]
+      <p><strong>確かめ。</strong>成分で書くと \(A_{ij} = \sum_k X_{ik} W_{kj} + b_j\) である。\(W_{kj}\) は、\(j\) 列目の \(A_{1j}, \dots, A_{Nj}\) のすべてに効くので、枝分かれの和を取って</p>
+      \[
+      \begin{aligned}
+      \frac{\partial L}{\partial W_{kj}} &amp;= \sum_{i=1}^{N} \frac{\partial L}{\partial A_{ij}}\,\frac{\partial A_{ij}}{\partial W_{kj}}\\
+      &amp;= \sum_{i} G_{ij}\, X_{ik} = (X^\top G)_{kj}
+      \end{aligned}
+      \]
+      <p>となる。\(b\) と \(X\) も同じように確かめられる。大きさも合っている：\(X^\top G\) は \((n \times N)(N \times m) = n \times m\) で \(W\) と同じ、\(G W^\top\) は \((N \times m)(m \times n) = N \times n\) で \(X\) と同じである。演習では、この式と、<code>Value</code> で 1 要素ずつ計算した勾配の差が、最大 \(4.4 \times 10^{-16}\) だった。</p>
+      <p>活性化関数 \(H = \sigma(A)\) は成分ごとの計算なので、勾配も成分ごとに微分を掛ける（\(\odot\) は成分ごとの積）。</p>
+      \[
+      \frac{\partial L}{\partial A} = \frac{\partial L}{\partial H} \odot \sigma'(A)
+      \]
+      <figure class="fig">
+        <div class="cv">
+        <svg viewBox="0 0 400 330" role="img" aria-labelledby="c34lt c34ld">
+          <title id="c34lt">1 つの層の順伝播と逆伝播</title>
+          <desc id="c34ld">左の列が順伝播で、上から下へ進む。入力 X（N 行 n 列）に W を掛けて b を足し A（N 行 m 列）、A に活性化関数 σ を通して H になる。右の列が逆伝播で、下から上へ進む。後ろの層から ∂L/∂H が来て、σ′(A) と成分ごとに掛けて G = ∂L/∂A になる。G から、∂L/∂W = X⊤G（n 行 m 列）、∂L/∂b = G の列ごとの和（長さ m）、∂L/∂X = G W⊤（N 行 n 列）が求まり、最後のものが前の層へ渡される。順伝播で取っておいた X と A を、逆伝播で使う（破線）。</desc>
+          <defs>
+            <marker id="c34la" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#18222D"/></marker>
+            <marker id="c34lb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#C2570C"/></marker>
+          </defs>
+          <text class="h" x="95" y="20" text-anchor="middle" style="fill:#3949AB">順伝播（下へ）</text>
+          <text class="h" x="300" y="20" text-anchor="middle" style="fill:#C2570C">逆伝播（上へ）</text>
+          <rect x="20" y="34" width="150" height="40" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="32" y="52">X</text>
+          <text class="s" x="32" y="67">入力（N × n）</text>
+          <path d="M95 74V100" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34la)"/>
+          <text class="s" x="104" y="92">× W + b</text>
+          <rect x="20" y="102" width="150" height="40" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="32" y="120">A = XW + b</text>
+          <text class="s" x="32" y="135">（N × m）</text>
+          <path d="M95 142V168" stroke="#18222D" stroke-width="1.3" marker-end="url(#c34la)"/>
+          <text class="s" x="104" y="160">σ を通す</text>
+          <rect x="20" y="170" width="150" height="40" rx="5" fill="#E8EAF6" stroke="#3949AB" stroke-width="1.2"/>
+          <text class="h" x="32" y="188">H = σ(A)</text>
+          <text class="s" x="32" y="203">次の層へ</text>
+          <rect x="210" y="270" width="180" height="40" rx="5" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.2"/>
+          <text class="h" x="222" y="288">∂L/∂H</text>
+          <text class="s" x="222" y="303">次の層から届く</text>
+          <path d="M300 270V244" stroke="#C2570C" stroke-width="1.3" marker-end="url(#c34lb)"/>
+          <text class="s" x="308" y="262">⊙ σ′(A)</text>
+          <rect x="210" y="202" width="180" height="40" rx="5" fill="#FCEBDD" stroke="#C2570C" stroke-width="1.2"/>
+          <text class="h" x="222" y="220">G = ∂L/∂A</text>
+          <text class="s" x="222" y="235">（N × m）</text>
+          <path d="M300 202V176" stroke="#C2570C" stroke-width="1.3" marker-end="url(#c34lb)"/>
+          <rect x="210" y="34" width="180" height="140" rx="5" fill="#FFFFFF" stroke="#C2570C" stroke-width="1.2"/>
+          <text class="h" x="222" y="56">∂L/∂W = X<tspan dy="-5" font-size="9">⊤</tspan><tspan dy="5">G</tspan></text>
+          <text class="s" x="222" y="72">（n × m）</text>
+          <text class="h" x="222" y="100">∂L/∂b = G の列の和</text>
+          <text class="s" x="222" y="116">（長さ m）</text>
+          <text class="h" x="222" y="144">∂L/∂X = G W<tspan dy="-5" font-size="9">⊤</tspan></text>
+          <text class="s" x="222" y="160">（N × n）前の層へ</text>
+          <path d="M170 54C188 54 192 54 208 54" stroke="#3949AB" stroke-width="1.1" stroke-dasharray="4 3" fill="none" marker-end="url(#c34la)"/>
+          <path d="M170 122C196 122 196 250 296 252" stroke="#3949AB" stroke-width="1.1" stroke-dasharray="4 3" fill="none"/>
+          <text class="s" x="20" y="240">破線：順伝播で取っておいた</text>
+          <text class="s" x="20" y="256">値を、逆伝播で使う</text>
+        </svg>
+        </div>
+        <figcaption>図 5　1 つの層の順伝播（左、下へ）と逆伝播（右、上へ）。逆伝播では、順伝播で取っておいた \(X\) と \(A\) を使う。</figcaption>
+      </figure>
+      <h3>ネット全体の逆伝播</h3>
+      <p>出口では、2 章で求めたとおり、softmax と交差エントロピーを合わせた勾配が「予測 − 正解」になる。\(P\) を予測した確率、\(Y\) を正解を 1 にした並び（one-hot）を、行に並べたものとして、</p>
+      \[
+      G_{\text{出口}} = \frac{\partial L}{\partial Z} = \frac{1}{N}\big(P - Y\big)
+      \]
+      <p>である（\(L\) はデータ \(N\) 個の平均）。あとは図 5 を出口から入口へ繰り返す。層 \(l\) の 1 次式の結果を \(A_l\)、出力を \(H_l\)、\(G_l = \partial L/\partial A_l\) とすると、</p>
+      \[
+      \begin{aligned}
+      \frac{\partial L}{\partial W_l} &amp;= H_{l-1}^\top G_l,\qquad \frac{\partial L}{\partial b_l} = \sum_{\text{行}} G_l\\
+      G_{l-1} &amp;= \big(G_l\, W_l^\top\big) \odot \sigma'(A_{l-1})
+      \end{aligned}
+      \]
+      <p>ReLU なら \(\sigma'(A) = \mathbb 1[A &gt; 0]\) である。演習 <code>ch03_mlp.py</code> は、この式をそのまま書いた 2 → 64 → 64 → 2 のネットで、逆伝播の勾配と数値微分の相対誤差は、30 か所で最大 \(2.6 \times 10^{-7}\)、中央値 \(1.8 \times 10^{-9}\) だった。</p>
+    </section>
+
+    <section id="memory">
+      <h2><span class="fl">8</span>順伝播で取っておくもの</h2>
+      <p>図 5 のとおり、逆伝播には順伝播の途中の値（各層の入力 \(H_{l-1}\) と \(A_l\)）が要る。そのため、学習のときは、層の数 × データの数 × 幅に比例するメモリを使う。学習しない（推論だけの）ときは途中の値を捨ててよいので、メモリはずっと少なくて済む。大きなモデルの学習で GPU のメモリが足りなくなるのは、重みそのものより、この途中の値や、Adam が重みごとに持つ値（3.5 節）のためであることも多い（<a href="08-vlm.html">8 章</a>）。</p>
+    </section>
+
+    <section id="ex">
+      <h2><span class="fl">9</span>演習</h2>
+      <div class="ex">
+        <p class="ex-h"><span>演習 3.4</span>自動微分を書く</p>
+        <p><code>Value</code> クラス、計算グラフの例、枝分かれ、XOR の学習、行列の式の確認、数値微分との時間の比較。30 秒ほどで終わる。</p>
+        <pre><code>python3 vla_math/ch03_4_autograd.py</code></pre>
+        <p>出力の一部：</p>
+<pre class="out">(2) 1 個のニューロンと 2 乗誤差: L = (w x + b − y)²
+    w          値   2.0   ∂L/∂(この節点) =  12.0
+    x          値   3.0   ∂L/∂(この節点) =   8.0
+    u = w x    値   6.0   ∂L/∂(この節点) =   4.0
+    L = e²     値   4.0   ∂L/∂(この節点) =   1.0
+
+(3) 同じ変数を 2 回使う: f = x y + x（x = 3, y = −2）
+    f = -3, ∂f/∂x = -1（= y + 1. 2 本の道の勾配の和）, ∂f/∂y = 3
+
+(6) 数値微分と逆伝播の時間（2 → H → H → 2 の ReLU ネット、渦巻き 400 点、各 3 回の最短）
+    H = 64: パラメータ  4482 個. 順伝播 1 回  0.176 ms、逆伝播込み  0.484 ms（順伝播の 2.7 倍）、数値微分   1.824 s（逆伝播の 3,768 倍）</pre>
+        <p>見るところ：</p>
+        <ul>
+          <li>(2) 図 2 の橙の数と一致する。</li>
+          <li>(6) 時間は計算機によって変わるが、数値微分が重みの数とともに増え、逆伝播が順伝播の数倍にとどまることは変わらない。</li>
+        </ul>
+        <p>変えてみる：<code>Value</code> に <code>sigmoid</code> を足し、出力の \(\sigma\) を <code>exp</code> と割り算で組み立てた場合と勾配が一致することを確かめる。<code>backward()</code> の前に勾配を 0 に戻すのを忘れると、何が起きるかを見る。</p>
+      </div>
+      <div class="ex">
+        <p class="ex-h"><span>演習 3.4 その 2</span>行列で書いた逆伝播</p>
+        <p>重みは numpy の配列で持ち、順伝播、逆伝播、Adam を手で書いてある（<code>MLP</code> クラス、60 行ほど）。10 秒ほどで終わる。</p>
+        <pre><code>python3 vla_math/ch03_mlp.py</code></pre>
+        <p>出力の一部：</p>
+<pre class="out">(1) 線形のモデル（入力 2 → 出力 2）
+    重み 6 個、学習後の交差エントロピー 0.604、検証データの正解率 63.7%
+
+(2) 隠れ層 2 つのニューラルネット（2 → 64 → 64 → 2、ReLU）
+       0 回目: 交差エントロピー 0.956、検証データの正解率 50.0%
+     200 回目: 交差エントロピー 0.003、検証データの正解率 99.7%
+    重みの数 4482 個
+
+(3) 勾配の確認（逆伝播 と 数値微分）
+    30 か所で比べた相対誤差: 最大 2.6e-07、中央値 1.8e-09</pre>
+        <p>見るところ：(3) で、ReLU の折れ目をまたぐと数値微分のほうがずれるので、差分の幅を小さく取っている。</p>
+        <p>変えてみる：活性化関数を <code>np.tanh</code> にする（逆伝播の微分も \(1 - h^2\) に変える）。</p>
+      </div>
+    </section>
+
+    <section id="sum">
+      <h2><span class="fl">10</span>まとめ</h2>
+      <ol class="verdict">
+        <li><strong>逆伝播は、連鎖律を出口から順に使って、全部の重みの勾配を 1 往復で求める。</strong>手間は順伝播の数倍で、重みの数によらない。数値微分は重みの数だけ順伝播が要る。</li>
+        <li><strong>演算ごとの勾配の配り方は決まっている。</strong>足し算はそのまま、掛け算は相手の値を掛けて、活性化関数はその微分を掛けて配る。枝分かれした変数には、各道からの勾配を足す。</li>
+        <li><strong>行列の層 \(A = XW + b\) では、\(\partial L/\partial W = X^\top G\)、\(\partial L/\partial X = G W^\top\) である。</strong>出口の勾配は、2 章の「予測 − 正解」である。</li>
+      </ol>
+    </section>
+
+    <section id="check">
+      <h2><span class="fl">11</span>確かめる問題</h2>
+      <ol class="q">
+        <li>図 2 で、\(w = 1\)、\(x = 2\)、\(b = 0\)、\(y = 1\) のときの、すべての節点の値と勾配を求めよ。</li>
+        <li>\(f = x^2 y + x\) の \(\partial f/\partial x\) を、計算グラフの道ごとの和として求め、ふつうに微分した結果と比べよ。</li>
+        <li>層 \(A = XW + b\) について、\(\partial L/\partial b = \sum_{\text{行}} G\) と \(\partial L/\partial X = G W^\top\) を、成分で書いて確かめよ。</li>
+        <li>重みが \(P\) 個のとき、数値微分で勾配を求めると順伝播が何回要るか。逆伝播ならどうか。</li>
+        <li>推論だけなら、順伝播の途中の値を捨ててよいのはなぜか。</li>
+      </ol>
+    </section>
+
+    <section id="read">
+      <h2><span class="fl">12</span>読むもの</h2>
+      <ul>
+        <li>Karpathy の動画講義「Neural Networks: Zero to Hero」の最初の回<a class="r" href="#r-karpathy">[2]</a>。この節の <code>Value</code> と同じ考え方の自動微分を、数十行で作りながら説明する。英語。</li>
+        <li>斎藤『ゼロから作る Deep Learning』5 章<a class="r" href="#r-zero1">[3]</a>。逆伝播を計算グラフで説明し、numpy で実装する。</li>
+        <li>Prince『Understanding Deep Learning』7 章（勾配と初期化）<a class="r" href="#r-prince">[4]</a>。行列の形の逆伝播を、図とともに導く。</li>
+        <li>Griewank「Who invented the reverse mode of differentiation?」<a class="r" href="#r-griewank">[1]</a>。逆向きの自動微分の歴史。</li>
+      </ul>
+    </section>
+
+    <section id="refs">
+      <h2><span class="fl">※</span>参考文献</h2>
+      <ol class="refs">
+        <li id="r-griewank">A. Griewank, "Who invented the reverse mode of differentiation?," Documenta Mathematica, Extra Volume: Optimization Stories, 389–400, 2012. <a href="https://www.emis.de/journals/DMJDMV/vol-ismp/52_griewank-andreas-b.html">https://www.emis.de/journals/DMJDMV/vol-ismp/52_griewank-andreas-b.html</a></li>
+        <li id="r-karpathy">A. Karpathy, "Neural Networks: Zero to Hero," 動画の講義. <a href="https://karpathy.ai/zero-to-hero.html">https://karpathy.ai/zero-to-hero.html</a></li>
+        <li id="r-zero1">斎藤康毅『ゼロから作る Deep Learning　Python で学ぶディープラーニングの理論と実装』オライリー・ジャパン, 2016.</li>
+        <li id="r-prince">S. J. D. Prince, "Understanding Deep Learning," MIT Press, 2023. 本の全文が公開されている。<a href="https://udlbook.github.io/udlbook/">https://udlbook.github.io/udlbook/</a></li>
+      </ol>
+    </section>
+    <nav class="chnav" aria-label="章の移動">
+    <a class="prev" href="03-3-layers.html"><small>前の節</small>3.3　層を重ねる</a>
+    <a class="next" href="03-5-training.html"><small>次の節</small>3.5　深いネットを学習させる</a>
+    <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
+    </nav>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>作成日 2026-11-14、更新 2026-11-15。<a href="https://github.com/mamoru1126/humanoid_study">mamoru1126/humanoid_study</a>。数式の表示に KaTeX（MIT ライセンス）を使っている。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function renderMath(){
+    if(!window.renderMathInElement) return;
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false,
+      strict: "ignore"
+    });
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderMath);
+  else renderMath();
+})();
+</script>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Object.keys(map).map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  var current = null;
+  function set(id){
+    if(current === id) return;
+    current = id;
+    links.forEach(function(a){ a.removeAttribute('aria-current'); });
+    if(map[id]) map[id].setAttribute('aria-current','true');
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) set(e.target.id); });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  secs.forEach(function(s){ io.observe(s); });
+  set(secs[0].id);
+})();
+</script>
+</body>
+</html>

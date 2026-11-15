@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 3 部　VLM</p>
     <h1><span class="chno">8</span>VLM の組み立て<small>画像を読める言語モデル</small></h1>
     <p class="lead">VLM（Vision-Language Model）は、画像を読んで、言葉で答える言語モデルである。中身は、6 章の画像のトークン化、7 章の画像エンコーダ、4〜5 章の言語モデルをつないだものにすぎない。この章では、つなぎ方、学習の段階、注意のマスク、推論の流れ、少ない重みで学習し直す方法（LoRA）を順に見る。VLA は、この VLM に行動を出させたものなので、この章の構成がそのまま 11 章の土台になる。</p>
+    
   </div>
 </header>
 

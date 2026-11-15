@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 4 部　ロボットの行動と VLA</p>
     <h1><span class="chno">11</span>VLA の組み立て<small>VLM に行動を出させる</small></h1>
     <p class="lead">VLA（Vision-Language-Action モデル）は、8 章の VLM に行動を出させたものである。画像と指示の理解は VLM が受け持ち、行動の出し方は 9〜10 章の方法を使う。この章では、行動の出し方の 3 つの流派（トークン、連続値、その両方）を、損失と推論の違いとして整理する。ここまでの 10 章の部品が、すべてこの章で組み上がる。</p>
+    
   </div>
 </header>
 

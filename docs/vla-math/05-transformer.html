@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 2 部　言葉と Transformer</p>
     <h1><span class="chno">5</span>注意機構と Transformer<small>列の中で情報を混ぜる</small></h1>
     <p class="lead">4 章のバイグラムは、1 つ前のトークンしか見られなかった。Transformer は、列の中のすべてのトークンを見て、次の予測に使う。その中心が注意機構（attention）である。VLM の画像エンコーダも、言語モデルも、VLA の行動を出す部分も、すべて Transformer でできている。この章では、注意機構の式と、それを積み上げた Transformer のブロックを押さえる。</p>
+    
   </div>
 </header>
 
@@ -278,7 +287,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <section id="block">
       <h2><span class="fl">3</span>Transformer のブロック</h2>
       <p><strong>複数のヘッド。</strong>注意機構を、次元を \(h\) 個に分けて並列に \(h\) 回行い、結果をつないで行列 \(W_O\) を掛ける（multi-head attention）。ヘッドごとに違う関係（色と物、物と動詞など）を見られる。</p>
-      <p><strong>ブロック。</strong>注意機構で列の中の情報を混ぜたあと、トークンごとに MLP（3 章）を通す。どちらも、3 章の LayerNorm と残差接続でつなぐ。</p>
+      <p><strong>ブロック。</strong>注意機構で列の中の情報を混ぜたあと、トークンごとに MLP（<a href="03-3-layers.html">3.3 節</a>）を通す。どちらも、<a href="03-5-training.html">3.5 節</a>の LayerNorm と残差接続でつなぐ。</p>
       \[
       \begin{aligned}
       X &amp;\leftarrow X + \mathrm{MHA}\big(\mathrm{LN}(X)\big)\\

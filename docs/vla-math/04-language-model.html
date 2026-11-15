@@ -196,6 +196,14 @@ ol.q li{margin:.6em 0}
 .chnav .up{grid-column:1/-1;text-align:center}
 table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 .partrow td{background:var(--faint);font-weight:700;font-size:.86rem;color:var(--steel)}
+.grouprow td{font-weight:700}
+.grouprow small{font-weight:400}
+.subnav ol{display:flex;flex-wrap:wrap;gap:6px;margin:1.1em 0 0;padding:0;list-style:none}
+.subnav a{display:block;padding:.28em .75em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font-size:.8rem;line-height:1.5;text-decoration:none}
+.subnav a:hover{border-color:var(--steel)}
+.subnav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fig svg text.m{font-family:var(--mono);font-size:12px}
+.eq-note{font-size:.86rem;color:var(--steel)}
 </style>
 </head>
 <body>
@@ -205,6 +213,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
     <p class="kicker">第 2 部　言葉と Transformer</p>
     <h1><span class="chno">4</span>言葉を数にする<small>トークンと言語モデル</small></h1>
     <p class="lead">VLM も VLA も、土台は言語モデルである。言語モデルは、文を「トークン」という部品の列にし、「次のトークンの確率分布」を出す。この章では、文字列をトークンにする方法、トークンを数のベクトルにする方法、そして次のトークンの予測が 2 章の最尤推定そのものであることを、いちばん小さな言語モデルで確かめる。</p>
+    
   </div>
 </header>
 
@@ -392,7 +401,7 @@ table.chlist td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums
       </ol>
     </section>
     <nav class="chnav" aria-label="章の移動">
-    <a class="prev" href="03-neural-net.html"><small>前の章</small>3　ニューラルネットと逆伝播</a>
+    <a class="prev" href="03-5-training.html"><small>前の章</small>3.5　深いネットを学習させる</a>
     <a class="next" href="05-transformer.html"><small>次の章</small>5　注意機構と Transformer</a>
     <a class="up" href="./"><small>全体の地図</small>ロードマップへ戻る</a>
     </nav>

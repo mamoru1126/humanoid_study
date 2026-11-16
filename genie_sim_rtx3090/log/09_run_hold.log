@@ -2,9 +2,9 @@
 == 動かない方策のサーバを起動（127.0.0.1:8999）
 OK:   起動しました.
 
-== 評価の実行（タスク: g2op_if_pick_block_color、シーン: 0、画面: なし）
+== 評価の実行（タスク: g2op_if_pick_block_color、シーン: 0、画面: あり）
 コンテナの中で実行するコマンド:
-  set -o pipefail; geniesim benchmark run g2op_if_pick_block_color --infer-host=127.0.0.1:8999 --benchmark.instance_ids=0 --benchmark.num_episode=1 --benchmark.record=true --benchmark.output_dir=/workspace/output/hs_runs/hold_20261116_033955 --app.headless=true 2>&1 | tee /workspace/output/hs_runs/hold_20261116_033955/run.log
+  set -o pipefail; geniesim benchmark run g2op_if_pick_block_color --infer-host=127.0.0.1:8999 --benchmark.instance_ids=0 --benchmark.num_episode=1 --benchmark.record=true --benchmark.output_dir=/workspace/output/hs_runs/hold_20261116_034338 --app.headless=false 2>&1 | tee /workspace/output/hs_runs/hold_20261116_034338/run.log
 指示ごとに1エピソードを行います（既定のタスクのシーン 0 は指示が 5 つ）. 動かない方策では、どのエピソードも時間切れで終わります.
 
 🧪 geniesim benchmark run
@@ -12,47 +12,47 @@ OK:   起動しました.
    Inference: 127.0.0.1:8999
    Python:    /usr/bin/python3.12
 
-   $ /usr/bin/python3.12 /workspace/source/geniesim_benchmark/src/geniesim_benchmark/app/app.py --config /workspace/source/geniesim_benchmark/src/geniesim_benchmark/config/g2op_if_pick_block_color.yaml --benchmark.infer_host=127.0.0.1:8999 --benchmark.instance_ids=0 --benchmark.num_episode=1 --benchmark.record=true --app.headless=true
+   $ /usr/bin/python3.12 /workspace/source/geniesim_benchmark/src/geniesim_benchmark/app/app.py --config /workspace/source/geniesim_benchmark/src/geniesim_benchmark/config/g2op_if_pick_block_color.yaml --benchmark.infer_host=127.0.0.1:8999 --benchmark.instance_ids=0 --benchmark.num_episode=1 --benchmark.record=true --app.headless=false
 
 Initializing GenieSim Asset Lib at /geniesim_assets
 Initialized GenieSim Asset Lib, Found 66 items, hash: 6c04453adee2ef93caa10e066ad9a00058d8f7220d774913fdec5a0d7073c315
-2026-11-16 03:39:57,003,003 INFO     [logger.py:79] using env SIM_REPO_ROOT=/workspace
-2026-11-16 03:39:57,003,003 INFO     [logger.py:79] using env SIM_ASSETS=/geniesim_assets
-Starting kit application with the following args:  ['/isaac-sim/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py', '/isaac-sim/apps/isaacsim.exp.base.python.kit', '--/app/tokens/exe-path=/isaac-sim/kit', '--/persistent/app/viewport/displayOptions=3094', '--/rtx/materialDb/syncLoads=True', '--/rtx/hydra/materialSyncLoads=True', '--/omni/kit/plugin/syncUsdLoads=True', '--/app/renderer/resolution/width=1280', '--/app/renderer/resolution/height=720', '--/app/window/width=1440', '--/app/window/height=900', '--/renderer/multiGpu/enabled=True', '--/app/fastShutdown=True', '--/app/installSignalHandlers=0', '--ext-folder', '/isaac-sim/exts', '--ext-folder', '/isaac-sim/apps', '--/app/tokens/data=/workspace/.kit/data', '--/app/tokens/cache=/workspace/.kit/cache', '--/app/tokens/logs=/workspace/.kit/logs', '--/app/tokens/documents=/workspace/.kit/documents', '--/app/tokens/omni_data=/workspace/.kit/data', '--/app/tokens/omni_cache=/workspace/.kit/cache', '--/app/tokens/omni_logs=/workspace/.kit/logs', '--/app/tokens/omni_documents=/workspace/Documents', '--/app/tokens/shared_documents=/workspace/Documents/Kit/shared', '--/physics/cudaDevice=0', '--/plugins/carb.tasking.plugin/threadCount=16', '--/plugins/omni.tbb.globalcontrol/maxThreadCount=16', '--portable', '--no-window', '--/app/window/hideUi=1']
-Passing the following args to the base kit application:  ['--config', '/workspace/source/geniesim_benchmark/src/geniesim_benchmark/config/g2op_if_pick_block_color.yaml', '--benchmark.infer_host=127.0.0.1:8999', '--benchmark.instance_ids=0', '--benchmark.num_episode=1', '--benchmark.record=true', '--app.headless=true']
+2026-11-16 03:43:40,174,174 INFO     [logger.py:79] using env SIM_REPO_ROOT=/workspace
+2026-11-16 03:43:40,174,174 INFO     [logger.py:79] using env SIM_ASSETS=/geniesim_assets
+Starting kit application with the following args:  ['/isaac-sim/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py', '/isaac-sim/apps/isaacsim.exp.base.python.kit', '--/app/tokens/exe-path=/isaac-sim/kit', '--/persistent/app/viewport/displayOptions=3094', '--/rtx/materialDb/syncLoads=True', '--/rtx/hydra/materialSyncLoads=True', '--/omni/kit/plugin/syncUsdLoads=True', '--/app/renderer/resolution/width=1280', '--/app/renderer/resolution/height=720', '--/app/window/width=1440', '--/app/window/height=900', '--/renderer/multiGpu/enabled=True', '--/app/fastShutdown=True', '--/app/installSignalHandlers=0', '--ext-folder', '/isaac-sim/exts', '--ext-folder', '/isaac-sim/apps', '--/app/tokens/data=/workspace/.kit/data', '--/app/tokens/cache=/workspace/.kit/cache', '--/app/tokens/logs=/workspace/.kit/logs', '--/app/tokens/documents=/workspace/.kit/documents', '--/app/tokens/omni_data=/workspace/.kit/data', '--/app/tokens/omni_cache=/workspace/.kit/cache', '--/app/tokens/omni_logs=/workspace/.kit/logs', '--/app/tokens/omni_documents=/workspace/Documents', '--/app/tokens/shared_documents=/workspace/Documents/Kit/shared', '--/physics/cudaDevice=0', '--/plugins/carb.tasking.plugin/threadCount=16', '--/plugins/omni.tbb.globalcontrol/maxThreadCount=16', '--portable']
+Passing the following args to the base kit application:  ['--config', '/workspace/source/geniesim_benchmark/src/geniesim_benchmark/config/g2op_if_pick_block_color.yaml', '--benchmark.infer_host=127.0.0.1:8999', '--benchmark.instance_ids=0', '--benchmark.num_episode=1', '--benchmark.record=true', '--app.headless=false']
 WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-E0000 00:00:1794800397.446453     671 descriptor_database.cc:633] File already exists in database: grpc/health/v1/health.proto
-W0000 00:00:1794800397.446468     671 message.cc:301] Protobuf GeneratedMessageFactory: File is already registered: grpc/health/v1/health.proto
-2026-11-16T03:39:57Z [Info] [carb] Logging to file: /workspace/.kit/logs/kit_20261116_033957.log
-2026-11-16T03:39:57Z [4ms] [Warning] [omni.ext.plugin] [ext: source] Extensions config 'extension.toml' doesn't exist '/workspace/source' or '/workspace/source/config'
-2026-11-16T03:39:57Z [5ms] [Warning] [omni.ext.plugin] [ext: 3rdparty] Extensions config 'extension.toml' doesn't exist '/workspace/3rdparty' or '/workspace/3rdparty/config'
-2026-11-16T03:39:57Z [5ms] [Warning] [omni.ext.plugin] [ext: .github] Extensions config 'extension.toml' doesn't exist '/workspace/.github' or '/workspace/.github/config'
-2026-11-16T03:39:57Z [5ms] [Warning] [omni.ext.plugin] [ext: THIRD_PARTY_LICENSES] Extensions config 'extension.toml' doesn't exist '/workspace/THIRD_PARTY_LICENSES' or '/workspace/THIRD_PARTY_LICENSES/config'
-2026-11-16T03:39:57Z [6ms] [Warning] [omni.ext.plugin] [ext: .kit] Extensions config 'extension.toml' doesn't exist '/workspace/.kit' or '/workspace/.kit/config'
-2026-11-16T03:39:57Z [6ms] [Warning] [omni.ext.plugin] [ext: .agent] Extensions config 'extension.toml' doesn't exist '/workspace/.agent' or '/workspace/.agent/config'
-2026-11-16T03:39:57Z [6ms] [Warning] [omni.ext.plugin] [ext: docs] Extensions config 'extension.toml' doesn't exist '/workspace/docs' or '/workspace/docs/config'
-2026-11-16T03:39:57Z [6ms] [Warning] [omni.ext.plugin] [ext: output] Extensions config 'extension.toml' doesn't exist '/workspace/output' or '/workspace/output/config'
-2026-11-16T03:39:57Z [6ms] [Warning] [omni.ext.plugin] [ext: scripts] Extensions config 'extension.toml' doesn't exist '/workspace/scripts' or '/workspace/scripts/config'
-2026-11-16T03:39:57Z [8ms] [Warning] [omni.ext.plugin] [ext: docker] Extensions config 'extension.toml' doesn't exist '/workspace/docker' or '/workspace/docker/config'
-2026-11-16T03:39:57Z [9ms] [Warning] [omni.ext.plugin] [ext: .vscode] Extensions config 'extension.toml' doesn't exist '/workspace/.vscode' or '/workspace/.vscode/config'
-2026-11-16T03:39:57Z [9ms] [Warning] [omni.ext.plugin] [ext: Documents] Extensions config 'extension.toml' doesn't exist '/workspace/Documents' or '/workspace/Documents/config'
-2026-11-16T03:39:57Z [10ms] [Warning] [omni.ext.plugin] [ext: .git] Extensions config 'extension.toml' doesn't exist '/workspace/.git' or '/workspace/.git/config'
+E0000 00:00:1794800620.614258    1897 descriptor_database.cc:633] File already exists in database: grpc/health/v1/health.proto
+W0000 00:00:1794800620.614274    1897 message.cc:301] Protobuf GeneratedMessageFactory: File is already registered: grpc/health/v1/health.proto
+2026-11-16T03:43:40Z [Info] [carb] Logging to file: /workspace/.kit/logs/kit_20261116_034340.log
+2026-11-16T03:43:40Z [5ms] [Warning] [omni.ext.plugin] [ext: .vscode] Extensions config 'extension.toml' doesn't exist '/workspace/.vscode' or '/workspace/.vscode/config'
+2026-11-16T03:43:40Z [5ms] [Warning] [omni.ext.plugin] [ext: Documents] Extensions config 'extension.toml' doesn't exist '/workspace/Documents' or '/workspace/Documents/config'
+2026-11-16T03:43:40Z [5ms] [Warning] [omni.ext.plugin] [ext: output] Extensions config 'extension.toml' doesn't exist '/workspace/output' or '/workspace/output/config'
+2026-11-16T03:43:40Z [7ms] [Warning] [omni.ext.plugin] [ext: .github] Extensions config 'extension.toml' doesn't exist '/workspace/.github' or '/workspace/.github/config'
+2026-11-16T03:43:40Z [7ms] [Warning] [omni.ext.plugin] [ext: THIRD_PARTY_LICENSES] Extensions config 'extension.toml' doesn't exist '/workspace/THIRD_PARTY_LICENSES' or '/workspace/THIRD_PARTY_LICENSES/config'
+2026-11-16T03:43:40Z [7ms] [Warning] [omni.ext.plugin] [ext: .agent] Extensions config 'extension.toml' doesn't exist '/workspace/.agent' or '/workspace/.agent/config'
+2026-11-16T03:43:40Z [7ms] [Warning] [omni.ext.plugin] [ext: .kit] Extensions config 'extension.toml' doesn't exist '/workspace/.kit' or '/workspace/.kit/config'
+2026-11-16T03:43:40Z [8ms] [Warning] [omni.ext.plugin] [ext: scripts] Extensions config 'extension.toml' doesn't exist '/workspace/scripts' or '/workspace/scripts/config'
+2026-11-16T03:43:40Z [8ms] [Warning] [omni.ext.plugin] [ext: docker] Extensions config 'extension.toml' doesn't exist '/workspace/docker' or '/workspace/docker/config'
+2026-11-16T03:43:40Z [9ms] [Warning] [omni.ext.plugin] [ext: docs] Extensions config 'extension.toml' doesn't exist '/workspace/docs' or '/workspace/docs/config'
+2026-11-16T03:43:40Z [9ms] [Warning] [omni.ext.plugin] [ext: .git] Extensions config 'extension.toml' doesn't exist '/workspace/.git' or '/workspace/.git/config'
+2026-11-16T03:43:40Z [10ms] [Warning] [omni.ext.plugin] [ext: 3rdparty] Extensions config 'extension.toml' doesn't exist '/workspace/3rdparty' or '/workspace/3rdparty/config'
+2026-11-16T03:43:40Z [10ms] [Warning] [omni.ext.plugin] [ext: source] Extensions config 'extension.toml' doesn't exist '/workspace/source' or '/workspace/source/config'
 [0.053s] [ext: omni.assets.plugins-0.0.0] startup
-[0.053s] [ext: omni.blobkey-1.1.2] startup
+[0.054s] [ext: omni.blobkey-1.1.2] startup
 [0.054s] [ext: omni.kit.async_engine-0.0.5] startup
-[0.333s] [ext: omni.client.lib-1.1.1] startup
-[0.347s] [ext: omni.client-1.3.0] startup
-[0.349s] [ext: omni.protobuf.lib-1.0.1] startup
-[0.350s] [ext: omni.grpc.lib-1.0.1] startup
-[0.353s] [ext: omni.metrics.core-0.0.3] startup
-[0.353s] [ext: omni.datastore-0.0.0] startup
-[0.354s] [ext: omni.gpu_foundation.shadercache.vulkan-1.0.0] startup
-[0.356s] [ext: omni.hsscclient-1.1.4] startup
-[0.357s] [ext: omni.stats-1.0.1] startup
-[0.357s] [ext: omni.ujitso.default-1.0.0] startup
-[0.360s] [ext: omni.gpu_foundation-0.0.0] startup
-[0.538s] [ext: carb.windowing.plugins-1.0.1] startup
-[0.539s] [ext: omni.kit.renderer.init-1.0.1] startup
+[0.335s] [ext: omni.client.lib-1.1.1] startup
+[0.349s] [ext: omni.client-1.3.0] startup
+[0.351s] [ext: omni.protobuf.lib-1.0.1] startup
+[0.352s] [ext: omni.grpc.lib-1.0.1] startup
+[0.355s] [ext: omni.metrics.core-0.0.3] startup
+[0.355s] [ext: omni.datastore-0.0.0] startup
+[0.356s] [ext: omni.gpu_foundation.shadercache.vulkan-1.0.0] startup
+[0.358s] [ext: omni.hsscclient-1.1.4] startup
+[0.359s] [ext: omni.stats-1.0.1] startup
+[0.360s] [ext: omni.ujitso.default-1.0.0] startup
+[0.363s] [ext: omni.gpu_foundation-0.0.0] startup
+[0.545s] [ext: carb.windowing.plugins-1.0.1] startup
+[0.565s] [ext: omni.kit.renderer.init-1.0.1] startup
 
 |---------------------------------------------------------------------------------------------|
 | Driver Version: 595.99.02     | Graphics API: Vulkan
@@ -71,318 +71,315 @@ W0000 00:00:1794800397.446468     671 message.cc:301] Protobuf GeneratedMessageF
 | Bare Metal Cores: 16 | Bare Metal Logical Cores: 32
 | Available Cores:  24 
 |---------------------------------------------------------------------------------------------|
-| Total Memory (MB): 64084 | Free Memory: 57889
+| Total Memory (MB): 64084 | Free Memory: 57789
 | Total Page/Swap (MB): 2047 | Free Page/Swap: 0
 |---------------------------------------------------------------------------------------------|
-2026-11-16T03:39:58Z [1,156ms] [Warning] [omni.rtx] CPU performance profile is set to powersave. This profile sets the CPU to the lowest frequency reducing performance.
-2026-11-16T03:39:58Z [1,164ms] [Warning] [omni.rtx] IOMMU is enabled.
-[1.303s] [ext: omni.kit.pipapi-0.0.0] startup
-[1.306s] [ext: omni.kit.pip_archive-0.0.0] startup
-[1.306s] [ext: isaacsim.pip.newton-0.12.1] startup
-[1.307s] [ext: isaacsim.pip.nv-1.0.2] startup
-[1.307s] [ext: isaacsim.pip.onnx-1.0.1] startup
-[1.307s] [ext: omni.pip.compute-1.9.7] startup
-[1.308s] [ext: omni.isaac.core_archive-5.4.1] startup
-[1.309s] [ext: omni.kit.telemetry-0.5.2] startup
-[1.327s] [ext: omni.kit.loop-isaac-1.6.2] startup
-[1.328s] [ext: omni.kit.test-2.2.3] startup
-[1.423s] [ext: omni.materialx.libs-1.0.9] startup
-[1.430s] [ext: omni.gpucompute.plugins-0.0.0] startup
-[1.431s] [ext: omni.usd.config-1.0.8] startup
-[1.434s] [ext: omni.usd.libs-1.0.3] startup
-[1.498s] [ext: omni.iray.libs-0.0.1] startup
-[1.501s] [ext: omni.mdl-57.0.6] startup
-[1.732s] [ext: omni.mdl.neuraylib-0.2.23] startup
-[1.736s] [ext: omni.kit.usd.mdl-1.1.12] startup
-[1.812s] [ext: omni.appwindow-1.2.2] startup
-[1.814s] [ext: omni.kit.renderer.core-1.3.2] startup
-[1.856s] [ext: omni.kit.renderer.capture-2.0.2] startup
-[1.858s] [ext: omni.kit.renderer.imgui-2.2.1] startup
-[1.927s] [ext: omni.ui-3.3.10] startup
-[1.941s] [ext: omni.kit.mainwindow-1.0.4] startup
-[1.942s] [ext: carb.audio-0.1.0] startup
-[1.944s] [ext: omni.uiaudio-1.0.0] startup
-[1.945s] [ext: omni.kit.uiapp-0.0.0] startup
-[1.945s] [ext: omni.usd.schema.metrics.assembler-110.1.1] startup
-[1.947s] [ext: omni.usd.schema.audio-0.0.1] startup
-[1.950s] [ext: omni.usd_resolver-1.0.0] startup
-[1.952s] [ext: omni.usd.core-1.10.42] startup
-[1.955s] [ext: omni.metropolis.schema-0.0.3] startup
-[1.956s] [ext: isaacsim.anim.robot.schema-0.1.1] startup
-[1.956s] [ext: isaacsim.common-6.2.0] startup
-[1.957s] [ext: omni.usd.schema.anim-0.0.1] startup
-[1.972s] [ext: omni.usd.schema.geospatial-0.0.1] startup
-[1.974s] [ext: omni.usd.schema.omnigraph-1.0.1] startup
-[1.978s] [ext: omni.usd.schema.semantics-0.0.0] startup
-[1.980s] [ext: omni.activity.core-1.0.4] startup
-[1.981s] [ext: omni.cubric-0.1.0] startup
-[1.982s] [ext: omni.graph.exec-0.9.6] startup
-[1.982s] [ext: omni.hydra.scene_delegate-0.3.5] startup
-[1.985s] [ext: usdrt.scenegraph-7.6.3] startup
-[2.006s] [ext: omni.hydra.usdrt_delegate-7.5.2] startup
-[2.011s] [ext: omni.inspect-1.0.2] startup
-[2.013s] [ext: omni.kit.actions.core-1.2.1] startup
-[2.016s] [ext: omni.kit.audiodeviceenum-1.0.2] startup
-[2.017s] [ext: omni.kit.commands-1.6.2] startup
-[2.025s] [ext: omni.kit.exec.core-0.13.6] startup
-[2.026s] [ext: omni.kit.usd_undo-0.1.8] startup
-[2.027s] [ext: omni.kit.window.popup_dialog-2.0.26] startup
-[2.034s] [ext: omni.kit.widget.connection_manager-1.0.4] startup
-[2.052s] [ext: omni.timeline-1.1.2] startup
-[2.053s] [ext: omni.usd-1.19.11] startup
-[2.124s] [ext: omni.graph.core-3.1.8] startup
-[2.126s] [ext: omni.kit.notification_manager-1.0.17] startup
-[2.130s] [ext: isaacsim.core.deprecation_manager-0.4.5] startup
-[2.133s] [ext: isaacsim.replicator.agent.schema-0.1.2] startup
-[2.133s] [ext: isaacsim.robot.schema-7.0.2] startup
-[2.137s] [ext: isaacsim.robot_motion.schema-0.2.2] startup
-[2.139s] [ext: omni.anim.behavior.schema-110.4.0] startup
-[2.139s] [ext: omni.anim.graph.schema-110.4.0] startup
-[2.140s] [ext: omni.anim.navigation.schema-110.4.0] startup
-[2.140s] [ext: omni.behavior.tree.schema-110.4.0] Warning: Possible version incompatibility. Attempting to load carb::ujitso::IFactory with version v0.3 against v0.2.
-startup
-[2.141s] [ext: omni.isaac.ml_archive-3.4.0] startup
-[2.141s] [ext: omni.kit.asset_converter-6.1.0] startup
-[2.155s] [ext: omni.pip.cloud-1.5.7] startup
-[2.173s] [ext: omni.usd.schema.flow-110.0.0] startup
-[2.174s] [ext: omni.usd.schema.newton-1.5.0] startup
-[2.175s] [ext: omni.usd.schema.mujoco-1.1.4] startup
-[2.175s] [ext: omni.usd.schema.omni_dome_light-1.0.0] startup
-[2.176s] [ext: omni.usd.schema.omni_lens_distortion-1.0.0] startup
-[2.176s] [ext: omni.usd.schema.omni_projectors-1.0.0] startup
-[2.177s] [ext: omni.usd.schema.omni_sensors-0.0.0] startup
-[2.182s] [ext: omni.usd.schema.omniscripting-1.0.1] startup
-[2.186s] [ext: omni.usd.schema.physical_lighting-0.1.0] startup
-[2.188s] [ext: omni.usd.schema.physx-110.4.4] startup
-[2.209s] [ext: omni.usd.schema.render_settings.rtx-1.0.3] startup
-[2.212s] [ext: omni.usd.schema.usd_particle_field-1.0.0] startup
-[2.213s] [ext: omni.kit.menu.core-1.3.0] startup
-[2.216s] [ext: omni.kit.menu.utils-2.2.8] startup
-[2.241s] [ext: omni.kit.usd.layers-2.7.9] startup
-[2.263s] [ext: omni.kit.primitive.mesh-1.1.1] startup
-[2.273s] [ext: omni.kit.stage_template.core-1.1.23] startup
-[2.274s] [ext: omni.kit.stage_templates-2.0.3] startup
-[2.279s] [ext: omni.usd.metrics.assembler-110.1.2] startup
-[2.281s] [ext: omni.warp.core-1.17.0] startup
-[2.612s] [ext: isaacsim.core.experimental.utils-0.23.3] startup
-[2.613s] [ext: omni.convexdecomposition-110.4.4] startup
-[2.616s] [ext: omni.physics-110.4.4] startup
-[2.618s] [ext: omni.physx.gpu-110.4.4] startup
-[2.618s] [ext: omni.physx.foundation-110.4.4] startup
-[2.620s] [ext: omni.usdphysics-110.4.4] startup
-[2.622s] [ext: omni.physx.cooking-110.4.4] startup
-[2.624s] [ext: omni.physx-110.4.4] startup
-[2.639s] [ext: omni.physics.physx-110.4.4] startup
-[2.641s] [ext: omni.physics.stageupdate-110.4.4] startup
-[2.643s] [ext: omni.physics.tensors-110.4.4] startup
-[2.654s] [ext: omni.physx.tensors-110.4.4] startup
-[2.657s] [ext: omni.usdex.libs-3.0.0] startup
-[2.669s] [ext: isaacsim.core.simulation_manager-1.17.4] startup
-[2.694s] [ext: isaacsim.test.docstring-1.3.2] startup
-[2.714s] [ext: isaacsim.core.experimental.prims-1.12.1] startup
-[3.165s] [ext: isaacsim.core.experimental.primdata-0.3.6] startup
-[3.166s] [ext: omni.kit.clipboard-1.1.1] startup
-[3.167s] [ext: omni.kit.widget.context_menu-1.5.0] startup
-[3.173s] [ext: omni.kit.context_menu-1.10.0] startup
-[3.179s] [ext: omni.kit.helper.file_utils-0.1.10] startup
-[3.182s] [ext: omni.kit.widget.nucleus_info-2.0.2] startup
-[3.183s] [ext: omni.kit.search_core-1.0.8] startup
-[3.185s] [ext: omni.kit.widget.path_field-2.0.14] startup
-[3.188s] [ext: omni.kit.widget.browser_bar-2.0.11] startup
-[3.190s] [ext: omni.kit.widget.filebrowser-2.14.5] startup
-[3.209s] [ext: omni.kit.widget.nucleus_connector-2.4.0] startup
-[3.210s] [ext: omni.kit.widget.options_menu-1.1.7] startup
-[3.217s] [ext: omni.kit.widget.options_button-1.0.3] startup
-[3.218s] [ext: omni.kit.widget.search_delegate-1.0.10] startup
-[3.221s] [ext: omni.ui.scene-2.1.1] startup
-[3.226s] [ext: omni.kit.window.filepicker-3.0.18] startup
-[3.288s] [ext: omni.kit.window.file_importer-1.1.22] startup
-[3.291s] [ext: omni.kit.material.library-3.1.8] startup
-[3.313s] [ext: isaacsim.core.experimental.materials-0.11.1] startup
-[3.324s] [ext: isaacsim.core.experimental.objects-0.9.1] startup
-[3.536s] [ext: isaacsim.robot_motion.experimental.motion_generation-7.2.0] startup
-[3.563s] [ext: isaacsim.robot_motion.controllers-0.4.0] startup
-[3.577s] [ext: isaacsim.robot_motion.cumotion-1.5.0] startup
-[3.595s] [ext: isaacsim.core.version-2.2.1] startup
-[3.596s] [ext: isaacsim.app.about-2.3.2] startup
-[3.603s] [ext: isaacsim.asset.transformer-6.2.1] startup
-[3.611s] [ext: omni.scene.optimizer.core-110.3.1] startup
-[3.660s] [ext: isaacsim.asset.importer.utils-1.9.1] startup
-[3.668s] [ext: isaacsim.asset.exporter.urdf-2.2.10] startup
-[3.694s] [ext: isaacsim.asset.transformer.rules-1.7.25] startup
-[3.743s] [ext: isaacsim.asset.importer.mjcf-3.13.0] startup
-[3.746s] [ext: isaacsim.asset.importer.urdf-3.11.12] startup
-[3.757s] [ext: isaacsim.storage.native-1.12.2] startup
-[3.762s] [ext: omni.usd.metrics.assembler.physics-110.4.4] startup
-[3.768s] [ext: isaacsim.core.utils-4.1.9] startup
-[3.772s] [ext: isaacsim.core.prims-0.11.7] startup
-[5.368s] [ext: isaacsim.core.api-5.3.2] startup
-[5.399s] [ext: isaacsim.core.cloner-1.7.6] startup
-[5.403s] [ext: omni.graph.tools-1.81.0] startup
-[5.488s] [ext: omni.graph-1.142.6] startup
-[5.567s] [ext: isaacsim.core.experimental.actuators-0.2.1] startup
-[5.590s] [ext: omni.hydra.engine.stats-1.0.5] startup
-[5.592s] [ext: omni.hydra.rtx.shadercache.vulkan-1.0.0] startup
-[5.594s] [ext: omni.index.libs-392300.2120.0] startup
-[5.594s] [ext: omni.index-1.0.1] startup
-[5.594s] [ext: omni.ujitso.client-0.0.0] startup
-[5.595s] [ext: omni.usd.schema.playback-1.1.0] startup
-[5.596s] [ext: omni.volume-0.5.2] startup
-[5.600s] [ext: omni.hydra.rtx-1.0.5] startup
-2026-11-16T03:40:02Z [5,585ms] [Warning] [omni.log] Source: omni.hydra was already registered.
-[5.628s] [ext: omni.kit.hydra_texture-1.6.2] startup
-[5.632s] [ext: omni.kit.raycast.query-1.2.0] startup
-[5.636s] [ext: omni.kit.viewport.legacy_gizmos-1.0.24] startup
-[5.638s] [ext: omni.kit.viewport.registry-104.0.6] startup
-[5.640s] [ext: omni.kit.viewport.scene_camera_model-1.0.7] startup
-[5.643s] [ext: omni.kit.widget.viewport-110.0.1] startup
-[5.659s] [ext: omni.kit.window.drop_support-1.0.8] startup
-[5.660s] [ext: omni.kit.viewport.window-110.0.5] startup
-[5.695s] [ext: omni.kit.viewport.utility-2.1.2] startup
-[5.699s] [ext: isaacsim.core.rendering_manager-0.5.3] startup
-[5.704s] [ext: omni.graph.action_core-1.1.9] startup
-[5.707s] [ext: omni.graph.action_nodes_core-2.11.0] startup
-[5.709s] [ext: omni.graph.action_nodes-2.11.0] startup
-[5.790s] [ext: omni.graph.action-2.10.2] startup
-[5.797s] [ext: omni.graph.image.core-0.6.1] startup
-[5.798s] [ext: omni.graph.image.nodes-1.3.2] startup
-[5.798s] [ext: omni.graph.nodes_core-2.11.0] startup
-[5.804s] [ext: omni.graph.nodes-2.12.1] startup
-[5.809s] [ext: omni.kit.hotkeys.core-1.6.1] startup
-[5.810s] [ext: omni.kit.property.adapter.core-1.1.1] startup
-[5.813s] [ext: omni.kit.property.adapter.usd-1.0.6] startup
-[5.815s] [ext: omni.kit.widget.filter-1.1.9] startup
-[5.817s] [ext: omni.kit.widget.highlight_label-1.0.3] startup
-[5.818s] [ext: omni.kit.widget.searchfield-1.1.8] startup
-[5.822s] [ext: omni.kit.window.file_exporter-1.0.38] startup
-[5.825s] [ext: omni.kit.widget.stage-4.7.2] startup
-[5.860s] [ext: omni.kit.window.content_browser_registry-0.0.6] startup
-[5.861s] [ext: omni.kit.window.file-2.0.17] startup
-[5.872s] [ext: omni.kit.window.content_browser-3.1.14] startup
-[5.887s] [ext: omni.kit.window.property-1.15.2] startup
-[5.954s] [ext: omni.kit.property.usd-4.9.18] startup
-[6.011s] [ext: omni.graph.scriptnode-2.10.2] startup
-[6.023s] [ext: omni.kit.widget.searchable_combobox-1.0.7] startup
-[6.027s] [ext: omni.kit.widget.settings-2.0.1] startup
-[6.035s] [ext: omni.kit.window.preferences-1.8.5] startup
-[6.052s] [ext: omni.kit.viewport.menubar.core-110.0.4] startup
-[6.081s] [ext: omni.syntheticdata-0.6.17] startup
-[6.134s] [ext: omni.replicator.nv-1.1.7] startup
-[6.142s] [ext: omni.videoencoding-0.2.1] startup
-[6.145s] [ext: omni.replicator.core-1.13.38] startup
-2026-11-16T03:40:03Z [6,174ms] [Warning] [pxr.Semantics] pxr.Semantics is deprecated - please use Semantics instead
-2026-11-16T03:40:03Z [6,292ms] [Warning] [omni.replicator.core.scripts.extension] No material configuration file, adding configuration to material settings directly.
-[6.688s] [ext: isaacsim.core.nodes-5.10.15] startup
-[6.755s] [ext: isaacsim.core.throttling-2.3.7] startup
-[6.757s] [ext: omni.kit.manipulator.viewport-107.0.1] startup
-[6.760s] [ext: omni.graph.visualization.nodes-2.1.4] startup
-[6.776s] [ext: omni.kit.window.extensions-1.7.0] startup
-[6.805s] [ext: isaacsim.gui.components-1.8.9] startup
-[6.826s] [ext: isaacsim.examples.base-1.3.4] startup
-[6.830s] [ext: omni.kit.widget.zoombar-1.0.7] startup
-[6.832s] [ext: omni.kit.browser.core-2.3.18] startup
-[6.844s] [ext: omni.kit.browser.folder.core-2.0.3] startup
-[6.860s] [ext: omni.kit.widget.stage_icons-1.0.8] startup
-[6.861s] [ext: omni.kit.window.stage-2.6.4] startup
-[6.866s] [ext: omni.kit.menu.stage-1.2.7] startup
-[6.869s] [ext: omni.kit.usd.collect-3.0.7] startup
-[6.879s] [ext: omni.kit.widget.prompt-1.0.7] startup
-[6.881s] [ext: omni.kit.tool.collect-2.3.0] startup
-[6.893s] [ext: isaacsim.examples.browser-0.3.4] startup
-[6.898s] [ext: omni.kit.search.files-1.0.4] startup
-[6.900s] [ext: omni.kit.widget.calendar-1.0.9] startup
-[6.902s] [ext: omni.kit.widget.extended_searchfield-1.0.31] startup
-[6.924s] [ext: omni.simready.content.browser-0.3.10] startup
-[7.204s] [ext: isaacsim.gui.content_browser-0.5.1] startup
-[7.209s] [ext: omni.kit.selection-0.1.6] startup
-[7.211s] [ext: isaacsim.gui.menu-2.10.12] startup
-[7.230s] [ext: isaacsim.gui.property-1.6.4] startup
-[7.253s] [ext: omni.kit.viewport.actions-110.1.1] startup
-[7.259s] [ext: omni.kit.viewport.menubar.display-110.0.0] startup
-[7.262s] [ext: isaacsim.gui.sensors.icon-2.2.4] startup
-[7.268s] [ext: omni.behavior.scripting.core-110.4.0] startup
-[7.278s] [ext: isaacsim.replicator.behavior-1.6.2] startup
-[7.294s] [ext: isaacsim.replicator.experimental.domain_randomization-1.2.12] startup
-[7.329s] [ext: isaacsim.replicator.domain_randomization-1.2.4] startup
-[7.395s] [ext: isaacsim.replicator.writers-1.5.7] startup
-[7.459s] [ext: isaacsim.robot.experimental.wheeled_robots-0.2.17] startup
-[7.521s] [ext: isaacsim.robot.surface_gripper-3.7.1] startup
-[7.535s] [ext: isaacsim.robot.manipulators-3.4.5] startup
-[7.551s] [ext: isaacsim.robot.policy.examples-7.2.3] startup
-[7.588s] [ext: isaacsim.robot.wheeled_robots-5.2.5] startup
-[7.595s] [ext: isaacsim.robot.wheeled_robots.nodes-0.1.14] startup
-[7.638s] [ext: isaacsim.robot_motion.lula-4.1.4] startup
-[7.644s] [ext: isaacsim.robot_motion.motion_generation-9.0.0] startup
-[7.662s] [ext: omni.kit.numpy.common-0.1.3] startup
-[7.663s] [ext: omni.rtx.spg-0.4.0] startup
-[7.668s] [ext: omni.sensors.nv.camera-1.4.0] startup
-[7.673s] [ext: isaacsim.sensors.camera-1.7.13] startup
-[7.708s] [ext: isaacsim.sensors.experimental.physics-4.0.0] startup
-[7.722s] [ext: omni.sensors.net-1.4.0] startup
-[7.725s] [ext: omni.sensors.nv.common-3.4.0] startup
-[7.732s] [ext: omni.sensors.nv.materials-2.4.0] startup
-[7.735s] [ext: omni.sensors.nv.acoustic-3.4.0] startup
-[7.738s] [ext: omni.sensors.nv.ids-2.4.0] startup
-[7.739s] [ext: omni.sensors.nv.lidar-3.4.0] startup
-[7.743s] [ext: omni.sensors.nv.radar-3.4.0] startup
-[7.746s] [ext: isaacsim.sensors.experimental.rtx-2.0.1] startup
-[8.144s] [ext: isaacsim.sensors.physics.nodes-1.6.2] startup
-[8.151s] [ext: isaacsim.util.debug_draw-3.2.8] startup
-[8.156s] [ext: isaacsim.sensors.physx-2.5.7] startup
-[8.168s] [ext: isaacsim.sensors.rtx-15.17.5] startup
-[8.184s] [ext: isaacsim.simulation_app-2.19.0] startup
-[8.185s] [ext: omni.anim.curve.core-1.6.1] startup
-[8.206s] [ext: omni.graph.ui_nodes-2.11.2] startup
-[8.305s] [ext: omni.kit.manipulator.camera-110.1.1] startup
-[8.321s] [ext: omni.kit.manipulator.selector-1.1.4] startup
-[8.323s] [ext: omni.kit.manipulator.transform-107.0.1] startup
-[8.338s] [ext: omni.kit.widget.toolbar-2.1.0] startup
-[8.352s] [ext: omni.kit.manipulator.tool.snap-1.5.15] startup
-[8.362s] [ext: omni.kit.viewport.manipulator.transform-107.0.4] startup
-[8.366s] [ext: omni.kit.manipulator.prim.core-108.0.2] startup
-[8.382s] [ext: omni.kit.manipulator.prim.usd-107.0.3] startup
-[8.385s] [ext: omni.kit.manipulator.prim-108.0.0] startup
-[8.385s] [ext: omni.kit.manipulator.selection-110.1.0] startup
-[8.389s] [ext: omni.kit.menu.create-2.0.2] startup
-[8.392s] [ext: omni.kit.property.audio-1.0.18] startup
-[8.397s] [ext: omni.kit.property.camera-1.0.14] startup
-[8.399s] [ext: omni.kit.property.geometry-2.1.2] startup
-[8.407s] [ext: omni.kit.property.light-1.0.16] startup
-[8.441s] [ext: omni.kit.property.material-1.15.1] startup
-[8.462s] [ext: omni.kit.property.render-1.2.2] startup
-[8.463s] [ext: omni.kit.property.transform-1.6.13] startup
-[8.480s] [ext: omni.kit.property.bundle-1.5.3] startup
-[8.483s] [ext: omni.kit.usdz_export-1.1.1] startup
-[8.487s] [ext: omni.kit.tool.asset_importer-6.0.4] startup
-[8.505s] [ext: omni.kit.ui.actions-1.0.5] startup
-[8.508s] [ext: omni.kit.viewport.menubar.camera-107.0.16] startup
-[8.521s] [ext: omni.kit.viewport.menubar.lighting-107.3.4] startup
-[8.529s] [ext: omni.kit.viewport.menubar.render-110.1.1] startup
-[8.539s] [ext: omni.kit.viewport.menubar.settings-110.0.2] startup
-[8.550s] [ext: omni.kit.window.console-1.1.12] startup
-[8.557s] [ext: omni.kit.window.status_bar-0.1.11] startup
-[8.560s] [ext: omni.kit.window.toolbar-3.0.3] startup
-[8.562s] [ext: omni.ocio-0.1.1] startup
-[8.564s] [ext: omni.physx.commands-110.4.4] startup
-[8.576s] [ext: omni.replicator.replicator_yaml-2.0.12] startup
-[8.595s] [ext: omni.rtx.window.settings-0.8.5] startup
-[8.604s] [ext: omni.rtx.settings.core-0.7.2] startup
-[8.618s] [ext: omni.usd.metrics.assembler.ui-110.1.3] startup
-[8.629s] [ext: semantics.schema.editor-2.0.2] startup
-[8.636s] [ext: semantics.schema.property-2.0.2] startup
-[8.639s] [ext: omni.kit.menu.common-2.0.2] startup
-[8.641s] [ext: isaacsim.exp.base-6.2.0] startup
-[8.642s] [ext: isaacsim.exp.base.python-6.2.0] startup
-[8.643s] Simulation App Starting
-2026-11-16T03:40:05Z [8,622ms] [Warning] [carb.omniclient.plugin]  Main: core: Core::getServerInfo: rejecting empty URL as invalid
-2026-11-16T03:40:05Z [8,662ms] [Warning] [carb.audio.device] audio device is misconfigured or broken {deviceIndex = 0, name = 'default'} (The device is likely misconfigured, check your $HOME/.asoundrc)
-2026-11-16T03:40:05Z [8,662ms] [Warning] [carb.audio.output] failed to retrieve the capabilities for device 0 {result = eDeviceLost (2)}
-2026-11-16T03:40:05Z [8,662ms] [Warning] [carb.audio.context] failed to set the requested output during context creation.  Using a null streamer instead {result = eDeviceLost (2)}
-[9.411s] Viewport updates disabled
-[9.411s] Simulation App Startup Complete
-2026-11-16T03:40:06Z [9,385ms] [Warning] [omni.fabric.plugin] Warning: attribute deviceIds not found for path /Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_0
-
-[9.412s] app ready
+2026-11-16T03:43:41Z [1,205ms] [Warning] [omni.rtx] CPU performance profile is set to powersave. This profile sets the CPU to the lowest frequency reducing performance.
+2026-11-16T03:43:41Z [1,213ms] [Warning] [omni.rtx] IOMMU is enabled.
+[1.357s] [ext: omni.kit.pipapi-0.0.0] startup
+[1.360s] [ext: omni.kit.pip_archive-0.0.0] startup
+[1.360s] [ext: isaacsim.pip.newton-0.12.1] startup
+[1.360s] [ext: isaacsim.pip.nv-1.0.2] startup
+[1.361s] [ext: isaacsim.pip.onnx-1.0.1] startup
+[1.361s] [ext: omni.pip.compute-1.9.7] startup
+[1.362s] [ext: omni.isaac.core_archive-5.4.1] startup
+[1.363s] [ext: omni.kit.telemetry-0.5.2] startup
+[1.380s] [ext: omni.kit.loop-isaac-1.6.2] startup
+[1.381s] [ext: omni.kit.test-2.2.3] startup
+[1.477s] [ext: omni.materialx.libs-1.0.9] startup
+[1.483s] [ext: omni.gpucompute.plugins-0.0.0] startup
+[1.484s] [ext: omni.usd.config-1.0.8] startup
+[1.487s] [ext: omni.usd.libs-1.0.3] startup
+[1.552s] [ext: omni.iray.libs-0.0.1] startup
+[1.555s] [ext: omni.mdl-57.0.6] startup
+[1.772s] [ext: omni.mdl.neuraylib-0.2.23] startup
+[1.776s] [ext: omni.kit.usd.mdl-1.1.12] startup
+[1.852s] [ext: omni.appwindow-1.2.2] startup
+[1.854s] [ext: omni.kit.renderer.core-1.3.2] startup
+[1.925s] [ext: omni.kit.renderer.capture-2.0.2] startup
+[1.927s] [ext: omni.kit.renderer.imgui-2.2.1] startup
+[1.998s] [ext: omni.ui-3.3.10] startup
+[2.012s] [ext: omni.kit.mainwindow-1.0.4] startup
+[2.014s] [ext: carb.audio-0.1.0] startup
+[2.015s] [ext: omni.uiaudio-1.0.0] startup
+[2.016s] [ext: omni.kit.uiapp-0.0.0] startup
+[2.016s] [ext: omni.usd.schema.metrics.assembler-110.1.1] startup
+[2.019s] [ext: omni.usd.schema.audio-0.0.1] startup
+[2.021s] [ext: omni.usd_resolver-1.0.0] startup
+[2.024s] [ext: omni.usd.core-1.10.42] startup
+[2.026s] [ext: omni.metropolis.schema-0.0.3] startup
+[2.027s] [ext: isaacsim.anim.robot.schema-0.1.1] startup
+[2.028s] [ext: isaacsim.common-6.2.0] startup
+[2.028s] [ext: omni.usd.schema.anim-0.0.1] startup
+[2.043s] [ext: omni.usd.schema.geospatial-0.0.1] startup
+[2.045s] [ext: omni.usd.schema.omnigraph-1.0.1] startup
+[2.049s] [ext: omni.usd.schema.semantics-0.0.0] startup
+[2.051s] [ext: omni.activity.core-1.0.4] startup
+[2.052s] [ext: omni.cubric-0.1.0] startup
+[2.052s] [ext: omni.graph.exec-0.9.6] startup
+[2.053s] [ext: omni.hydra.scene_delegate-0.3.5] startup
+[2.056s] [ext: usdrt.scenegraph-7.6.3] startup
+[2.077s] [ext: omni.hydra.usdrt_delegate-7.5.2] startup
+[2.082s] [ext: omni.inspect-1.0.2] startup
+[2.084s] [ext: omni.kit.actions.core-1.2.1] startup
+[2.087s] [ext: omni.kit.audiodeviceenum-1.0.2] startup
+[2.088s] [ext: omni.kit.commands-1.6.2] startup
+[2.096s] [ext: omni.kit.exec.core-0.13.6] startup
+[2.097s] [ext: omni.kit.usd_undo-0.1.8] startup
+[2.098s] [ext: omni.kit.window.popup_dialog-2.0.26] startup
+[2.105s] [ext: omni.kit.widget.connection_manager-1.0.4] startup
+[2.123s] [ext: omni.timeline-1.1.2] startup
+[2.124s] [ext: omni.usd-1.19.11] startup
+[2.195s] [ext: omni.graph.core-3.1.8] startup
+[2.197s] [ext: omni.kit.notification_manager-1.0.17] startup
+[2.201s] [ext: isaacsim.core.deprecation_manager-0.4.5] startup
+[2.203s] [ext: isaacsim.replicator.agent.schema-0.1.2] startup
+[2.204s] [ext: isaacsim.robot.schema-7.0.2] startup
+[2.208s] [ext: isaacsim.robot_motion.schema-0.2.2] startup
+[2.209s] [ext: omni.anim.behavior.schema-110.4.0] startup
+[2.210s] [ext: omni.anim.graph.schema-110.4.0] startup
+[2.211s] [ext: omni.anim.navigation.schema-110.4.0] startup
+[2.211s] [ext: omni.behavior.tree.schema-110.4.0]Warning: Possible version incompatibility. Attempting to load carb::ujitso::IFactory with version v0.3 against v0.2.
+ startup
+[2.212s] [ext: omni.isaac.ml_archive-3.4.0] startup
+[2.212s] [ext: omni.kit.asset_converter-6.1.0] startup
+[2.225s] [ext: omni.pip.cloud-1.5.7] startup
+[2.244s] [ext: omni.usd.schema.flow-110.0.0] startup
+[2.245s] [ext: omni.usd.schema.newton-1.5.0] startup
+[2.245s] [ext: omni.usd.schema.mujoco-1.1.4] startup
+[2.246s] [ext: omni.usd.schema.omni_dome_light-1.0.0] startup
+[2.246s] [ext: omni.usd.schema.omni_lens_distortion-1.0.0] startup
+[2.247s] [ext: omni.usd.schema.omni_projectors-1.0.0] startup
+[2.247s] [ext: omni.usd.schema.omni_sensors-0.0.0] startup
+[2.253s] [ext: omni.usd.schema.omniscripting-1.0.1] startup
+[2.256s] [ext: omni.usd.schema.physical_lighting-0.1.0] startup
+[2.259s] [ext: omni.usd.schema.physx-110.4.4] startup
+[2.280s] [ext: omni.usd.schema.render_settings.rtx-1.0.3] startup
+[2.283s] [ext: omni.usd.schema.usd_particle_field-1.0.0] startup
+[2.284s] [ext: omni.kit.menu.core-1.3.0] startup
+[2.286s] [ext: omni.kit.menu.utils-2.2.8] startup
+[2.312s] [ext: omni.kit.usd.layers-2.7.9] startup
+[2.333s] [ext: omni.kit.primitive.mesh-1.1.1] startup
+[2.344s] [ext: omni.kit.stage_template.core-1.1.23] startup
+[2.345s] [ext: omni.kit.stage_templates-2.0.3] startup
+[2.349s] [ext: omni.usd.metrics.assembler-110.1.2] startup
+[2.352s] [ext: omni.warp.core-1.17.0] startup
+[2.675s] [ext: isaacsim.core.experimental.utils-0.23.3] startup
+[2.676s] [ext: omni.convexdecomposition-110.4.4] startup
+[2.679s] [ext: omni.physics-110.4.4] startup
+[2.681s] [ext: omni.physx.gpu-110.4.4] startup
+[2.681s] [ext: omni.physx.foundation-110.4.4] startup
+[2.683s] [ext: omni.usdphysics-110.4.4] startup
+[2.684s] [ext: omni.physx.cooking-110.4.4] startup
+[2.687s] [ext: omni.physx-110.4.4] startup
+[2.702s] [ext: omni.physics.physx-110.4.4] startup
+[2.703s] [ext: omni.physics.stageupdate-110.4.4] startup
+[2.706s] [ext: omni.physics.tensors-110.4.4] startup
+[2.716s] [ext: omni.physx.tensors-110.4.4] startup
+[2.719s] [ext: omni.usdex.libs-3.0.0] startup
+[2.732s] [ext: isaacsim.core.simulation_manager-1.17.4] startup
+[2.756s] [ext: isaacsim.test.docstring-1.3.2] startup
+[2.777s] [ext: isaacsim.core.experimental.prims-1.12.1] startup
+[3.196s] [ext: isaacsim.core.experimental.primdata-0.3.6] startup
+[3.198s] [ext: omni.kit.clipboard-1.1.1] startup
+[3.198s] [ext: omni.kit.widget.context_menu-1.5.0] startup
+[3.204s] [ext: omni.kit.context_menu-1.10.0] startup
+[3.210s] [ext: omni.kit.helper.file_utils-0.1.10] startup
+[3.213s] [ext: omni.kit.widget.nucleus_info-2.0.2] startup
+[3.215s] [ext: omni.kit.search_core-1.0.8] startup
+[3.216s] [ext: omni.kit.widget.path_field-2.0.14] startup
+[3.219s] [ext: omni.kit.widget.browser_bar-2.0.11] startup
+[3.221s] [ext: omni.kit.widget.filebrowser-2.14.5] startup
+[3.241s] [ext: omni.kit.widget.nucleus_connector-2.4.0] startup
+[3.242s] [ext: omni.kit.widget.options_menu-1.1.7] startup
+[3.249s] [ext: omni.kit.widget.options_button-1.0.3] startup
+[3.250s] [ext: omni.kit.widget.search_delegate-1.0.10] startup
+[3.253s] [ext: omni.ui.scene-2.1.1] startup
+[3.258s] [ext: omni.kit.window.filepicker-3.0.18] startup
+[3.321s] [ext: omni.kit.window.file_importer-1.1.22] startup
+[3.324s] [ext: omni.kit.material.library-3.1.8] startup
+[3.345s] [ext: isaacsim.core.experimental.materials-0.11.1] startup
+[3.356s] [ext: isaacsim.core.experimental.objects-0.9.1] startup
+[3.566s] [ext: isaacsim.robot_motion.experimental.motion_generation-7.2.0] startup
+[3.592s] [ext: isaacsim.robot_motion.controllers-0.4.0] startup
+[3.606s] [ext: isaacsim.robot_motion.cumotion-1.5.0] startup
+[3.623s] [ext: isaacsim.core.version-2.2.1] startup
+[3.625s] [ext: isaacsim.app.about-2.3.2] startup
+[3.632s] [ext: isaacsim.asset.transformer-6.2.1] startup
+[3.639s] [ext: omni.scene.optimizer.core-110.3.1] startup
+[3.689s] [ext: isaacsim.asset.importer.utils-1.9.1] startup
+[3.697s] [ext: isaacsim.asset.exporter.urdf-2.2.10] startup
+[3.723s] [ext: isaacsim.asset.transformer.rules-1.7.25] startup
+[3.772s] [ext: isaacsim.asset.importer.mjcf-3.13.0] startup
+[3.774s] [ext: isaacsim.asset.importer.urdf-3.11.12] startup
+[3.785s] [ext: isaacsim.storage.native-1.12.2] startup
+[3.791s] [ext: omni.usd.metrics.assembler.physics-110.4.4] startup
+[3.797s] [ext: isaacsim.core.utils-4.1.9] startup
+[3.801s] [ext: isaacsim.core.prims-0.11.7] startup
+[5.392s] [ext: isaacsim.core.api-5.3.2] startup
+[5.423s] [ext: isaacsim.core.cloner-1.7.6] startup
+[5.427s] [ext: omni.graph.tools-1.81.0] startup
+[5.513s] [ext: omni.graph-1.142.6] startup
+[5.591s] [ext: isaacsim.core.experimental.actuators-0.2.1] startup
+[5.618s] [ext: omni.hydra.engine.stats-1.0.5] startup
+[5.622s] [ext: omni.hydra.rtx.shadercache.vulkan-1.0.0] startup
+[5.624s] [ext: omni.index.libs-392300.2120.0] startup
+[5.624s] [ext: omni.index-1.0.1] startup
+[5.624s] [ext: omni.ujitso.client-0.0.0] startup
+[5.625s] [ext: omni.usd.schema.playback-1.1.0] startup
+[5.626s] [ext: omni.volume-0.5.2] startup
+[5.630s] [ext: omni.hydra.rtx-1.0.5] startup
+2026-11-16T03:43:45Z [5,615ms] [Warning] [omni.log] Source: omni.hydra was already registered.
+[5.658s] [ext: omni.kit.hydra_texture-1.6.2] startup
+[5.662s] [ext: omni.kit.raycast.query-1.2.0] startup
+[5.666s] [ext: omni.kit.viewport.legacy_gizmos-1.0.24] startup
+[5.669s] [ext: omni.kit.viewport.registry-104.0.6] startup
+[5.670s] [ext: omni.kit.viewport.scene_camera_model-1.0.7] startup
+[5.674s] [ext: omni.kit.widget.viewport-110.0.1] startup
+[5.689s] [ext: omni.kit.window.drop_support-1.0.8] startup
+[5.690s] [ext: omni.kit.viewport.window-110.0.5] startup
+[5.725s] [ext: omni.kit.viewport.utility-2.1.2] startup
+[5.728s] [ext: isaacsim.core.rendering_manager-0.5.3] startup
+[5.734s] [ext: omni.graph.action_core-1.1.9] startup
+[5.736s] [ext: omni.graph.action_nodes_core-2.11.0] startup
+[5.739s] [ext: omni.graph.action_nodes-2.11.0] startup
+[5.784s] [ext: omni.graph.action-2.10.2] startup
+[5.786s] [ext: omni.graph.image.core-0.6.1] startup
+[5.789s] [ext: omni.graph.image.nodes-1.3.2] startup
+[5.791s] [ext: omni.graph.nodes_core-2.11.0] startup
+[5.802s] [ext: omni.graph.nodes-2.12.1] startup
+[5.807s] [ext: omni.kit.hotkeys.core-1.6.1] startup
+[5.808s] [ext: omni.kit.property.adapter.core-1.1.1] startup
+[5.811s] [ext: omni.kit.property.adapter.usd-1.0.6] startup
+[5.813s] [ext: omni.kit.widget.filter-1.1.9] startup
+[5.815s] [ext: omni.kit.widget.highlight_label-1.0.3] startup
+[5.817s] [ext: omni.kit.widget.searchfield-1.1.8] startup
+[5.821s] [ext: omni.kit.window.file_exporter-1.0.38] startup
+[5.824s] [ext: omni.kit.widget.stage-4.7.2] startup
+[5.858s] [ext: omni.kit.window.content_browser_registry-0.0.6] startup
+[5.859s] [ext: omni.kit.window.file-2.0.17] startup
+[5.870s] [ext: omni.kit.window.content_browser-3.1.14] startup
+[5.885s] [ext: omni.kit.window.property-1.15.2] startup
+[5.951s] [ext: omni.kit.property.usd-4.9.18] startup
+[6.008s] [ext: omni.graph.scriptnode-2.10.2] startup
+[6.020s] [ext: omni.kit.widget.searchable_combobox-1.0.7] startup
+[6.023s] [ext: omni.kit.widget.settings-2.0.1] startup
+[6.031s] [ext: omni.kit.window.preferences-1.8.5] startup
+[6.049s] [ext: omni.kit.viewport.menubar.core-110.0.4] startup
+[6.078s] [ext: omni.syntheticdata-0.6.17] startup
+[6.130s] [ext: omni.replicator.nv-1.1.7] startup
+[6.140s] [ext: omni.videoencoding-0.2.1] startup
+[6.146s] [ext: omni.replicator.core-1.13.38] startup
+2026-11-16T03:43:46Z [6,176ms] [Warning] [pxr.Semantics] pxr.Semantics is deprecated - please use Semantics instead
+2026-11-16T03:43:46Z [6,302ms] [Warning] [omni.replicator.core.scripts.extension] No material configuration file, adding configuration to material settings directly.
+[6.711s] [ext: isaacsim.core.nodes-5.10.15] startup
+[6.783s] [ext: isaacsim.core.throttling-2.3.7] startup
+[6.785s] [ext: omni.kit.manipulator.viewport-107.0.1] startup
+[6.788s] [ext: omni.graph.visualization.nodes-2.1.4] startup
+[6.805s] [ext: omni.kit.window.extensions-1.7.0] startup
+[6.835s] [ext: isaacsim.gui.components-1.8.9] startup
+[6.855s] [ext: isaacsim.examples.base-1.3.4] startup
+[6.859s] [ext: omni.kit.widget.zoombar-1.0.7] startup
+[6.861s] [ext: omni.kit.browser.core-2.3.18] startup
+[6.873s] [ext: omni.kit.browser.folder.core-2.0.3] startup
+[6.889s] [ext: omni.kit.widget.stage_icons-1.0.8] startup
+[6.890s] [ext: omni.kit.window.stage-2.6.4] startup
+[6.895s] [ext: omni.kit.menu.stage-1.2.7] startup
+[6.898s] [ext: omni.kit.usd.collect-3.0.7] startup
+[6.908s] [ext: omni.kit.widget.prompt-1.0.7] startup
+[6.910s] [ext: omni.kit.tool.collect-2.3.0] startup
+[6.922s] [ext: isaacsim.examples.browser-0.3.4] startup
+[6.928s] [ext: omni.kit.search.files-1.0.4] startup
+[6.929s] [ext: omni.kit.widget.calendar-1.0.9] startup
+[6.932s] [ext: omni.kit.widget.extended_searchfield-1.0.31] startup
+[6.957s] [ext: omni.simready.content.browser-0.3.10] startup
+[7.233s] [ext: isaacsim.gui.content_browser-0.5.1] startup
+[7.237s] [ext: omni.kit.selection-0.1.6] startup
+[7.240s] [ext: isaacsim.gui.menu-2.10.12] startup
+[7.258s] [ext: isaacsim.gui.property-1.6.4] startup
+[7.282s] [ext: omni.kit.viewport.actions-110.1.1] startup
+[7.287s] [ext: omni.kit.viewport.menubar.display-110.0.0] startup
+[7.291s] [ext: isaacsim.gui.sensors.icon-2.2.4] startup
+[7.297s] [ext: omni.behavior.scripting.core-110.4.0] startup
+[7.306s] [ext: isaacsim.replicator.behavior-1.6.2] startup
+[7.322s] [ext: isaacsim.replicator.experimental.domain_randomization-1.2.12] startup
+[7.358s] [ext: isaacsim.replicator.domain_randomization-1.2.4] startup
+[7.425s] [ext: isaacsim.replicator.writers-1.5.7] startup
+[7.486s] [ext: isaacsim.robot.experimental.wheeled_robots-0.2.17] startup
+[7.547s] [ext: isaacsim.robot.surface_gripper-3.7.1] startup
+[7.561s] [ext: isaacsim.robot.manipulators-3.4.5] startup
+[7.576s] [ext: isaacsim.robot.policy.examples-7.2.3] startup
+[7.613s] [ext: isaacsim.robot.wheeled_robots-5.2.5] startup
+[7.620s] [ext: isaacsim.robot.wheeled_robots.nodes-0.1.14] startup
+[7.660s] [ext: isaacsim.robot_motion.lula-4.1.4] startup
+[7.666s] [ext: isaacsim.robot_motion.motion_generation-9.0.0] startup
+[7.684s] [ext: omni.kit.numpy.common-0.1.3] startup
+[7.685s] [ext: omni.rtx.spg-0.4.0] startup
+[7.690s] [ext: omni.sensors.nv.camera-1.4.0] startup
+[7.695s] [ext: isaacsim.sensors.camera-1.7.13] startup
+[7.729s] [ext: isaacsim.sensors.experimental.physics-4.0.0] startup
+[7.743s] [ext: omni.sensors.net-1.4.0] startup
+[7.745s] [ext: omni.sensors.nv.common-3.4.0] startup
+[7.752s] [ext: omni.sensors.nv.materials-2.4.0] startup
+[7.755s] [ext: omni.sensors.nv.acoustic-3.4.0] startup
+[7.758s] [ext: omni.sensors.nv.ids-2.4.0] startup
+[7.760s] [ext: omni.sensors.nv.lidar-3.4.0] startup
+[7.764s] [ext: omni.sensors.nv.radar-3.4.0] startup
+[7.767s] [ext: isaacsim.sensors.experimental.rtx-2.0.1] startup
+[8.164s] [ext: isaacsim.sensors.physics.nodes-1.6.2] startup
+[8.170s] [ext: isaacsim.util.debug_draw-3.2.8] startup
+[8.175s] [ext: isaacsim.sensors.physx-2.5.7] startup
+[8.187s] [ext: isaacsim.sensors.rtx-15.17.5] startup
+[8.203s] [ext: isaacsim.simulation_app-2.19.0] startup
+[8.203s] [ext: omni.anim.curve.core-1.6.1] startup
+[8.225s] [ext: omni.graph.ui_nodes-2.11.2] startup
+[8.287s] [ext: omni.kit.manipulator.camera-110.1.1] startup
+[8.303s] [ext: omni.kit.manipulator.selector-1.1.4] startup
+[8.305s] [ext: omni.kit.manipulator.transform-107.0.1] startup
+[8.320s] [ext: omni.kit.widget.toolbar-2.1.0] startup
+[8.334s] [ext: omni.kit.manipulator.tool.snap-1.5.15] startup
+[8.344s] [ext: omni.kit.viewport.manipulator.transform-107.0.4] startup
+[8.348s] [ext: omni.kit.manipulator.prim.core-108.0.2] startup
+[8.364s] [ext: omni.kit.manipulator.prim.usd-107.0.3] startup
+[8.367s] [ext: omni.kit.manipulator.prim-108.0.0] startup
+[8.367s] [ext: omni.kit.manipulator.selection-110.1.0] startup
+[8.371s] [ext: omni.kit.menu.create-2.0.2] startup
+[8.374s] [ext: omni.kit.property.audio-1.0.18] startup
+[8.379s] [ext: omni.kit.property.camera-1.0.14] startup
+[8.381s] [ext: omni.kit.property.geometry-2.1.2] startup
+[8.389s] [ext: omni.kit.property.light-1.0.16] startup
+[8.423s] [ext: omni.kit.property.material-1.15.1] startup
+[8.444s] [ext: omni.kit.property.render-1.2.2] startup
+[8.446s] [ext: omni.kit.property.transform-1.6.13] startup
+[8.462s] [ext: omni.kit.property.bundle-1.5.3] startup
+[8.465s] [ext: omni.kit.usdz_export-1.1.1] startup
+[8.470s] [ext: omni.kit.tool.asset_importer-6.0.4] startup
+[8.487s] [ext: omni.kit.ui.actions-1.0.5] startup
+[8.490s] [ext: omni.kit.viewport.menubar.camera-107.0.16] startup
+[8.503s] [ext: omni.kit.viewport.menubar.lighting-107.3.4] startup
+[8.512s] [ext: omni.kit.viewport.menubar.render-110.1.1] startup
+[8.521s] [ext: omni.kit.viewport.menubar.settings-110.0.2] startup
+[8.532s] [ext: omni.kit.window.console-1.1.12] startup
+[8.540s] [ext: omni.kit.window.status_bar-0.1.11] startup
+[8.543s] [ext: omni.kit.window.toolbar-3.0.3] startup
+[8.545s] [ext: omni.ocio-0.1.1] startup
+[8.547s] [ext: omni.physx.commands-110.4.4] startup
+[8.560s] [ext: omni.replicator.replicator_yaml-2.0.12] startup
+[8.578s] [ext: omni.rtx.window.settings-0.8.5] startup
+[8.587s] [ext: omni.rtx.settings.core-0.7.2] startup
+[8.602s] [ext: omni.usd.metrics.assembler.ui-110.1.3] startup
+[8.614s] [ext: semantics.schema.editor-2.0.2] startup
+[8.621s] [ext: semantics.schema.property-2.0.2] startup
+[8.625s] [ext: omni.kit.menu.common-2.0.2] startup
+[8.627s] [ext: isaacsim.exp.base-6.2.0] startup
+[8.627s] [ext: isaacsim.exp.base.python-6.2.0] startup
+[8.629s] Simulation App Starting
+2026-11-16T03:43:48Z [8,686ms] [Warning] [carb.omniclient.plugin]  Main: core: Core::getServerInfo: rejecting empty URL as invalid
+2026-11-16T03:43:49Z [8,732ms] [Warning] [carb.audio.device] audio device is misconfigured or broken {deviceIndex = 0, name = 'default'} (The device is likely misconfigured, check your $HOME/.asoundrc)
+2026-11-16T03:43:49Z [8,732ms] [Warning] [carb.audio.output] failed to retrieve the capabilities for device 0 {result = eDeviceLost (2)}
+2026-11-16T03:43:49Z [8,732ms] [Warning] [carb.audio.context] failed to set the requested output during context creation.  Using a null streamer instead {result = eDeviceLost (2)}
+[9.740s] Simulation App Startup Complete
+[9.757s] app ready
 Warp 1.17.0 initialized:
    CUDA Toolkit 12.9, Driver 13.2
    Devices:
@@ -391,88 +388,86 @@ Warp 1.17.0 initialized:
    Kernel cache:
      /tmp/geniesim-newton-warp-1000/1.17.0
 **** simulation paused ****
-**** simulation paused ****
-**** simulation paused ****
-**** simulation paused ****
-2026-11-16 03:40:08,850,850 INFO     [logger.py:79] using env SIM_REPO_ROOT=/workspace
-2026-11-16 03:40:08,850,850 INFO     [logger.py:79] using env SIM_ASSETS=/geniesim_assets
-2026-11-16 03:40:08,850,850 INFO     [logger.py:79] Evaluating agent on the given task: table_task_1_g2_op
-2026-11-16 03:40:08,851,851 WARNING  [logger.py:79] Use self-defined task_name: table_task_1_g2_op
-2026-11-16 03:40:08,851,851 INFO     [logger.py:79] Random seed set to: 1
-2026-11-16 03:40:08,853,853 INFO     [logger.py:79] sub_task_name: pick_block_color
-2026-11-16 03:40:08,853,853 INFO     [logger.py:79] Explicit --benchmark.instance_ids override: [0]
-2026-11-16 03:40:08,855,855 INFO     [logger.py:79] Saved task json to /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/_checkpoint_tasks/20fd69b4637c4b1092961b5c47189d9f/table_task_1_g2_op_0.json
-2026-11-16 03:40:08,856,856 INFO     [logger.py:79] Saved task json to /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/_checkpoint_tasks/20fd69b4637c4b1092961b5c47189d9f/table_task_1_g2_op_0.json (no generalization)
-2026-11-16 03:40:08,878,878 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:08,892,892 INFO     [logger.py:79] Infer service address: 127.0.0.1:8999
-2026-11-16 03:40:08,949,949 INFO     [logger.py:79] Added new Workspace from: /workspace/source/geniesim_benchmark/src/geniesim_benchmark/benchmark/config/llm_task/pick_block_color/0/scene.usda
-2026-11-16 03:40:08,985,985 INFO     [logger.py:79] JSON configuration file not found: /geniesim_assets//background/home/home_b_aligned/background.json, skipping object filtering
-[9.671s] [ext: isaacsim.core.includes-2.9.5] startup
-[9.672s] [ext: isaacsim.sensors.rtx.nodes-0.1.7] startup
-[9.682s] [ext: isaacsim.ros2.core-1.11.2] startup
-[9.776s] Attempting to load system rclpy
-[9.806s] rclpy loaded
-[9.810s] [ext: isaacsim.ros2.control-0.1.6] startup
-[9.817s] [ext: isaacsim.ros2.nodes-1.22.9] startup
-[9.926s] [ext: isaacsim.ros2.examples-1.2.9] startup
-[9.935s] [ext: isaacsim.ros2.ui-1.9.3] startup
-[10.076s] [ext: isaacsim.ros2.bridge-5.1.4] startup
-2026-11-16T03:40:09Z [11,919ms] [Warning] [omni.usd] Encountered USD Warnings but USD Diagnostics are currently muted. To view USD Warnings, please set the '/persistent/app/usd/muteUsdDiagnostics' setting to false in Preferences page.
-2026-11-16T03:40:10Z [13,006ms] [Warning] [omni.physicsschema.plugin] ScaleOrientation is not supported for rigid bodies, prim path: /World/background/Xform/benchmark_bed_001/entity. You may ignore this if the scale is close to uniform.
-2026-11-16T03:40:10Z [13,714ms] [Warning] [omni.physx.cooking.plugin] PhysX warning: Cooking::cookConvexMesh: GPU-compatible convex hull could not be built because of oblong shape. Will fall back to CPU collision, particles and deformables will not collide with this mesh!, FILE /builds/omniverse/physics/physx/source/geomutils/src/cooking/GuCookingConvexMesh.cpp, LINE 124
-2026-11-16T03:40:10Z [13,714ms] [Warning] [omni.physx.cooking.plugin] ConvexDecompositionTask: failed to cook GPU-compatible mesh, collision detection will fall back to CPU. Collisions with particles and deformables will not work with this mesh. Prim /Workspace/Objects/table_7643d40d/entity/body/visual
-2026-11-16T03:40:14Z [17,499ms] [Warning] [omni.physx.cooking.plugin] PhysX warning: SDF creation: Mesh is not suitable for SDF (non-manifold, not watertight, duplicated triangles, ...) and automatic repair failed. The computed SDF might not work as expected. If collisions are not good, try to improve the mesh structure e.g., by applying remeshing., FILE /builds/omniverse/physics/physx/source/geomutils/src/GuSDF.cpp, LINE 1019
+2026-11-16 03:43:52,483,483 INFO     [logger.py:79] using env SIM_REPO_ROOT=/workspace
+2026-11-16 03:43:52,483,483 INFO     [logger.py:79] using env SIM_ASSETS=/geniesim_assets
+2026-11-16 03:43:52,483,483 INFO     [logger.py:79] Evaluating agent on the given task: table_task_1_g2_op
+2026-11-16 03:43:52,483,483 WARNING  [logger.py:79] Use self-defined task_name: table_task_1_g2_op
+2026-11-16 03:43:52,483,483 INFO     [logger.py:79] Random seed set to: 1
+2026-11-16 03:43:52,484,484 INFO     [logger.py:79] sub_task_name: pick_block_color
+2026-11-16 03:43:52,484,484 INFO     [logger.py:79] Explicit --benchmark.instance_ids override: [0]
+2026-11-16 03:43:52,486,486 INFO     [logger.py:79] Saved task json to /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/_checkpoint_tasks/49bcf66673534f0d8044b5b417dff6ee/table_task_1_g2_op_0.json
+2026-11-16 03:43:52,486,486 INFO     [logger.py:79] Saved task json to /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/_checkpoint_tasks/49bcf66673534f0d8044b5b417dff6ee/table_task_1_g2_op_0.json (no generalization)
+2026-11-16 03:43:52,508,508 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:43:52,521,521 INFO     [logger.py:79] Infer service address: 127.0.0.1:8999
+2026-11-16 03:43:52,569,569 INFO     [logger.py:79] Added new Workspace from: /workspace/source/geniesim_benchmark/src/geniesim_benchmark/benchmark/config/llm_task/pick_block_color/0/scene.usda
+2026-11-16 03:43:52,594,594 INFO     [logger.py:79] JSON configuration file not found: /geniesim_assets//background/home/home_b_aligned/background.json, skipping object filtering
+[10.016s] [ext: isaacsim.core.includes-2.9.5] startup
+[10.016s] [ext: isaacsim.sensors.rtx.nodes-0.1.7] startup
+[10.027s] [ext: isaacsim.ros2.core-1.11.2] startup
+[10.113s] Attempting to load system rclpy
+[10.144s] rclpy loaded
+[10.147s] [ext: isaacsim.ros2.control-0.1.6] startup
+[10.154s] [ext: isaacsim.ros2.nodes-1.22.9] startup
+[10.261s] [ext: isaacsim.ros2.examples-1.2.9] startup
+[10.269s] [ext: isaacsim.ros2.ui-1.9.3] startup
+[10.408s] [ext: isaacsim.ros2.bridge-5.1.4] startup
+2026-11-16T03:43:52Z [12,365ms] [Warning] [omni.usd] Encountered USD Warnings but USD Diagnostics are currently muted. To view USD Warnings, please set the '/persistent/app/usd/muteUsdDiagnostics' setting to false in Preferences page.
+2026-11-16T03:43:53Z [13,433ms] [Warning] [omni.physicsschema.plugin] ScaleOrientation is not supported for rigid bodies, prim path: /World/background/Xform/benchmark_bed_001/entity. You may ignore this if the scale is close to uniform.
+2026-11-16T03:43:54Z [14,164ms] [Warning] [omni.physx.cooking.plugin] PhysX warning: Cooking::cookConvexMesh: GPU-compatible convex hull could not be built because of oblong shape. Will fall back to CPU collision, particles and deformables will not collide with this mesh!, FILE /builds/omniverse/physics/physx/source/geomutils/src/cooking/GuCookingConvexMesh.cpp, LINE 124
+2026-11-16T03:43:54Z [14,164ms] [Warning] [omni.physx.cooking.plugin] ConvexDecompositionTask: failed to cook GPU-compatible mesh, collision detection will fall back to CPU. Collisions with particles and deformables will not work with this mesh. Prim /Workspace/Objects/table_7643d40d/entity/body/visual
+2026-11-16T03:43:58Z [17,898ms] [Warning] [omni.physx.cooking.plugin] PhysX warning: SDF creation: Mesh is not suitable for SDF (non-manifold, not watertight, duplicated triangles, ...) and automatic repair failed. The computed SDF might not work as expected. If collisions are not good, try to improve the mesh structure e.g., by applying remeshing., FILE /builds/omniverse/physics/physx/source/geomutils/src/GuSDF.cpp, LINE 1019
 [Physics Callback] 0.05 Hz
-2026-11-16 03:40:25,730,730 WARNING  [logger.py:79] Failed to register camera /World/Camera: No valid sensor paths provided
-2026-11-16 03:40:26,894,894 INFO     [logger.py:79] Found 0 articulation(s) in scene
-2026-11-16T03:40:25Z [28,611ms] [Warning] [omni.replicator.core.scripts.utils.utils] Encountered invalid prim path /World/Camera
-[Physics Callback] 1.60 Hz
-2026-11-16 03:40:27,501,501 INFO     [logger.py:79] Config task info for pick_block_color with G2_omnipicker
-2026-11-16 03:40:28,635,635 INFO     [logger.py:79] ========Collect physics==========
-2026-11-16 03:40:28,636,636 INFO     [logger.py:79] /Workspace/Objects/table_7643d40d/entity
-2026-11-16 03:40:28,636,636 INFO     [logger.py:79]   -rigidbody
-2026-11-16 03:40:28,638,638 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_378069fe/entity
-2026-11-16 03:40:28,638,638 INFO     [logger.py:79]   -rigidbody
-2026-11-16 03:40:28,638,638 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_53a9cedc/entity
-2026-11-16 03:40:28,638,638 INFO     [logger.py:79]   -rigidbody
-2026-11-16 03:40:28,638,638 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_e25f9bd9/entity
-2026-11-16 03:40:28,638,638 INFO     [logger.py:79]   -rigidbody
-2026-11-16 03:40:28,639,639 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_d0fa4ca3/entity
-2026-11-16 03:40:28,639,639 INFO     [logger.py:79]   -rigidbody
-2026-11-16 03:40:28,639,639 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_658016ed/entity
-2026-11-16 03:40:28,639,639 INFO     [logger.py:79]   -rigidbody
-[Physics Callback] 1.14 Hz
-2026-11-16 03:40:29,437,437 INFO     [logger.py:79] EPISODE FILE: /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/_checkpoint_tasks/20fd69b4637c4b1092961b5c47189d9f/table_task_1_g2_op_0.json
-2026-11-16 03:40:29,477,477 INFO     [logger.py:79] Material replaced: mesh='/Workspace/Objects/table_7643d40d/entity/body/visual' -> material='/Workspace/Objects/table_7643d40d/entity/Looks/ml_part_00_04'
-2026-11-16 03:40:29,505,505 INFO     [logger.py:79] Material replaced: mesh='/Workspace/Objects/table_7643d40d/entity/part_00/visual' -> material='/Workspace/Objects/table_7643d40d/entity/Looks/ml_part_00_10'
-2026-11-16 03:40:29,536,536 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_378069fe'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
-2026-11-16 03:40:29,536,536 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:29,536,536 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:29,597,597 INFO     [logger.py:79] [local_recorder] started episode 0 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0000_20261116_034029_580363_e6d2d60f (['hand_left', 'hand_right', 'head'], every_n=4)
-2026-11-16 03:40:29,600,600 INFO     [logger.py:79] [chassis-drive] captured robot standing height z=0.0000m
-2026-11-16 03:40:29,601,601 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_378069fe'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
-2026-11-16 03:40:29,601,601 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:29,601,601 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
-[Physics Callback] 53.20 Hz
-2026-11-16 03:40:30,500,500 INFO     [logger.py:79] Finish reset robot...
-2026-11-16 03:40:30,514,514 INFO     [logger.py:79] =========reset one frame========
-2026-11-16 03:40:30,625,625 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.7767, 0.7767]
-2026-11-16T03:40:28Z [30,974ms] [Warning] [rtx.hydra] Mesh '/genie/body_link2/visuals/body_link2/mesh' has corrupted data in primvar 'st': buffer size 8498 doesn't match expected size 40253 in faceVarying primvars
-2026-11-16T03:40:28Z [30,982ms] [Warning] [rtx.hydra] Mesh '/genie/body_link4/visuals/body_link4/mesh' has corrupted data in primvar 'st': buffer size 15975 doesn't match expected size 86226 in faceVarying primvars
-2026-11-16T03:40:28Z [31,066ms] [Warning] [rtx.hydra] Mesh '/genie/base_link/visuals/base_link/mesh' has corrupted data in primvar 'st': buffer size 49329 doesn't match expected size 252735 in faceVarying primvars
-2026-11-16T03:40:28Z [31,140ms] [Warning] [rtx.hydra] Mesh '/genie/arm_l_link2/visuals/default_visual/mesh' has corrupted data in primvar 'st': buffer size 73505 doesn't match expected size 313550 in faceVarying primvars
-2026-11-16T03:40:28Z [31,159ms] [Warning] [rtx.hydra] Mesh '/genie/body_link5/visuals/body_link5/mesh' has corrupted data in primvar 'st': buffer size 35730 doesn't match expected size 198306 in faceVarying primvars
-2026-11-16T03:40:28Z [31,175ms] [Warning] [rtx.hydra] Mesh '/genie/arm_r_link2/visuals/default_visual/mesh' has corrupted data in primvar 'st': buffer size 73505 doesn't match expected size 313550 in faceVarying primvars
-2026-11-16T03:40:28Z [31,298ms] [Warning] [omni.rtx] DLSS increasing input dimensions: Render resolution of (320, 200) is below minimal input resolution of 300.
-2026-11-16T03:40:28Z [31,570ms] [Warning] [omni.syntheticdata.plugin] OgnSdPostRenderVarToHost : rendervar copy from texture directly to host buffer is counter-performant. Please use copy from texture to device buffer first.
+2026-11-16 03:44:11,297,297 WARNING  [logger.py:79] Failed to register camera /World/Camera: No valid sensor paths provided
+2026-11-16 03:44:12,476,476 INFO     [logger.py:79] Found 0 articulation(s) in scene
+[Physics Callback] 0.64 Hz
+2026-11-16 03:44:13,082,082 INFO     [logger.py:79] Config task info for pick_block_color with G2_omnipicker
+2026-11-16 03:44:13,949,949 INFO     [logger.py:79] ========Collect physics==========
+2026-11-16 03:44:13,950,950 INFO     [logger.py:79] /Workspace/Objects/table_7643d40d/entity
+2026-11-16 03:44:13,950,950 INFO     [logger.py:79]   -rigidbody
+2026-11-16 03:44:13,951,951 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_378069fe/entity
+2026-11-16 03:44:13,951,951 INFO     [logger.py:79]   -rigidbody
+2026-11-16 03:44:13,951,951 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_53a9cedc/entity
+2026-11-16 03:44:13,951,951 INFO     [logger.py:79]   -rigidbody
+2026-11-16 03:44:13,951,951 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_e25f9bd9/entity
+2026-11-16 03:44:13,951,951 INFO     [logger.py:79]   -rigidbody
+2026-11-16 03:44:13,952,952 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_d0fa4ca3/entity
+2026-11-16 03:44:13,952,952 INFO     [logger.py:79]   -rigidbody
+2026-11-16 03:44:13,952,952 INFO     [logger.py:79] /Workspace/Objects/benchmark_building_blocks_658016ed/entity
+2026-11-16 03:44:13,952,952 INFO     [logger.py:79]   -rigidbody
+[Physics Callback] 1.35 Hz
+2026-11-16 03:44:14,867,867 INFO     [logger.py:79] EPISODE FILE: /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/_checkpoint_tasks/49bcf66673534f0d8044b5b417dff6ee/table_task_1_g2_op_0.json
+2026-11-16 03:44:14,909,909 INFO     [logger.py:79] Material replaced: mesh='/Workspace/Objects/table_7643d40d/entity/body/visual' -> material='/Workspace/Objects/table_7643d40d/entity/Looks/ml_part_00_04'
+2026-11-16 03:44:14,938,938 INFO     [logger.py:79] Material replaced: mesh='/Workspace/Objects/table_7643d40d/entity/part_00/visual' -> material='/Workspace/Objects/table_7643d40d/entity/Looks/ml_part_00_10'
+2026-11-16 03:44:14,980,980 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_378069fe'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
+2026-11-16 03:44:14,981,981 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:14,981,981 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
+[Physics Callback] 45.18 Hz
+2026-11-16 03:44:15,041,041 INFO     [logger.py:79] [local_recorder] started episode 0 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0000_20261116_034415_017621_bc662cd8 (['hand_left', 'hand_right', 'head'], every_n=4)
+2026-11-16 03:44:15,045,045 INFO     [logger.py:79] [chassis-drive] captured robot standing height z=0.0000m
+2026-11-16 03:44:15,046,046 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_378069fe'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
+2026-11-16 03:44:15,046,046 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:15,046,046 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_378069fe', obj_name_list=['benchmark_building_blocks_378069fe'], gripper_id=right_gripper, already_picked=set()
+2026-11-16T03:44:10Z [30,636ms] [Warning] [rtx.hydra] Mesh '/genie/body_link5/visuals/body_link5/mesh' has corrupted data in primvar 'st': buffer size 35730 doesn't match expected size 198306 in faceVarying primvars
+2026-11-16T03:44:11Z [30,775ms] [Warning] [rtx.hydra] Mesh '/genie/body_link4/visuals/body_link4/mesh' has corrupted data in primvar 'st': buffer size 15975 doesn't match expected size 86226 in faceVarying primvars
+2026-11-16T03:44:11Z [30,786ms] [Warning] [rtx.hydra] Mesh '/genie/base_link/visuals/base_link/mesh' has corrupted data in primvar 'st': buffer size 49329 doesn't match expected size 252735 in faceVarying primvars
+2026-11-16T03:44:11Z [30,797ms] [Warning] [rtx.hydra] Mesh '/genie/arm_r_link2/visuals/default_visual/mesh' has corrupted data in primvar 'st': buffer size 73505 doesn't match expected size 313550 in faceVarying primvars
+2026-11-16T03:44:11Z [30,801ms] [Warning] [rtx.hydra] Mesh '/genie/arm_l_link2/visuals/default_visual/mesh' has corrupted data in primvar 'st': buffer size 73505 doesn't match expected size 313550 in faceVarying primvars
+2026-11-16T03:44:11Z [30,808ms] [Warning] [rtx.hydra] Mesh '/genie/body_link2/visuals/body_link2/mesh' has corrupted data in primvar 'st': buffer size 8498 doesn't match expected size 40253 in faceVarying primvars
+2026-11-16T03:44:11Z [30,908ms] [Warning] [omni.rtx] DLSS increasing input dimensions: Render resolution of (320, 200) is below minimal input resolution of 300.
+2026-11-16T03:44:11Z [31,012ms] [Warning] [omni.replicator.core.scripts.utils.utils] Encountered invalid prim path /World/Camera
+2026-11-16T03:44:14Z [33,731ms] [Warning] [omni.syntheticdata.plugin] OgnSdPostRenderVarToHost : rendervar copy from texture directly to host buffer is counter-performant. Please use copy from texture to device buffer first.
+[Physics Callback] 49.42 Hz
+2026-11-16 03:44:16,078,078 INFO     [logger.py:79] Finish reset robot...
+2026-11-16 03:44:16,113,113 INFO     [logger.py:79] =========reset one frame========
+2026-11-16 03:44:16,393,393 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.7445, 0.7445]
 
 ========== 初始化 Solver ==========
 机器人部件: 1
-正在加载配置文件: /tmp/geniesim-ik-hftz3kbd/solver.yaml
+正在加载配置文件: /tmp/geniesim-ik-o0a654v6/solver.yaml
 配置文件加载成功
 正在初始化RobotWrapper...
-成功加载完整模型，路径为: /tmp/geniesim-ik-hftz3kbd/robot.urdf
-成功加载配置文件: /tmp/geniesim-ik-hftz3kbd/solver.yaml
+成功加载完整模型，路径为: /tmp/geniesim-ik-o0a654v6/robot.urdf
+成功加载配置文件: /tmp/geniesim-ik-o0a654v6/solver.yaml
 目标维度设置为: 1
 已加载左臂关节配置
 
@@ -508,11 +503,11 @@ Variables初始化完成
 
 ========== 初始化 Solver ==========
 机器人部件: 3
-正在加载配置文件: /tmp/geniesim-ik-hftz3kbd/solver.yaml
+正在加载配置文件: /tmp/geniesim-ik-o0a654v6/solver.yaml
 配置文件加载成功
 正在初始化RobotWrapper...
-成功加载完整模型，路径为: /tmp/geniesim-ik-hftz3kbd/robot.urdf
-成功加载配置文件: /tmp/geniesim-ik-hftz3kbd/solver.yaml
+成功加载完整模型，路径为: /tmp/geniesim-ik-o0a654v6/robot.urdf
+成功加载配置文件: /tmp/geniesim-ik-o0a654v6/solver.yaml
 目标维度设置为: 1
 已加载右臂关节配置
 
@@ -545,391 +540,415 @@ Variables初始化完成
 初始化完成
 ====================================
 
-2026-11-16 03:40:30,648,648 INFO     [logger.py:79] Finish reset env...
-2026-11-16 03:40:30,648,648 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_378069fe evt: 0
-2026-11-16 03:40:30,650,650 INFO     [logger.py:79] Action [StepOut] evt: 0
-2026-11-16 03:40:30,650,650 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:30,650,650 INFO     [logger.py:79] 
+2026-11-16 03:44:16,416,416 INFO     [logger.py:79] Finish reset env...
+2026-11-16 03:44:16,417,417 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_378069fe evt: 0
+2026-11-16 03:44:16,418,418 INFO     [logger.py:79] Action [StepOut] evt: 0
+2026-11-16 03:44:16,418,418 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:16,418,418 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-[Physics Callback] 91.02 Hz
-2026-11-16 03:40:30,688,688 INFO     [logger.py:79] Connecting to policy server at ws://127.0.0.1:8999...
-2026-11-16 03:40:30,690,690 INFO     [logger.py:79] Connected to policy server
-2026-11-16 03:40:30,690,690 INFO     [logger.py:79] Sending payload to server, size=2139829 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:30,694,694 INFO     [logger.py:79] [gripper-cmd] step=1 cmd=[0.7767, 0.7767]
-2026-11-16 03:40:31,268,268 INFO     [logger.py:79] STEP 30
-2026-11-16 03:40:31,269,269 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:31,269,269 INFO     [logger.py:79] 
+2026-11-16 03:44:16,453,453 INFO     [logger.py:79] Connecting to policy server at ws://127.0.0.1:8999...
+2026-11-16 03:44:16,456,456 INFO     [logger.py:79] Connected to policy server
+2026-11-16 03:44:16,456,456 INFO     [logger.py:79] Sending payload to server, size=2138848 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:44:16,460,460 INFO     [logger.py:79] [gripper-cmd] step=1 cmd=[0.7445, 0.7445]
+[Physics Callback] 38.38 Hz
+2026-11-16 03:44:17,679,679 INFO     [logger.py:79] STEP 30
+2026-11-16 03:44:17,679,679 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:17,680,680 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:31,288,288 INFO     [logger.py:79] Sending payload to server, size=274618 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 107.91 Hz
-2026-11-16 03:40:31,812,812 INFO     [logger.py:79] STEP 60
-2026-11-16 03:40:31,812,812 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:31,812,812 INFO     [logger.py:79] 
+2026-11-16 03:44:17,702,702 INFO     [logger.py:79] Sending payload to server, size=274187 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.63 Hz
+2026-11-16 03:44:18,914,914 INFO     [logger.py:79] STEP 60
+2026-11-16 03:44:18,914,914 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:18,915,915 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:31,830,830 INFO     [logger.py:79] Sending payload to server, size=275703 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:32,280,280 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.7768, 0.7768]
-2026-11-16 03:40:32,310,310 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.7768, 0.7768]
-2026-11-16 03:40:32,311,311 INFO     [logger.py:79] STEP 90
-2026-11-16 03:40:32,312,312 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:32,312,312 INFO     [logger.py:79] 
+2026-11-16 03:44:18,932,932 INFO     [logger.py:79] Sending payload to server, size=275415 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 49.80 Hz
+2026-11-16 03:44:20,049,049 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.745, 0.745]
+[Physics Callback] 51.85 Hz
+2026-11-16 03:44:20,116,116 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.745, 0.745]
+2026-11-16 03:44:20,117,117 INFO     [logger.py:79] STEP 90
+2026-11-16 03:44:20,117,117 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:20,118,118 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:32,330,330 INFO     [logger.py:79] Sending payload to server, size=276865 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 124.99 Hz
-2026-11-16 03:40:32,851,851 INFO     [logger.py:79] STEP 120
-2026-11-16 03:40:32,851,851 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:32,851,851 INFO     [logger.py:79] 
+2026-11-16 03:44:20,136,136 INFO     [logger.py:79] Sending payload to server, size=276634 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.11 Hz
+2026-11-16 03:44:21,313,313 INFO     [logger.py:79] STEP 120
+2026-11-16 03:44:21,314,314 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:21,314,314 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:32,869,869 INFO     [logger.py:79] Sending payload to server, size=278133 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:33,359,359 INFO     [logger.py:79] STEP 150
-2026-11-16 03:40:33,359,359 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:33,360,360 INFO     [logger.py:79] 
+2026-11-16 03:44:21,333,333 INFO     [logger.py:79] Sending payload to server, size=277715 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.63 Hz
+2026-11-16 03:44:22,547,547 INFO     [logger.py:79] STEP 150
+2026-11-16 03:44:22,547,547 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:22,547,547 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:33,377,377 INFO     [logger.py:79] Sending payload to server, size=278928 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 118.10 Hz
-2026-11-16 03:40:33,902,902 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.7768, 0.7768]
-2026-11-16 03:40:33,926,926 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.7768, 0.7768]
-2026-11-16 03:40:33,928,928 INFO     [logger.py:79] STEP 180
-2026-11-16 03:40:33,928,928 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:33,928,928 INFO     [logger.py:79] 
+2026-11-16 03:44:22,567,567 INFO     [logger.py:79] Sending payload to server, size=278555 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.40 Hz
+2026-11-16 03:44:23,666,666 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.745, 0.745]
+2026-11-16 03:44:23,740,740 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.745, 0.745]
+2026-11-16 03:44:23,741,741 INFO     [logger.py:79] STEP 180
+2026-11-16 03:44:23,742,742 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:23,742,742 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:33,945,945 INFO     [logger.py:79] Sending payload to server, size=279870 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:34,516,516 INFO     [logger.py:79] Action [StepOut] evt: 3
-2026-11-16 03:40:34,517,517 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_378069fe evt: 4
-2026-11-16 03:40:34,541,541 INFO     [logger.py:79] STEP 210
-2026-11-16 03:40:34,541,541 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:34,541,541 INFO     [logger.py:79] 
+2026-11-16 03:44:23,759,759 INFO     [logger.py:79] Sending payload to server, size=279443 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 53.20 Hz
+2026-11-16 03:44:24,844,844 INFO     [logger.py:79] Action [StepOut] evt: 3
+2026-11-16 03:44:24,844,844 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_378069fe evt: 4
+2026-11-16 03:44:24,919,919 INFO     [logger.py:79] STEP 210
+2026-11-16 03:44:24,919,919 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:24,920,920 INFO     [logger.py:79] 
 Instruction: Right arm picks up red block on the table
 
-2026-11-16 03:40:34,558,558 INFO     [logger.py:79] Sending payload to server, size=280446 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:34,559,559 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:34,587,587 INFO     [logger.py:79] Stop recording (local)
-2026-11-16 03:40:34,965,965 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0000_20261116_034029_580363_e6d2d60f/instructions_raw.json
-2026-11-16 03:40:34,965,965 INFO     [logger.py:79] [local_recorder] stopped episode 0 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0000_20261116_034029_580363_e6d2d60f (408 frames across 3 cameras, duration=4.99s)
-[Physics Callback] 73.11 Hz
-2026-11-16 03:40:35,001,001 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:35,016,016 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_53a9cedc'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
-2026-11-16 03:40:35,016,016 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:35,016,016 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:35,035,035 INFO     [logger.py:79] [local_recorder] started episode 1 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0001_20261116_034035_017785_29a3bb07 (['hand_left', 'hand_right', 'head'], every_n=4)
-2026-11-16 03:40:35,038,038 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_53a9cedc'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
-2026-11-16 03:40:35,039,039 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:35,039,039 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:35,063,063 INFO     [logger.py:79] Finish reset robot...
-2026-11-16 03:40:35,074,074 INFO     [logger.py:79] =========reset one frame========
-2026-11-16 03:40:35,174,174 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
-2026-11-16 03:40:35,175,175 INFO     [logger.py:79] Finish reset env...
-2026-11-16 03:40:35,175,175 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_53a9cedc evt: 0
-2026-11-16 03:40:35,176,176 INFO     [logger.py:79] Action [StepOut] evt: 0
-2026-11-16 03:40:35,176,176 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:35,177,177 INFO     [logger.py:79] 
+2026-11-16 03:44:24,942,942 INFO     [logger.py:79] Sending payload to server, size=280041 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:44:24,943,943 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:24,990,990 INFO     [logger.py:79] Stop recording (local)
+2026-11-16 03:44:25,325,325 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0000_20261116_034415_017621_bc662cd8/instructions_raw.json
+2026-11-16 03:44:25,325,325 INFO     [logger.py:79] [local_recorder] stopped episode 0 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0000_20261116_034415_017621_bc662cd8 (372 frames across 3 cameras, duration=9.95s)
+[Physics Callback] 36.75 Hz
+2026-11-16 03:44:25,349,349 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:25,362,362 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_53a9cedc'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
+2026-11-16 03:44:25,362,362 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:25,362,362 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:25,409,409 INFO     [logger.py:79] [local_recorder] started episode 1 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0001_20261116_034425_395033_0b646b62 (['hand_left', 'hand_right', 'head'], every_n=4)
+2026-11-16 03:44:25,412,412 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_53a9cedc'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
+2026-11-16 03:44:25,412,412 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:25,412,412 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_53a9cedc', obj_name_list=['benchmark_building_blocks_53a9cedc'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:25,448,448 INFO     [logger.py:79] Finish reset robot...
+2026-11-16 03:44:25,492,492 INFO     [logger.py:79] =========reset one frame========
+2026-11-16 03:44:25,700,700 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
+2026-11-16 03:44:25,701,701 INFO     [logger.py:79] Finish reset env...
+2026-11-16 03:44:25,701,701 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_53a9cedc evt: 0
+2026-11-16 03:44:25,702,702 INFO     [logger.py:79] Action [StepOut] evt: 0
+2026-11-16 03:44:25,703,703 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:25,703,703 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:35,206,206 INFO     [logger.py:79] Sending payload to server, size=2146920 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:35,730,730 INFO     [logger.py:79] STEP 30
-2026-11-16 03:40:35,730,730 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:35,730,730 INFO     [logger.py:79] 
+2026-11-16 03:44:25,732,732 INFO     [logger.py:79] Sending payload to server, size=2145842 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:44:25,734,734 INFO     [logger.py:79] [gripper-cmd] step=1 cmd=[0.785, 0.785]
+[Physics Callback] 41.83 Hz
+2026-11-16 03:44:26,914,914 INFO     [logger.py:79] STEP 30
+2026-11-16 03:44:26,914,914 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:26,914,914 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:35,748,748 INFO     [logger.py:79] Sending payload to server, size=281191 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 91.42 Hz
-2026-11-16 03:40:36,390,390 INFO     [logger.py:79] STEP 60
-2026-11-16 03:40:36,390,390 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:36,390,390 INFO     [logger.py:79] 
+2026-11-16 03:44:26,931,931 INFO     [logger.py:79] Sending payload to server, size=280045 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.74 Hz
+2026-11-16 03:44:28,128,128 INFO     [logger.py:79] STEP 60
+2026-11-16 03:44:28,128,128 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:28,128,128 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:36,407,407 INFO     [logger.py:79] Sending payload to server, size=282058 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:36,875,875 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
-2026-11-16 03:40:36,894,894 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
-2026-11-16 03:40:36,895,895 INFO     [logger.py:79] STEP 90
-2026-11-16 03:40:36,896,896 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:36,896,896 INFO     [logger.py:79] 
+2026-11-16 03:44:28,144,144 INFO     [logger.py:79] Sending payload to server, size=280776 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.91 Hz
+2026-11-16 03:44:29,246,246 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
+2026-11-16 03:44:29,316,316 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
+2026-11-16 03:44:29,317,317 INFO     [logger.py:79] STEP 90
+2026-11-16 03:44:29,317,317 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:29,317,317 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:36,915,915 INFO     [logger.py:79] Sending payload to server, size=282636 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 116.63 Hz
-2026-11-16 03:40:37,395,395 INFO     [logger.py:79] STEP 120
-2026-11-16 03:40:37,396,396 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:37,396,396 INFO     [logger.py:79] 
+2026-11-16 03:44:29,336,336 INFO     [logger.py:79] Sending payload to server, size=281500 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.14 Hz
+[Physics Callback] 50.66 Hz
+2026-11-16 03:44:30,549,549 INFO     [logger.py:79] STEP 120
+2026-11-16 03:44:30,549,549 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:30,550,550 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:37,420,420 INFO     [logger.py:79] Sending payload to server, size=283267 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:37,898,898 INFO     [logger.py:79] STEP 150
-2026-11-16 03:40:37,898,898 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:37,898,898 INFO     [logger.py:79] 
+2026-11-16 03:44:30,568,568 INFO     [logger.py:79] Sending payload to server, size=282108 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 49.16 Hz
+2026-11-16 03:44:31,788,788 INFO     [logger.py:79] STEP 150
+2026-11-16 03:44:31,789,789 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:31,789,789 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:37,916,916 INFO     [logger.py:79] Sending payload to server, size=283832 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 126.37 Hz
-2026-11-16 03:40:38,390,390 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
-2026-11-16 03:40:38,422,422 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
-2026-11-16 03:40:38,424,424 INFO     [logger.py:79] STEP 180
-2026-11-16 03:40:38,424,424 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:38,424,424 INFO     [logger.py:79] 
+2026-11-16 03:44:31,810,810 INFO     [logger.py:79] Sending payload to server, size=282795 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.54 Hz
+2026-11-16 03:44:32,907,907 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
+2026-11-16 03:44:32,984,984 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
+2026-11-16 03:44:32,985,985 INFO     [logger.py:79] STEP 180
+2026-11-16 03:44:32,986,986 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:32,986,986 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:38,443,443 INFO     [logger.py:79] Sending payload to server, size=284407 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:38,953,953 INFO     [logger.py:79] Action [StepOut] evt: 3
-2026-11-16 03:40:38,953,953 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_53a9cedc evt: 4
-2026-11-16 03:40:38,974,974 INFO     [logger.py:79] STEP 210
-2026-11-16 03:40:38,974,974 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:38,974,974 INFO     [logger.py:79] 
+2026-11-16 03:44:33,002,002 INFO     [logger.py:79] Sending payload to server, size=283298 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.99 Hz
+2026-11-16 03:44:34,112,112 INFO     [logger.py:79] Action [StepOut] evt: 3
+2026-11-16 03:44:34,112,112 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_53a9cedc evt: 4
+2026-11-16 03:44:34,183,183 INFO     [logger.py:79] STEP 210
+2026-11-16 03:44:34,183,183 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:34,183,183 INFO     [logger.py:79] 
 Instruction: Left arm picks up yellow block on the table
 
-2026-11-16 03:40:38,993,993 INFO     [logger.py:79] Sending payload to server, size=284493 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:38,995,995 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-[Physics Callback] 115.01 Hz
-2026-11-16 03:40:39,019,019 INFO     [logger.py:79] Stop recording (local)
-2026-11-16 03:40:39,409,409 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0001_20261116_034035_017785_29a3bb07/instructions_raw.json
-2026-11-16 03:40:39,409,409 INFO     [logger.py:79] [local_recorder] stopped episode 1 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0001_20261116_034035_017785_29a3bb07 (339 frames across 3 cameras, duration=3.98s)
-2026-11-16 03:40:39,441,441 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:39,456,456 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_e25f9bd9'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
-2026-11-16 03:40:39,457,457 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:39,457,457 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:39,476,476 INFO     [logger.py:79] [local_recorder] started episode 2 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0002_20261116_034039_460322_9f4b82dc (['hand_left', 'hand_right', 'head'], every_n=4)
-2026-11-16 03:40:39,479,479 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_e25f9bd9'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
-2026-11-16 03:40:39,479,479 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:39,479,479 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:39,502,502 INFO     [logger.py:79] Finish reset robot...
-2026-11-16 03:40:39,519,519 INFO     [logger.py:79] =========reset one frame========
-2026-11-16 03:40:39,594,594 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
-2026-11-16 03:40:39,596,596 INFO     [logger.py:79] Finish reset env...
-2026-11-16 03:40:39,596,596 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_e25f9bd9 evt: 0
-2026-11-16 03:40:39,598,598 INFO     [logger.py:79] Action [StepOut] evt: 0
-2026-11-16 03:40:39,598,598 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:39,599,599 INFO     [logger.py:79] 
+2026-11-16 03:44:34,202,202 INFO     [logger.py:79] Sending payload to server, size=284051 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:44:34,203,203 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:34,254,254 INFO     [logger.py:79] Stop recording (local)
+2026-11-16 03:44:34,589,589 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0001_20261116_034425_395033_0b646b62/instructions_raw.json
+2026-11-16 03:44:34,589,589 INFO     [logger.py:79] [local_recorder] stopped episode 1 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0001_20261116_034425_395033_0b646b62 (333 frames across 3 cameras, duration=8.85s)
+[Physics Callback] 35.80 Hz
+2026-11-16 03:44:34,613,613 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:34,628,628 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_e25f9bd9'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
+2026-11-16 03:44:34,628,628 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:34,628,628 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:34,674,674 INFO     [logger.py:79] [local_recorder] started episode 2 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0002_20261116_034434_659805_da8581cf (['hand_left', 'hand_right', 'head'], every_n=4)
+2026-11-16 03:44:34,677,677 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_e25f9bd9'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
+2026-11-16 03:44:34,677,677 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:34,677,677 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_e25f9bd9', obj_name_list=['benchmark_building_blocks_e25f9bd9'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:34,718,718 INFO     [logger.py:79] Finish reset robot...
+2026-11-16 03:44:34,759,759 INFO     [logger.py:79] =========reset one frame========
+2026-11-16 03:44:34,962,962 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
+2026-11-16 03:44:34,963,963 INFO     [logger.py:79] Finish reset env...
+2026-11-16 03:44:34,963,963 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_e25f9bd9 evt: 0
+2026-11-16 03:44:34,964,964 INFO     [logger.py:79] Action [StepOut] evt: 0
+2026-11-16 03:44:34,964,964 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:34,964,964 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:39,630,630 INFO     [logger.py:79] Sending payload to server, size=2150970 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 59.92 Hz
-2026-11-16 03:40:40,143,143 INFO     [logger.py:79] STEP 30
-2026-11-16 03:40:40,143,143 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:40,143,143 INFO     [logger.py:79] 
+2026-11-16 03:44:34,993,993 INFO     [logger.py:79] Sending payload to server, size=2151032 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 42.67 Hz
+2026-11-16 03:44:36,167,167 INFO     [logger.py:79] STEP 30
+2026-11-16 03:44:36,168,168 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:36,168,168 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:40,161,161 INFO     [logger.py:79] Sending payload to server, size=284949 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:40,699,699 INFO     [logger.py:79] STEP 60
-2026-11-16 03:40:40,699,699 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:40,699,699 INFO     [logger.py:79] 
+2026-11-16 03:44:36,185,185 INFO     [logger.py:79] Sending payload to server, size=284593 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.66 Hz
+2026-11-16 03:44:37,374,374 INFO     [logger.py:79] STEP 60
+2026-11-16 03:44:37,374,374 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:37,374,374 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:40,716,716 INFO     [logger.py:79] Sending payload to server, size=285448 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 115.59 Hz
-2026-11-16 03:40:41,186,186 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
-2026-11-16 03:40:41,206,206 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
-2026-11-16 03:40:41,207,207 INFO     [logger.py:79] STEP 90
-2026-11-16 03:40:41,207,207 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:41,207,207 INFO     [logger.py:79] 
+2026-11-16 03:44:37,392,392 INFO     [logger.py:79] Sending payload to server, size=284902 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.65 Hz
+2026-11-16 03:44:38,479,479 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
+2026-11-16 03:44:38,549,549 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
+2026-11-16 03:44:38,550,550 INFO     [logger.py:79] STEP 90
+2026-11-16 03:44:38,550,550 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:38,551,551 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:41,224,224 INFO     [logger.py:79] Sending payload to server, size=285888 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:41,750,750 INFO     [logger.py:79] STEP 120
-2026-11-16 03:40:41,751,751 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:41,751,751 INFO     [logger.py:79] 
+2026-11-16 03:44:38,569,569 INFO     [logger.py:79] Sending payload to server, size=285244 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.76 Hz
+[Physics Callback] 52.75 Hz
+2026-11-16 03:44:39,727,727 INFO     [logger.py:79] STEP 120
+2026-11-16 03:44:39,727,727 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:39,727,727 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:41,776,776 INFO     [logger.py:79] Sending payload to server, size=286372 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 119.62 Hz
-2026-11-16 03:40:42,271,271 INFO     [logger.py:79] STEP 150
-2026-11-16 03:40:42,271,271 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:42,271,271 INFO     [logger.py:79] 
+2026-11-16 03:44:39,749,749 INFO     [logger.py:79] Sending payload to server, size=285828 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.49 Hz
+2026-11-16 03:44:40,904,904 INFO     [logger.py:79] STEP 150
+2026-11-16 03:44:40,904,904 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:40,904,904 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:42,289,289 INFO     [logger.py:79] Sending payload to server, size=286674 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:42,821,821 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
-2026-11-16 03:40:42,859,859 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
-2026-11-16 03:40:42,860,860 INFO     [logger.py:79] STEP 180
-2026-11-16 03:40:42,860,860 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:42,860,860 INFO     [logger.py:79] 
+2026-11-16 03:44:40,923,923 INFO     [logger.py:79] Sending payload to server, size=286272 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.49 Hz
+2026-11-16 03:44:42,017,017 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
+2026-11-16 03:44:42,100,100 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
+2026-11-16 03:44:42,101,101 INFO     [logger.py:79] STEP 180
+2026-11-16 03:44:42,101,101 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:42,102,102 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:42,876,876 INFO     [logger.py:79] Sending payload to server, size=286895 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 112.85 Hz
-2026-11-16 03:40:43,344,344 INFO     [logger.py:79] Action [StepOut] evt: 3
-2026-11-16 03:40:43,344,344 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_e25f9bd9 evt: 4
-2026-11-16 03:40:43,364,364 INFO     [logger.py:79] STEP 210
-2026-11-16 03:40:43,365,365 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:43,365,365 INFO     [logger.py:79] 
+2026-11-16 03:44:42,119,119 INFO     [logger.py:79] Sending payload to server, size=286530 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.77 Hz
+2026-11-16 03:44:43,204,204 INFO     [logger.py:79] Action [StepOut] evt: 3
+2026-11-16 03:44:43,204,204 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_e25f9bd9 evt: 4
+2026-11-16 03:44:43,275,275 INFO     [logger.py:79] STEP 210
+2026-11-16 03:44:43,275,275 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:43,275,275 INFO     [logger.py:79] 
 Instruction: Right arm picks up blue block on the table
 
-2026-11-16 03:40:43,385,385 INFO     [logger.py:79] Sending payload to server, size=286961 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:43,387,387 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:43,421,421 INFO     [logger.py:79] Stop recording (local)
-2026-11-16 03:40:43,798,798 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0002_20261116_034039_460322_9f4b82dc/instructions_raw.json
-2026-11-16 03:40:43,799,799 INFO     [logger.py:79] [local_recorder] stopped episode 2 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0002_20261116_034039_460322_9f4b82dc (339 frames across 3 cameras, duration=3.95s)
-2026-11-16 03:40:43,833,833 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:43,849,849 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_d0fa4ca3'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
-2026-11-16 03:40:43,849,849 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:43,849,849 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:43,880,880 INFO     [logger.py:79] [local_recorder] started episode 3 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0003_20261116_034043_862140_c433b1f3 (['hand_left', 'hand_right', 'head'], every_n=4)
-2026-11-16 03:40:43,887,887 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_d0fa4ca3'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
-2026-11-16 03:40:43,887,887 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:43,887,887 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
-2026-11-16 03:40:43,922,922 INFO     [logger.py:79] Finish reset robot...
-2026-11-16 03:40:43,940,940 INFO     [logger.py:79] =========reset one frame========
-2026-11-16 03:40:44,033,033 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
-2026-11-16 03:40:44,035,035 INFO     [logger.py:79] Finish reset env...
-2026-11-16 03:40:44,035,035 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_d0fa4ca3 evt: 0
-2026-11-16 03:40:44,039,039 INFO     [logger.py:79] Action [StepOut] evt: 0
-2026-11-16 03:40:44,039,039 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:44,039,039 INFO     [logger.py:79] 
+2026-11-16 03:44:43,293,293 INFO     [logger.py:79] Sending payload to server, size=286683 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:44:43,294,294 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:43,347,347 INFO     [logger.py:79] Stop recording (local)
+2026-11-16 03:44:43,682,682 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0002_20261116_034434_659805_da8581cf/instructions_raw.json
+2026-11-16 03:44:43,682,682 INFO     [logger.py:79] [local_recorder] stopped episode 2 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0002_20261116_034434_659805_da8581cf (333 frames across 3 cameras, duration=8.67s)
+2026-11-16 03:44:43,718,718 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:43,741,741 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_d0fa4ca3'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
+2026-11-16 03:44:43,741,741 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:43,741,741 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:43,767,767 INFO     [logger.py:79] [local_recorder] started episode 3 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0003_20261116_034443_752363_d9f6a3b1 (['hand_left', 'hand_right', 'head'], every_n=4)
+[Physics Callback] 32.27 Hz
+2026-11-16 03:44:43,770,770 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_d0fa4ca3'], bbox=[0.1, 0.2, 0.1], gripper_id=left_gripper, already_followed=set()
+2026-11-16 03:44:43,770,770 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:43,770,770 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_d0fa4ca3', obj_name_list=['benchmark_building_blocks_d0fa4ca3'], gripper_id=left_gripper, already_picked=set()
+2026-11-16 03:44:43,802,802 INFO     [logger.py:79] Finish reset robot...
+2026-11-16 03:44:43,845,845 INFO     [logger.py:79] =========reset one frame========
+2026-11-16 03:44:44,034,034 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
+2026-11-16 03:44:44,035,035 INFO     [logger.py:79] Finish reset env...
+2026-11-16 03:44:44,035,035 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_d0fa4ca3 evt: 0
+2026-11-16 03:44:44,036,036 INFO     [logger.py:79] Action [StepOut] evt: 0
+2026-11-16 03:44:44,037,037 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:44,037,037 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-[Physics Callback] 61.21 Hz
-2026-11-16 03:40:44,095,095 INFO     [logger.py:79] Sending payload to server, size=2153895 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:44,641,641 INFO     [logger.py:79] STEP 30
-2026-11-16 03:40:44,641,641 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:44,641,641 INFO     [logger.py:79] 
+2026-11-16 03:44:44,066,066 INFO     [logger.py:79] Sending payload to server, size=2153447 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 43.21 Hz
+2026-11-16 03:44:45,248,248 INFO     [logger.py:79] STEP 30
+2026-11-16 03:44:45,248,248 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:45,248,248 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:44,660,660 INFO     [logger.py:79] Sending payload to server, size=287384 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 114.91 Hz
-2026-11-16 03:40:45,234,234 INFO     [logger.py:79] STEP 60
-2026-11-16 03:40:45,235,235 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:45,235,235 INFO     [logger.py:79] 
+2026-11-16 03:44:45,265,265 INFO     [logger.py:79] Sending payload to server, size=287036 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.85 Hz
+2026-11-16 03:44:46,444,444 INFO     [logger.py:79] STEP 60
+2026-11-16 03:44:46,444,444 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:46,444,444 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:45,253,253 INFO     [logger.py:79] Sending payload to server, size=287622 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:45,761,761 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
-2026-11-16 03:40:45,782,782 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
-2026-11-16 03:40:45,783,783 INFO     [logger.py:79] STEP 90
-2026-11-16 03:40:45,783,783 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:45,783,783 INFO     [logger.py:79] 
+2026-11-16 03:44:46,463,463 INFO     [logger.py:79] Sending payload to server, size=287258 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.43 Hz
+2026-11-16 03:44:47,574,574 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
+2026-11-16 03:44:47,650,650 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
+2026-11-16 03:44:47,652,652 INFO     [logger.py:79] STEP 90
+2026-11-16 03:44:47,653,653 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:47,653,653 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:45,803,803 INFO     [logger.py:79] Sending payload to server, size=287848 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 106.43 Hz
-2026-11-16 03:40:46,336,336 INFO     [logger.py:79] STEP 120
-2026-11-16 03:40:46,336,336 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:46,336,336 INFO     [logger.py:79] 
+2026-11-16 03:44:47,670,670 INFO     [logger.py:79] Sending payload to server, size=287583 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.29 Hz
+[Physics Callback] 51.88 Hz
+2026-11-16 03:44:48,861,861 INFO     [logger.py:79] STEP 120
+2026-11-16 03:44:48,861,861 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:48,861,861 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:46,361,361 INFO     [logger.py:79] Sending payload to server, size=288020 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:46,861,861 INFO     [logger.py:79] STEP 150
-2026-11-16 03:40:46,861,861 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:46,861,861 INFO     [logger.py:79] 
+2026-11-16 03:44:48,880,880 INFO     [logger.py:79] Sending payload to server, size=287985 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.85 Hz
+2026-11-16 03:44:50,075,075 INFO     [logger.py:79] STEP 150
+2026-11-16 03:44:50,075,075 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:50,075,075 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:46,879,879 INFO     [logger.py:79] Sending payload to server, size=287882 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 115.77 Hz
-2026-11-16 03:40:47,363,363 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
-2026-11-16 03:40:47,394,394 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
-2026-11-16 03:40:47,396,396 INFO     [logger.py:79] STEP 180
-2026-11-16 03:40:47,397,397 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:47,397,397 INFO     [logger.py:79] 
+2026-11-16 03:44:50,097,097 INFO     [logger.py:79] Sending payload to server, size=288058 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 49.93 Hz
+2026-11-16 03:44:51,253,253 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
+2026-11-16 03:44:51,323,323 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
+2026-11-16 03:44:51,324,324 INFO     [logger.py:79] STEP 180
+2026-11-16 03:44:51,324,324 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:51,324,324 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:47,422,422 INFO     [logger.py:79] Sending payload to server, size=288053 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:47,868,868 INFO     [logger.py:79] Action [StepOut] evt: 3
-2026-11-16 03:40:47,868,868 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_d0fa4ca3 evt: 4
-2026-11-16 03:40:47,905,905 INFO     [logger.py:79] STEP 210
-2026-11-16 03:40:47,905,905 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:47,905,905 INFO     [logger.py:79] 
+2026-11-16 03:44:51,343,343 INFO     [logger.py:79] Sending payload to server, size=288248 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.32 Hz
+2026-11-16 03:44:52,435,435 INFO     [logger.py:79] Action [StepOut] evt: 3
+2026-11-16 03:44:52,435,435 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_d0fa4ca3 evt: 4
+2026-11-16 03:44:52,512,512 INFO     [logger.py:79] STEP 210
+2026-11-16 03:44:52,513,513 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:52,513,513 INFO     [logger.py:79] 
 Instruction: Left arm picks up green block on the table
 
-2026-11-16 03:40:47,922,922 INFO     [logger.py:79] Sending payload to server, size=288241 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:47,924,924 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:47,948,948 INFO     [logger.py:79] Stop recording (local)
-2026-11-16 03:40:48,328,328 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0003_20261116_034043_862140_c433b1f3/instructions_raw.json
-2026-11-16 03:40:48,329,329 INFO     [logger.py:79] [local_recorder] stopped episode 3 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0003_20261116_034043_862140_c433b1f3 (345 frames across 3 cameras, duration=4.07s)
-[Physics Callback] 88.29 Hz
-2026-11-16 03:40:48,366,366 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:48,381,381 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_658016ed'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
-2026-11-16 03:40:48,381,381 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:48,382,382 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:48,405,405 INFO     [logger.py:79] [local_recorder] started episode 4 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0004_20261116_034048_389357_cbd5be64 (['hand_left', 'hand_right', 'head'], every_n=4)
-2026-11-16 03:40:48,410,410 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_658016ed'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
-2026-11-16 03:40:48,410,410 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:48,410,410 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
-2026-11-16 03:40:48,442,442 INFO     [logger.py:79] Finish reset robot...
-2026-11-16 03:40:48,460,460 INFO     [logger.py:79] =========reset one frame========
-2026-11-16 03:40:48,562,562 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
-2026-11-16 03:40:48,563,563 INFO     [logger.py:79] Finish reset env...
-2026-11-16 03:40:48,563,563 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_658016ed evt: 0
-2026-11-16 03:40:48,564,564 INFO     [logger.py:79] Action [StepOut] evt: 0
-2026-11-16 03:40:48,564,564 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:48,564,564 INFO     [logger.py:79] 
+2026-11-16 03:44:52,530,530 INFO     [logger.py:79] Sending payload to server, size=288628 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:44:52,531,531 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:52,583,583 INFO     [logger.py:79] Stop recording (local)
+2026-11-16 03:44:52,954,954 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0003_20261116_034443_752363_d9f6a3b1/instructions_raw.json
+2026-11-16 03:44:52,955,955 INFO     [logger.py:79] [local_recorder] stopped episode 3 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0003_20261116_034443_752363_d9f6a3b1 (333 frames across 3 cameras, duration=8.82s)
+[Physics Callback] 32.76 Hz
+2026-11-16 03:44:52,996,996 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:44:53,020,020 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_658016ed'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
+2026-11-16 03:44:53,020,020 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:53,020,020 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:53,054,054 INFO     [logger.py:79] [local_recorder] started episode 4 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0004_20261116_034453_038677_17e920d2 (['hand_left', 'hand_right', 'head'], every_n=4)
+2026-11-16 03:44:53,058,058 INFO     [logger.py:79] [Follow] Initialized with obj_name_list=['benchmark_building_blocks_658016ed'], bbox=[0.1, 0.2, 0.1], gripper_id=right_gripper, already_followed=set()
+2026-11-16 03:44:53,058,058 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:53,059,059 INFO     [logger.py:79] [PickUpOnGripper] Initialized with obj_name='benchmark_building_blocks_658016ed', obj_name_list=['benchmark_building_blocks_658016ed'], gripper_id=right_gripper, already_picked=set()
+2026-11-16 03:44:53,093,093 INFO     [logger.py:79] Finish reset robot...
+2026-11-16 03:44:53,134,134 INFO     [logger.py:79] =========reset one frame========
+2026-11-16 03:44:53,329,329 INFO     [logger.py:79] [gripper-obs] step=0 actual=[0.785, 0.785]
+2026-11-16 03:44:53,331,331 INFO     [logger.py:79] Finish reset env...
+2026-11-16 03:44:53,331,331 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_658016ed evt: 0
+2026-11-16 03:44:53,332,332 INFO     [logger.py:79] Action [StepOut] evt: 0
+2026-11-16 03:44:53,332,332 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:53,332,332 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:48,594,594 INFO     [logger.py:79] Sending payload to server, size=2154993 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:49,074,074 INFO     [logger.py:79] STEP 30
-2026-11-16 03:40:49,074,074 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:49,074,074 INFO     [logger.py:79] 
+2026-11-16 03:44:53,360,360 INFO     [logger.py:79] Sending payload to server, size=2155610 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 42.77 Hz
+2026-11-16 03:44:54,502,502 INFO     [logger.py:79] STEP 30
+2026-11-16 03:44:54,502,502 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:54,502,502 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:49,092,092 INFO     [logger.py:79] Sending payload to server, size=288642 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 107.28 Hz
-2026-11-16 03:40:49,618,618 INFO     [logger.py:79] STEP 60
-2026-11-16 03:40:49,619,619 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:49,619,619 INFO     [logger.py:79] 
+2026-11-16 03:44:54,519,519 INFO     [logger.py:79] Sending payload to server, size=289014 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.21 Hz
+2026-11-16 03:44:55,677,677 INFO     [logger.py:79] STEP 60
+2026-11-16 03:44:55,678,678 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:55,678,678 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:49,643,643 INFO     [logger.py:79] Sending payload to server, size=288694 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:50,144,144 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
-2026-11-16 03:40:50,184,184 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
-2026-11-16 03:40:50,185,185 INFO     [logger.py:79] STEP 90
-2026-11-16 03:40:50,185,185 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:50,186,186 INFO     [logger.py:79] 
+2026-11-16 03:44:55,693,693 INFO     [logger.py:79] Sending payload to server, size=289000 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.62 Hz
+2026-11-16 03:44:56,786,786 INFO     [logger.py:79] [gripper-cmd] step=90 cmd=[0.785, 0.785]
+2026-11-16 03:44:56,855,855 INFO     [logger.py:79] [gripper-obs] step=90 actual=[0.785, 0.785]
+2026-11-16 03:44:56,856,856 INFO     [logger.py:79] STEP 90
+2026-11-16 03:44:56,857,857 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:56,857,857 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:50,202,202 INFO     [logger.py:79] Sending payload to server, size=288922 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 112.49 Hz
-2026-11-16 03:40:50,705,705 INFO     [logger.py:79] STEP 120
-2026-11-16 03:40:50,706,706 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:50,706,706 INFO     [logger.py:79] 
+2026-11-16 03:44:56,875,875 INFO     [logger.py:79] Sending payload to server, size=289082 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 52.72 Hz
+[Physics Callback] 50.87 Hz
+2026-11-16 03:44:58,069,069 INFO     [logger.py:79] STEP 120
+2026-11-16 03:44:58,069,069 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:58,069,069 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:50,726,726 INFO     [logger.py:79] Sending payload to server, size=288862 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:51,241,241 INFO     [logger.py:79] STEP 150
-2026-11-16 03:40:51,242,242 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:51,242,242 INFO     [logger.py:79] 
+2026-11-16 03:44:58,085,085 INFO     [logger.py:79] Sending payload to server, size=289206 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.11 Hz
+2026-11-16 03:44:59,280,280 INFO     [logger.py:79] STEP 150
+2026-11-16 03:44:59,280,280 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:44:59,280,280 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:51,262,262 INFO     [logger.py:79] Sending payload to server, size=289030 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-[Physics Callback] 119.80 Hz
-2026-11-16 03:40:51,768,768 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
-2026-11-16 03:40:51,795,795 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
-2026-11-16 03:40:51,796,796 INFO     [logger.py:79] STEP 180
-2026-11-16 03:40:51,796,796 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:51,797,797 INFO     [logger.py:79] 
+2026-11-16 03:44:59,299,299 INFO     [logger.py:79] Sending payload to server, size=289159 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 51.17 Hz
+2026-11-16 03:45:00,436,436 INFO     [logger.py:79] [gripper-cmd] step=180 cmd=[0.785, 0.785]
+2026-11-16 03:45:00,510,510 INFO     [logger.py:79] [gripper-obs] step=180 actual=[0.785, 0.785]
+2026-11-16 03:45:00,511,511 INFO     [logger.py:79] STEP 180
+2026-11-16 03:45:00,511,511 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:45:00,511,511 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:51,815,815 INFO     [logger.py:79] Sending payload to server, size=289260 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:52,329,329 INFO     [logger.py:79] Action [StepOut] evt: 3
-2026-11-16 03:40:52,329,329 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_658016ed evt: 4
-[Physics Callback] 114.30 Hz
-2026-11-16 03:40:52,364,364 INFO     [logger.py:79] STEP 210
-2026-11-16 03:40:52,365,365 INFO     [logger.py:79] CoRobotPolicy: calling model infer
-2026-11-16 03:40:52,365,365 INFO     [logger.py:79] 
+2026-11-16 03:45:00,528,528 INFO     [logger.py:79] Sending payload to server, size=289421 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+[Physics Callback] 50.61 Hz
+2026-11-16 03:45:01,651,651 INFO     [logger.py:79] Action [StepOut] evt: 3
+2026-11-16 03:45:01,651,651 INFO     [logger.py:79] Action [Follow] benchmark_building_blocks_658016ed evt: 4
+2026-11-16 03:45:01,728,728 INFO     [logger.py:79] STEP 210
+2026-11-16 03:45:01,729,729 INFO     [logger.py:79] CoRobotPolicy: calling model infer
+2026-11-16 03:45:01,729,729 INFO     [logger.py:79] 
 Instruction: Right arm picks up purple block on the table
 
-2026-11-16 03:40:52,389,389 INFO     [logger.py:79] Sending payload to server, size=289319 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
-2026-11-16 03:40:52,390,390 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
-2026-11-16 03:40:52,425,425 INFO     [logger.py:79] Stop recording (local)
-2026-11-16 03:40:52,809,809 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0004_20261116_034048_389357_cbd5be64/instructions_raw.json
-2026-11-16 03:40:52,809,809 INFO     [logger.py:79] [local_recorder] stopped episode 4 → /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/recording_0004_20261116_034048_389357_cbd5be64 (345 frames across 3 cameras, duration=4.02s)
-2026-11-16 03:40:52,843,843 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:45:01,751,751 INFO     [logger.py:79] Sending payload to server, size=289561 bytes, robot_type=g2a_sim, ee_type=zhiyuan_gripper_omnipicker
+2026-11-16 03:45:01,752,752 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+2026-11-16 03:45:01,821,821 INFO     [logger.py:79] Stop recording (local)
+2026-11-16 03:45:02,139,139 INFO     [logger.py:79] [local_recorder] saved /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0004_20261116_034453_038677_17e920d2/instructions_raw.json
+2026-11-16 03:45:02,140,140 INFO     [logger.py:79] [local_recorder] stopped episode 4 → /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/recording_0004_20261116_034453_038677_17e920d2 (333 frames across 3 cameras, duration=8.77s)
+[Physics Callback] 33.23 Hz
+2026-11-16 03:45:02,162,162 INFO     [logger.py:79] Evaluation result file generated at /workspace/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
 Shutting down...
-2026-11-16 03:40:53,453,453 INFO     [logger.py:79] Shutting down ROS2...
-2026-11-16 03:40:53,513,513 INFO     [logger.py:79] robot_interface destroyed
-[56.650s] Simulation App Shutting Down
+2026-11-16 03:45:02,759,759 INFO     [logger.py:79] Shutting down ROS2...
+2026-11-16 03:45:02,783,783 INFO     [logger.py:79] robot_interface destroyed
+[82.809s] Simulation App Shutting Down
 
 == 結果
-GPU 0 のメモリ使用量の最大: 5972 MiB / 24576 MiB（この実行の間. 他のプロセスの分も含む）
-記録の置き場所: /home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_033955
+GPU 0 のメモリ使用量の最大: 6051 MiB / 24576 MiB（この実行の間. 他のプロセスの分も含む）
+記録の置き場所: /home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_034338
 OK:   採点結果が出ました.
-/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
+/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/evaluate_ret_00.json
 OK:   録画が 3 本あります（ブラウザや VLC で開ける）.
-/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/hand_left.webm
-/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/hand_right.webm
-/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_033955/table_task_1_g2_op/pick_block_color/head.webm
-方策のサーバの記録: /home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_033955/policy_server.log
+/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/hand_left.webm
+/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/hand_right.webm
+/home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_034338/table_task_1_g2_op/pick_block_color/head.webm
+方策のサーバの記録: /home/ubuntu/genie_sim_ws/genie_sim/output/hs_runs/hold_20261116_034338/policy_server.log
 
 ロボットは動かないので、点数は 0 で正常です.
 ここまで通れば、この PC で Genie Sim の評価の仕組みが動いています.

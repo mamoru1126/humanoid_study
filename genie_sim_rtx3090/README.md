@@ -76,6 +76,8 @@ Genie Sim は更新が速いので、手順を確かめた版に固定してい�
 | 7 | `07_up.sh` | コンテナを起動する | なし |
 | 8 | `08_preview.sh` | カメラ画像を 1 組保存する | なし |
 | 9 | `09_run_hold.sh` | 動かない方策で、評価を最後まで回す | なし |
+| 11 | `11_setup_baseline.sh` | 学習済みの π0.5 を用意する（デモ用） | 大きい。Python の環境と重みで数十 GB の見込み |
+| 12 | `12_run_baseline.sh` | π0.5 にタスクをやらせる（1 台で完結するデモ） | なし |
 
 ### 0. このリポジトリを取得する
 
@@ -240,6 +242,27 @@ Isaac Sim の画面を開いて、動いている様子を見ることもでき�
 3. 手順 8 か 9 を実行します。
 
 画面を開くと、その分の VRAM も使います。まずは画面なしで通してから試すのを勧めます。
+
+## 学習済みの π0.5 で動かす（1 台で完結するデモ）
+
+動かない方策では、ロボットはじっとしたままです。ロボットが実際にタスクをこなすところを見るには、AgiBot World Challenge のベースライン（π0.5 を Genie Sim のデータで学習したもの）を、同じ PC で動かします。推論に使う VRAM は 8 GB 未満とされているので、Isaac Sim（画面ありで約 6 GB）と RTX 3090 1 枚に同居させます。
+
+1. 準備（1 回だけ）。推論のコード ACoT-VLA を取得し、uv で Python の環境を作り、重み `instruction_and_robust_pi05` を ModelScope から取得します。コンテナの外で動きます。
+
+   ```bash
+   bash scripts/11_setup_baseline.sh
+   ```
+
+2. 画面で見るなら、`.env` を `RUN_WINDOW=true` にして、画面ありでコンテナを起動しておきます（[画面ありで見る](#画面ありで見る)）。
+3. 実行します。π0.5 の方策サーバをこの PC で立て（重みの読み込みに数分）、既定のタスク `g2op_if_pick_block_color`（指示された色のブロックを取る）を 5 つの指示で回します。終わるとサーバも止めます。
+
+   ```bash
+   bash scripts/12_run_baseline.sh
+   ```
+
+- 大会の公式の起動方法（`tunnel.sh`）は大会のサーバにつなぐもので、手元の Genie Sim とは直接つながりません。`scripts/baseline_server.py` は、その推論の部分（`tunnel_agent.py` の `PolicyHandler`）だけを使い、Genie Sim 付属の動かない方策と同じ形で待ち受けます。
+- この重みは、指示に従う課題（`g2op_if_` で始まるタスク）向けです。ほかの種類の課題には、別の重み（`manipulation_pi05`、`spatial_pi05`）が要ります。
+- **確認の状況：** このスクリプトは、RTX 3090 の実機ではまだ動かしていません。重みの大きさ、読み込みの時間、成功率も未確認です。止まったら、記録の `policy_server.log` を見てください。
 
 ## 2 台目の PC を使う
 
@@ -460,6 +483,9 @@ genie_sim_rtx3090/
 │   ├── 08_preview.sh               カメラ画像を 1 組保存する
 │   ├── 09_run_hold.sh              動かない方策で評価を回す
 │   ├── 10_run_policy.sh            自分の方策サーバをつないで評価する
+│   ├── 11_setup_baseline.sh        学習済みの π0.5 を用意する
+│   ├── 12_run_baseline.sh          π0.5 にタスクをやらせる（1 台で完結）
+│   ├── baseline_server.py          π0.5 の方策サーバ（12_run_baseline.sh が使う）
 │   ├── hold_server.sh              動かない方策のサーバを立てる（2 台目の PC 用）
 │   ├── into.sh                     コンテナの中に入る
 │   ├── down.sh                     コンテナを止める
@@ -478,6 +504,7 @@ genie_sim_rtx3090/
 │   └── output/hs_runs/   実行の記録
 ├── assets/             アセット
 ├── venv/               geniesim コマンドの入った仮想環境
+├── acot_vla/           π0.5 の推論のコードと重み（11_setup_baseline.sh）
 └── isaac-cache/        Isaac Sim のキャッシュ
 ```
 

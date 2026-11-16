@@ -71,6 +71,20 @@ else
       say "      イメージを手元でビルドするときは LIBUIPC_SM の指定が要ります（.env に設定済み）."
       ;;
   esac
+
+  restricted="$(gpu_dev_restricted)"
+  if [ -n "${restricted}" ]; then
+    warn "GPU のデバイスを、その他の利用者が読み書きできません. コンテナの中のホストの利用者は GPU を使えません（root だけが使える）."
+    printf '%s\n' "${restricted}" | sed 's/^/        /'
+    modprobe_lines="$(gpu_dev_modprobe_lines)"
+    if [ -n "${modprobe_lines}" ]; then
+      say "      権限を決めている設定:"
+      printf '%s\n' "${modprobe_lines}" | sed 's/^/        /'
+    fi
+    say "      直し方は README の「GPU のデバイスの権限」を見てください."
+  else
+    ok "GPU のデバイスは、コンテナの中の利用者からも使える権限です."
+  fi
 fi
 
 step "メモリとディスク"

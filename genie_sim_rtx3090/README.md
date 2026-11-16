@@ -124,7 +124,9 @@ Docker の公式の apt リポジトリから入れます。`sudo` を使いま�
 bash scripts/03_install_nvidia_toolkit.sh
 ```
 
-コンテナの中から GPU を使うための部品です。`sudo` を使います。最後に、試しのコンテナの中で `nvidia-smi` を実行して、GPU が見えることを確かめます。
+コンテナの中から GPU を使うための部品です。`sudo` を使います。最後に、試しのコンテナの中で `nvidia-smi` を 2 回実行します。1 回目は root として、2 回目は今の利用者と同じ番号の利用者として実行します。Genie Sim のコンテナの中の作業は後者の権限で動くので、両方で GPU が見えれば成功です。
+
+2 回目だけが `Failed to initialize NVML: Insufficient Permissions` で失敗したときは、GPU のデバイスの権限が足りません。スクリプトは「NG」で止まり、原因のデバイスを表示します。[GPU のデバイスの権限](#gpu-のデバイスの権限) の手順で直してから、もう一度実行します。
 
 ### 4. Genie Sim の本体を取得する
 
@@ -172,7 +174,8 @@ bash scripts/07_up.sh
 
 コンテナ `geniesim4` を起動して、準備が終わるまで待ちます。初回は、コンテナの中で Python のパッケージを登録するので、時間がかかります。待つ上限は 900 秒です（`.env` の `UP_TIMEOUT`）。
 
-- 「コンテナの準備ができました」と出れば成功です。続けて、コンテナから見える GPU を表示します。
+- 「コンテナの準備ができました」と出たあと、コンテナから見える GPU が表示されれば成功です。GPU を使えないときは「NG」で止まります。[GPU のデバイスの権限](#gpu-のデバイスの権限) を見てください。
+- コンテナがすでに動いているときも、中から GPU を使えるかを確かめます。権限を直す前に起動したコンテナなら「NG」で止まるので、`bash scripts/down.sh` で片付けてから、もう一度実行します。
 - 「libuipc unavailable」についての説明が出ますが、RTX 3090 では想定どおりです。
 - 画面のある端末から実行すると、画面をつないだ状態で起動します。SSH 越しなど、画面がないときは、画面なしで起動します。どちらでも、この先の手順は進められます。
 
@@ -320,6 +323,7 @@ bash scripts/08_preview.sh g2op_if_pick_block_shape
 |---|---|
 | 手順 1 で「NG」が出る | 同じ行に直し方が出ます。直してから、もう一度実行します |
 | `could not select device driver` と出て、コンテナが GPU を使えない | NVIDIA Container Toolkit が入っていないか、Docker に登録されていません。手順 3 を実行します |
+| `Failed to initialize NVML: Insufficient Permissions` と出る（手順 3 の 2 回目の確認、手順 7） | GPU のデバイスを、コンテナの中の利用者が使えません。[GPU のデバイスの権限](#gpu-のデバイスの権限) を見てください |
 | 手順 6 のビルドが `Unsupported host GPU capability '8.6'` で止まる | libuipc の対象が指定されていません。`.env` に `LIBUIPC_SM=89` があるかを確かめます |
 | 手順 6 のビルドで、`nvcr.io` からの取得に認証を求められる | NVIDIA NGC の API キーを作り、`docker login nvcr.io` でログインします |
 | 起動のログに「libuipc unavailable」と出る | RTX 3090 では想定どおりです。対処は要りません |
@@ -340,6 +344,40 @@ bash scripts/08_preview.sh g2op_if_pick_block_shape
 ```bash
 bash scripts/into.sh
 ```
+
+## GPU のデバイスの権限
+
+Genie Sim のコンテナの中の作業は、root ではなく、PC の利用者と同じ番号の利用者として動きます。この利用者は、PC 側で入っているグループ（`vglusers` など）を持ちません。そのため、GPU のデバイス（`/dev/nvidia0` など）を「その他の利用者」が読み書きできないと、コンテナの中から GPU を使えず、`Failed to initialize NVML: Insufficient Permissions` と出ます。root で動く試しのコンテナでは GPU が見えるので、気づきにくい問題です。
+
+手順 1 は、この状態を「注意」として表示します。手順 3 と 7 は「NG」で止まります。
+
+よくある原因は、VirtualGL の設定です。VirtualGL を設定すると、GPU を `vglusers` グループだけに許すことがあります。次のコマンドで確かめます。
+
+```bash
+ls -l /dev/nvidia*
+```
+
+```bash
+grep -rn NVreg_DeviceFile /etc/modprobe.d
+```
+
+`crw-rw----  root vglusers` のように、末尾の 3 文字が `---` で、`NVreg_DeviceFileMode=0660` の行（例：`/etc/modprobe.d/virtualgl.conf`）が見つかれば、これが原因です。
+
+直すには、その行の `0660` を `0666` に書き換えます。`sudo` を使います。
+
+```bash
+sudo sed -i 's/NVreg_DeviceFileMode=0660/NVreg_DeviceFileMode=0666/' /etc/modprobe.d/virtualgl.conf
+```
+
+```bash
+sudo update-initramfs -u
+```
+
+そのあとで PC を再起動します。再起動したら、`ls -l /dev/nvidia*` の権限が `crw-rw-rw-` になっていることを確かめます。
+
+- この変更で、この PC のどの利用者も GPU を使えるようになります。VirtualGL で GPU を `vglusers` だけに限っていた意味がなくなるので、ほかの人と共有している PC では、管理者と相談してから変えます。
+- 動いているコンテナの中のデバイスの権限は、起動したときのままです。再起動のあとで、`bash scripts/down.sh`、`bash scripts/07_up.sh` の順に実行して、コンテナを作り直します。
+- 直したら、`bash scripts/03_install_nvidia_toolkit.sh` で確かめられます。2 回目の確認まで通れば大丈夫です。
 
 ## ドライバについて
 

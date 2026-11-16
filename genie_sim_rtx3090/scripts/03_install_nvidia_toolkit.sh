@@ -60,7 +60,16 @@ else
   sudo systemctl restart docker
 fi
 
-step "確認（コンテナの中で nvidia-smi を実行する）"
+step "確認 1（コンテナの中で、root として nvidia-smi を実行する）"
 "${DOCKER[@]}" run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
-ok "コンテナから GPU が見えました."
+ok "root ではコンテナから GPU が見えました."
+
+# Genie Sim のコンテナでは、ホストの利用者と同じ番号の利用者として動く（07 以降と into.sh）.
+# root だけで見えても足りないので、同じ条件で確かめる.
+step "確認 2（コンテナの中で、ホストの利用者 $(id -u):$(id -g) として nvidia-smi を実行する）"
+if ! "${DOCKER[@]}" run --rm --runtime=nvidia --gpus all --user "$(id -u):$(id -g)" ubuntu nvidia-smi -L; then
+  gpu_dev_explain
+  die "ホストの利用者の権限では、コンテナから GPU を使えません."
+fi
+ok "ホストの利用者の権限でも、コンテナから GPU が見えました."
 say "次は bash scripts/04_fetch.sh です."

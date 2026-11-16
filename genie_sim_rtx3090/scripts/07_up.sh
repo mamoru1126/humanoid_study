@@ -24,6 +24,10 @@ fi
 
 state="$(container_state)"
 if [ "${state}" = "running" ]; then
+  if ! container_gpu_ok; then
+    gpu_dev_explain
+    die "コンテナ ${GS_CONTAINER} は動いていますが、中から GPU を使えません. 権限を直す前に起動したコンテナです. 直してから bash scripts/down.sh、続けて bash scripts/07_up.sh を実行してください."
+  fi
   ok "コンテナ ${GS_CONTAINER} はすでに動いています."
   say "次は bash scripts/08_preview.sh です. 設定を変えて起動し直すときは、先に bash scripts/down.sh を実行してください."
   exit 0
@@ -100,7 +104,10 @@ if [[ "${logs,,}" == *libuipc* ]] && [[ "${logs,,}" == *unavailable* ]]; then
 fi
 
 step "コンテナから見える GPU"
-in_container_quiet "nvidia-smi --query-gpu=index,name,memory.used,memory.total --format=csv,noheader" || note "コンテナの中で nvidia-smi を実行できませんでした."
+if ! in_container_quiet "nvidia-smi --query-gpu=index,name,memory.used,memory.total --format=csv,noheader"; then
+  gpu_dev_explain
+  die "コンテナの中で、ホストの利用者の権限では GPU を使えません. 直したあとで bash scripts/down.sh、続けて bash scripts/07_up.sh を実行してください."
+fi
 
 say ""
 say "次は bash scripts/08_preview.sh です. コンテナに入るときは bash scripts/into.sh、止めるときは bash scripts/down.sh."

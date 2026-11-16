@@ -190,6 +190,49 @@ resolve_headless() {
   echo "true"
 }
 
+# ---- GPU のデバイスの権限 ----------------------------------------------------------
+# コンテナの中の利用者は、ホストの利用者と同じ番号だが、ホストの補助グループ（vglusers など）は持たない.
+# そのため、その他の利用者が読み書きできない GPU のデバイスは、コンテナの中から使えない.
+# そうしたデバイスを「パス 権限 所有グループ」の形で1行ずつ表示する（なければ何も表示しない）.
+gpu_dev_restricted() {
+  local dev mode
+  for dev in /dev/nvidia[0-9]* /dev/nvidiactl /dev/nvidia-modeset /dev/nvidia-uvm; do
+    if [ ! -c "${dev}" ]; then
+      continue
+    fi
+    mode="$(stat -c '%a' "${dev}")"
+    if [ $((8#${mode} & 6)) -ne 6 ]; then
+      printf '%s %s %s\n' "${dev}" "${mode}" "$(stat -c '%G' "${dev}")"
+    fi
+  done
+}
+
+# /etc/modprobe.d の中で、NVIDIA のデバイスの権限を決めている行を表示する（例: VirtualGL の設定）
+gpu_dev_modprobe_lines() {
+  grep -rsn 'NVreg_DeviceFile' /etc/modprobe.d 2> /dev/null || true
+}
+
+# 権限の問題についての案内を表示する（03 と 07 で使う）
+gpu_dev_explain() {
+  local restricted lines
+  restricted="$(gpu_dev_restricted)"
+  if [ -n "${restricted}" ]; then
+    say "その他の利用者が読み書きできない GPU のデバイス（パス 権限 所有グループ）:"
+    printf '%s\n' "${restricted}" | sed 's/^/  /'
+  fi
+  lines="$(gpu_dev_modprobe_lines)"
+  if [ -n "${lines}" ]; then
+    say "権限を決めている設定:"
+    printf '%s\n' "${lines}" | sed 's/^/  /'
+  fi
+  say "直し方は README の「GPU のデバイスの権限」を見てください."
+}
+
+# コンテナの中で、ホストの利用者として GPU を使えるか
+container_gpu_ok() {
+  in_container_quiet "nvidia-smi -L" > /dev/null 2>&1
+}
+
 # ---- GPU の記録（ホスト側の nvidia-smi）---------------------------------------------
 GPU_LOG_PID=""
 
